@@ -1,0 +1,41 @@
+{
+  "node": {
+    "4072be709f53833066c68543028151ee65a035f21a": {
+      "workers": {
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "getShopDetails",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "exportedName": "getShopDetails",
+      "filename": "app/actions/client.ts"
+    },
+    "4091e139df1d7a997dc0aa97cf5d8e64126fe1cdc0": {
+      "workers": {
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "createBooking",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "exportedName": "createBooking",
+      "filename": "app/actions/client.ts"
+    },
+    "700a18c646a3aa3514e42de64c63d3f9616005654c": {
+      "workers": {
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "getAvailableSlots",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "exportedName": "getAvailableSlots",
+      "filename": "app/actions/client.ts"
+    }
+  },
+  "edge": {}
+}

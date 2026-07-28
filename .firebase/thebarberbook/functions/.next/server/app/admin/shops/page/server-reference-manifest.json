@@ -1,0 +1,53 @@
+{
+  "node": {
+    "4024e62dd20c05dd3c24f2d6871471688fec13ad17": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "createShop",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "createShop",
+      "filename": "app/actions/shop.ts"
+    },
+    "007ebd0afb855e490622c8eb8d31e9df02e263d491": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "getShops",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "getShops",
+      "filename": "app/actions/shop.ts"
+    },
+    "40d57209df5473cd87e44266d382b8bfd6f6b8d036": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "deleteShop",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "deleteShop",
+      "filename": "app/actions/shop.ts"
+    },
+    "6050b8c18c325a429a6bf709de05edd147803b5470": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "toggleShopStatus",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "toggleShopStatus",
+      "filename": "app/actions/shop.ts"
+    }
+  },
+  "edge": {}
+}

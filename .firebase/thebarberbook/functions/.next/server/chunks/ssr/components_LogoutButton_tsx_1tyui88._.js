@@ -1,0 +1,3 @@
+module.exports=[1615,a=>{"use strict";var b=a.i(87924),c=a.i(57230),d=a.i(18740);a.i(30485);var e=a.i(16511);a.s(["LogoutButton",0,function(){let a=async()=>{await (0,e.signOut)(d.auth),await fetch("/api/auth/session",{method:"DELETE"}),window.location.href="/"};return(0,b.jsxs)("button",{onClick:a,className:"w-full flex items-center gap-3 p-4 hover:bg-red-50 rounded-xl transition-colors text-red-600",children:[(0,b.jsx)("div",{className:"p-2",children:(0,b.jsx)(c.LogOut,{size:18})}),(0,b.jsx)("div",{className:"flex-1 text-left font-medium text-sm",children:"Sign Out"})]})}])}];
+
+//# sourceMappingURL=components_LogoutButton_tsx_1tyui88._.js.map

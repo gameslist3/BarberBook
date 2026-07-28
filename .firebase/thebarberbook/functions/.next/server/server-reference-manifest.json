@@ -1,0 +1,276 @@
+{
+  "node": {
+    "0001a61acfdd8051f6749a79249853b140bb8551f3": {
+      "workers": {
+        "app/(client)/explore/page": {
+          "moduleId": 67556,
+          "async": true,
+          "exportedName": "getAllActiveShops",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "filename": "app/actions/client.ts",
+      "exportedName": "getAllActiveShops"
+    },
+    "700a18c646a3aa3514e42de64c63d3f9616005654c": {
+      "workers": {
+        "app/(client)/explore/page": {
+          "moduleId": 67556,
+          "async": true,
+          "exportedName": "getAvailableSlots",
+          "filename": "app/actions/client.ts"
+        },
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "getAvailableSlots",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "filename": "app/actions/client.ts",
+      "exportedName": "getAvailableSlots"
+    },
+    "4072be709f53833066c68543028151ee65a035f21a": {
+      "workers": {
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "getShopDetails",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "filename": "app/actions/client.ts",
+      "exportedName": "getShopDetails"
+    },
+    "4091e139df1d7a997dc0aa97cf5d8e64126fe1cdc0": {
+      "workers": {
+        "app/(client)/shop/[id]/page": {
+          "moduleId": 69818,
+          "async": true,
+          "exportedName": "createBooking",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "filename": "app/actions/client.ts",
+      "exportedName": "createBooking"
+    },
+    "00457819bb41fb6ea650a93e8fdf800f68638c5b76": {
+      "workers": {
+        "app/admin/dashboard/page": {
+          "moduleId": 97417,
+          "async": true,
+          "exportedName": "getAdminDashboardStats",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "filename": "app/actions/admin.ts",
+      "exportedName": "getAdminDashboardStats"
+    },
+    "4024e62dd20c05dd3c24f2d6871471688fec13ad17": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "createShop",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "createShop",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "createShop"
+    },
+    "007ebd0afb855e490622c8eb8d31e9df02e263d491": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "getShops",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "getShops",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "getShops"
+    },
+    "40d57209df5473cd87e44266d382b8bfd6f6b8d036": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "deleteShop",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "deleteShop",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "deleteShop"
+    },
+    "6050b8c18c325a429a6bf709de05edd147803b5470": {
+      "workers": {
+        "app/admin/shops/page": {
+          "moduleId": 96858,
+          "async": true,
+          "exportedName": "toggleShopStatus",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "toggleShopStatus",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "toggleShopStatus"
+    },
+    "0038878eb2d22e72589f1c3481173ebf85537841d1": {
+      "workers": {
+        "app/shop/bookings/page": {
+          "moduleId": 33868,
+          "async": true,
+          "exportedName": "getShopBookings",
+          "filename": "app/actions/bookings.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "getShopBookings",
+          "filename": "app/actions/bookings.ts"
+        }
+      },
+      "filename": "app/actions/bookings.ts",
+      "exportedName": "getShopBookings"
+    },
+    "60409bb2a0dec495c6ae501d303270ed6d23b05f33": {
+      "workers": {
+        "app/shop/bookings/page": {
+          "moduleId": 33868,
+          "async": true,
+          "exportedName": "updateBookingStatus",
+          "filename": "app/actions/bookings.ts"
+        },
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "updateBookingStatus",
+          "filename": "app/actions/bookings.ts"
+        }
+      },
+      "filename": "app/actions/bookings.ts",
+      "exportedName": "updateBookingStatus"
+    },
+    "000b7e045d01b0ccc357ce7d1a7eaf9b9cd683633e": {
+      "workers": {
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "getShopProfile",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/settings/page": {
+          "moduleId": 99612,
+          "async": true,
+          "exportedName": "getShopProfile",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "getShopProfile"
+    },
+    "00ba0cfffd20fddaf6d2c3181f1536233e517ada42": {
+      "workers": {
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "getShopDashboardStats",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "getShopDashboardStats"
+    },
+    "4085638d477e0b14b60481d21e944cf82cab2f70e9": {
+      "workers": {
+        "app/shop/dashboard/page": {
+          "moduleId": 8469,
+          "async": true,
+          "exportedName": "updateShopProfile",
+          "filename": "app/actions/shop.ts"
+        },
+        "app/shop/settings/page": {
+          "moduleId": 99612,
+          "async": true,
+          "exportedName": "updateShopProfile",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "filename": "app/actions/shop.ts",
+      "exportedName": "updateShopProfile"
+    },
+    "00f3f8e6e8db18e7cb71e8533a152a5adf52963937": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "getServices",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "filename": "app/actions/services.ts",
+      "exportedName": "getServices"
+    },
+    "4063d823ce5586eed7cb889ce9f071a7eba0b4b21c": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "addService",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "filename": "app/actions/services.ts",
+      "exportedName": "addService"
+    },
+    "40e5a8992707515f311242915849e2daf1f33e92e6": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "deleteService",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "filename": "app/actions/services.ts",
+      "exportedName": "deleteService"
+    },
+    "606cfeb6aaacf2795fb0f9c679bad74db0d3b74277": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "toggleServiceStatus",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "filename": "app/actions/services.ts",
+      "exportedName": "toggleServiceStatus"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "LbW/8zj8l2FBY2xTsE+rxW55PolRKTfN0t2Ys+T42Io="
+}

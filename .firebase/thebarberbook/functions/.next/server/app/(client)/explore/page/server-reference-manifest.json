@@ -1,0 +1,29 @@
+{
+  "node": {
+    "0001a61acfdd8051f6749a79249853b140bb8551f3": {
+      "workers": {
+        "app/(client)/explore/page": {
+          "moduleId": 67556,
+          "async": true,
+          "exportedName": "getAllActiveShops",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "exportedName": "getAllActiveShops",
+      "filename": "app/actions/client.ts"
+    },
+    "700a18c646a3aa3514e42de64c63d3f9616005654c": {
+      "workers": {
+        "app/(client)/explore/page": {
+          "moduleId": 67556,
+          "async": true,
+          "exportedName": "getAvailableSlots",
+          "filename": "app/actions/client.ts"
+        }
+      },
+      "exportedName": "getAvailableSlots",
+      "filename": "app/actions/client.ts"
+    }
+  },
+  "edge": {}
+}

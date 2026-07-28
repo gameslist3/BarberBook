@@ -1,0 +1,29 @@
+{
+  "node": {
+    "0038878eb2d22e72589f1c3481173ebf85537841d1": {
+      "workers": {
+        "app/shop/bookings/page": {
+          "moduleId": 33868,
+          "async": true,
+          "exportedName": "getShopBookings",
+          "filename": "app/actions/bookings.ts"
+        }
+      },
+      "exportedName": "getShopBookings",
+      "filename": "app/actions/bookings.ts"
+    },
+    "60409bb2a0dec495c6ae501d303270ed6d23b05f33": {
+      "workers": {
+        "app/shop/bookings/page": {
+          "moduleId": 33868,
+          "async": true,
+          "exportedName": "updateBookingStatus",
+          "filename": "app/actions/bookings.ts"
+        }
+      },
+      "exportedName": "updateBookingStatus",
+      "filename": "app/actions/bookings.ts"
+    }
+  },
+  "edge": {}
+}

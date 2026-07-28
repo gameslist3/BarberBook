@@ -1,0 +1,53 @@
+{
+  "node": {
+    "00f3f8e6e8db18e7cb71e8533a152a5adf52963937": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "getServices",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "exportedName": "getServices",
+      "filename": "app/actions/services.ts"
+    },
+    "4063d823ce5586eed7cb889ce9f071a7eba0b4b21c": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "addService",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "exportedName": "addService",
+      "filename": "app/actions/services.ts"
+    },
+    "40e5a8992707515f311242915849e2daf1f33e92e6": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "deleteService",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "exportedName": "deleteService",
+      "filename": "app/actions/services.ts"
+    },
+    "606cfeb6aaacf2795fb0f9c679bad74db0d3b74277": {
+      "workers": {
+        "app/shop/services/page": {
+          "moduleId": 69175,
+          "async": true,
+          "exportedName": "toggleServiceStatus",
+          "filename": "app/actions/services.ts"
+        }
+      },
+      "exportedName": "toggleServiceStatus",
+      "filename": "app/actions/services.ts"
+    }
+  },
+  "edge": {}
+}

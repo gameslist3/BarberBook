@@ -1,0 +1,17 @@
+{
+  "node": {
+    "00457819bb41fb6ea650a93e8fdf800f68638c5b76": {
+      "workers": {
+        "app/admin/dashboard/page": {
+          "moduleId": 97417,
+          "async": true,
+          "exportedName": "getAdminDashboardStats",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "exportedName": "getAdminDashboardStats",
+      "filename": "app/actions/admin.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,29 @@
+{
+  "node": {
+    "000b7e045d01b0ccc357ce7d1a7eaf9b9cd683633e": {
+      "workers": {
+        "app/shop/settings/page": {
+          "moduleId": 99612,
+          "async": true,
+          "exportedName": "getShopProfile",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "getShopProfile",
+      "filename": "app/actions/shop.ts"
+    },
+    "4085638d477e0b14b60481d21e944cf82cab2f70e9": {
+      "workers": {
+        "app/shop/settings/page": {
+          "moduleId": 99612,
+          "async": true,
+          "exportedName": "updateShopProfile",
+          "filename": "app/actions/shop.ts"
+        }
+      },
+      "exportedName": "updateShopProfile",
+      "filename": "app/actions/shop.ts"
+    }
+  },
+  "edge": {}
+}
