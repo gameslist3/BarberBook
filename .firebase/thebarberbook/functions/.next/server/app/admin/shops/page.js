@@ -11,9 +11,9 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_forbidde
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthorized_0l_sp0x.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_0-o-goa.js")
 R.c("server/chunks/ssr/app_admin_layout_tsx_1_c9o0g._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__072zzwz._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__1vmlbyj._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_0airgni._.js")
 R.c("server/chunks/ssr/node_modules_next_13m025q._.js")
-R.c("server/chunks/ssr/_1zvzkzz._.js")
+R.c("server/chunks/ssr/_1itqusa._.js")
 R.m(50638)
 module.exports=R.m(50638).exports

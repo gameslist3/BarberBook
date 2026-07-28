@@ -66,6 +66,42 @@
       "filename": "app/actions/admin.ts",
       "exportedName": "getAdminDashboardStats"
     },
+    "4047a6f49d3fa7c67fd0ead6b3a57876c3842e9cf0": {
+      "workers": {
+        "app/admin/dashboard/page": {
+          "moduleId": 97417,
+          "async": true,
+          "exportedName": "deleteUserAccount",
+          "filename": "app/actions/admin.ts"
+        },
+        "app/admin/users/page": {
+          "moduleId": 1879,
+          "async": true,
+          "exportedName": "deleteUserAccount",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "filename": "app/actions/admin.ts",
+      "exportedName": "deleteUserAccount"
+    },
+    "60732c24142d79d9a7345e13b5781d31e45bfd9ee7": {
+      "workers": {
+        "app/admin/dashboard/page": {
+          "moduleId": 97417,
+          "async": true,
+          "exportedName": "toggleUserStatus",
+          "filename": "app/actions/admin.ts"
+        },
+        "app/admin/users/page": {
+          "moduleId": 1879,
+          "async": true,
+          "exportedName": "toggleUserStatus",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "filename": "app/actions/admin.ts",
+      "exportedName": "toggleUserStatus"
+    },
     "4024e62dd20c05dd3c24f2d6871471688fec13ad17": {
       "workers": {
         "app/admin/shops/page": {

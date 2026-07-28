@@ -1,4 +1,29 @@
 {
-  "node": {},
+  "node": {
+    "60732c24142d79d9a7345e13b5781d31e45bfd9ee7": {
+      "workers": {
+        "app/admin/users/page": {
+          "moduleId": 1879,
+          "async": true,
+          "exportedName": "toggleUserStatus",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "exportedName": "toggleUserStatus",
+      "filename": "app/actions/admin.ts"
+    },
+    "4047a6f49d3fa7c67fd0ead6b3a57876c3842e9cf0": {
+      "workers": {
+        "app/admin/users/page": {
+          "moduleId": 1879,
+          "async": true,
+          "exportedName": "deleteUserAccount",
+          "filename": "app/actions/admin.ts"
+        }
+      },
+      "exportedName": "deleteUserAccount",
+      "filename": "app/actions/admin.ts"
+    }
+  },
   "edge": {}
 }

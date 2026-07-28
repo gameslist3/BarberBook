@@ -62,7 +62,7 @@ export default function LocationPickerMap({
         center={center} 
         zoom={position ? 15 : 12} 
         scrollWheelZoom={true}
-        tap={false}
+        style={{ touchAction: 'none' }}
         className="h-full w-full rounded-xl z-0 relative shadow-sm border border-gray-200"
     >
       <TileLayer
