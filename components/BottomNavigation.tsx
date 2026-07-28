@@ -29,7 +29,7 @@ export function BottomNavigation({ userRole }: { userRole?: string }) {
               key={item.name}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-                isActive ? "text-indigo-600" : "text-gray-500 hover:text-gray-900"
+                isActive ? "text-indigo-600" : "text-gray-600 hover:text-gray-900"
               }`}
             >
               <Icon size={20} className={isActive ? "fill-indigo-50" : ""} />

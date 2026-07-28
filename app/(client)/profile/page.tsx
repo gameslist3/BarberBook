@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getServerUser } from "@/lib/get-server-user";
 import { redirect } from "next/navigation";
 import { User, Mail, Calendar, Settings, Shield } from "lucide-react";
@@ -21,8 +22,8 @@ export default async function ProfilePage() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{user.name || "User"}</h2>
-            <p className="text-gray-500 flex items-center gap-1 mt-1 text-sm"><Mail size={14} /> {user.email}</p>
-            <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+            <p className="text-gray-600 flex items-center gap-1 mt-1 text-sm"><Mail size={14} /> {user.email}</p>
+            <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700">
               Role: {user.role}
             </span>
           </div>

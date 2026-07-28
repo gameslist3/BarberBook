@@ -101,7 +101,7 @@ export default function ShopDetailsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12 relative">
-      <Link href="/explore" className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors">
+      <Link href="/explore" className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 mb-6 transition-colors">
         <ChevronLeft size={16} /> Back to Map
       </Link>
       
@@ -130,14 +130,14 @@ export default function ShopDetailsPage() {
         </div>
         
         <div className="p-8">
-          <div className="flex flex-wrap gap-6 mb-8 text-sm text-gray-600">
-            <div className="flex items-center gap-2"><MapPin size={18} /> {shop.address || "No address provided"}</div>
+          <div className="flex flex-wrap gap-6 mb-8 text-sm text-gray-700">
+            <div className="flex items-center gap-2 text-gray-700"><MapPin size={18} className="text-gray-500" /> {shop.address || "No address provided"}</div>
             {shop.phone && (
                 <a href={`tel:${shop.phone}`} className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
                     <Phone size={18} /> {shop.phone}
                 </a>
             )}
-            <div className="flex items-center gap-2"><Clock size={18} /> {shop.openTime || "9:00 AM"} - {shop.closeTime || "6:00 PM"}</div>
+            <div className="flex items-center gap-2 text-gray-700"><Clock size={18} className="text-gray-500" /> {shop.openTime || "9:00 AM"} - {shop.closeTime || "6:00 PM"}</div>
             <div className="flex items-center gap-2 font-medium text-gray-900">Owner: {shop.owner?.name || 'Unknown'}</div>
           </div>
           
@@ -156,7 +156,7 @@ export default function ShopDetailsPage() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Services</h2>
                 {(!shop.services || shop.services.filter((s:any) => s.isActive !== false).length === 0) ? (
-                  <p className="text-gray-500">This shop hasn't added any services yet.</p>
+                  <p className="text-gray-600">This shop hasn't added any services yet.</p>
                 ) : (
                   <div className="space-y-4">
                     {shop.services.filter((s:any) => s.isActive !== false).map((service: any) => (
@@ -168,7 +168,7 @@ export default function ShopDetailsPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <h3 className="font-bold text-gray-900">{service.name}</h3>
-                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1"><Clock size={14}/> {service.duration} mins</p>
+                            <p className="text-sm text-gray-600 mt-1 flex items-center gap-1"><Clock size={14} className="text-gray-500"/> {service.duration} mins</p>
                           </div>
                           <div className="text-lg font-bold text-gray-900">${Number(service.price).toFixed(2)}</div>
                         </div>
@@ -180,7 +180,7 @@ export default function ShopDetailsPage() {
 
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us</h2>
-                <div className="bg-gray-50 rounded-2xl p-6 text-gray-600 leading-relaxed border border-gray-100">
+                <div className="bg-gray-50 rounded-2xl p-6 text-gray-700 leading-relaxed border border-gray-100">
                   {shop.description || "Welcome to our shop! We provide premium grooming services."}
                 </div>
               </div>
@@ -263,7 +263,7 @@ export default function ShopDetailsPage() {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                      <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-500">
+                      <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600">
                         Today ({new Date().toLocaleDateString()})
                       </div>
                     </div>
@@ -299,7 +299,7 @@ export default function ShopDetailsPage() {
                   <div className="mt-4 p-6 bg-white border border-gray-200 rounded-xl text-center">
                     <UserIcon className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Guest Mode</h3>
-                    <p className="text-sm text-gray-500 mb-6">
+                    <p className="text-sm text-gray-600 mb-6">
                       You are viewing this shop as a guest. Please create an account or sign in to book an appointment.
                     </p>
                     <a href="/signup" className="inline-block w-full bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 mb-3">

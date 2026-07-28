@@ -61,7 +61,8 @@ export default function LocationPickerMap({
     <MapContainer 
         center={center} 
         zoom={position ? 15 : 12} 
-        scrollWheelZoom={true} 
+        scrollWheelZoom={true}
+        tap={false}
         className="h-full w-full rounded-xl z-0 relative shadow-sm border border-gray-200"
     >
       <TileLayer

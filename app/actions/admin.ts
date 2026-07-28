@@ -35,3 +35,57 @@ export async function getAdminDashboardStats() {
     return { totalShops: 0, totalUsers: 0, totalBookings: 0, revenue: 0 };
   }
 }
+
+export async function toggleUserStatus(userId: string, isActive: boolean) {
+  const user = await getServerUser();
+  if (!user || (user.role !== "ADMIN" && user.role !== "APP_OWNER")) return { success: false };
+
+  try {
+    await adminDb.collection("users").doc(userId).update({ isActive });
+    
+    // If shop owner, also toggle their shop
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    if (userDoc.exists && userDoc.data()?.role === "SHOP_OWNER") {
+        const shopsSnap = await adminDb.collection("shops").where("ownerId", "==", userId).get();
+        if (!shopsSnap.empty) {
+            await adminDb.collection("shops").doc(shopsSnap.docs[0].id).update({ isActive });
+        }
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteUserAccount(userId: string) {
+  const user = await getServerUser();
+  if (!user || (user.role !== "ADMIN" && user.role !== "APP_OWNER")) return { success: false };
+
+  try {
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    
+    // Delete Auth user
+    try {
+        const { adminAuth } = await import("@/lib/firebase-admin");
+        await adminAuth.deleteUser(userId);
+    } catch (e) {
+        console.log("Auth user might not exist or err:", e);
+    }
+    
+    // If shop owner, delete shop
+    if (userDoc.exists && userDoc.data()?.role === "SHOP_OWNER") {
+        const shopsSnap = await adminDb.collection("shops").where("ownerId", "==", userId).get();
+        if (!shopsSnap.empty) {
+            await adminDb.collection("shops").doc(shopsSnap.docs[0].id).delete();
+        }
+    }
+    
+    // Delete user doc
+    await adminDb.collection("users").doc(userId).delete();
+    
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

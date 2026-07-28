@@ -37,7 +37,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, setSheetExp
           </div>
           <div className="ml-3 flex-1 min-w-0">
             <h3 className="text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors truncate">{shop.shopName}</h3>
-            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+            <p className="text-xs text-gray-600 flex items-center gap-1 mt-0.5 truncate">
               <MapPin size={12} className="shrink-0" /> {shop.address || "Local Shop"}
             </p>
             <div className="flex items-center gap-3 mt-1">
@@ -61,7 +61,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, setSheetExp
               setSheetExpanded(false);
             }
           }}
-          className={`shrink-0 p-2.5 rounded-full transition-colors flex items-center justify-center ${shop.googleMapLink ? (selectedShopId === shop.id ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100') : 'bg-gray-50 text-gray-300 cursor-not-allowed'}`}
+          className={`shrink-0 p-2.5 rounded-full transition-colors flex items-center justify-center ${shop.googleMapLink ? (selectedShopId === shop.id ? 'bg-indigo-600 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100') : 'bg-gray-50 text-gray-400 cursor-not-allowed'}`}
           disabled={!shop.googleMapLink}
           title={shop.googleMapLink ? "View on map" : "Location not set"}
         >
@@ -72,7 +72,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, setSheetExp
       <div className="mt-4 pt-3 border-t border-gray-100">
         <div className="flex items-center justify-between min-h-[30px]">
           {isLoading ? (
-             <div className="flex items-center gap-2 text-xs text-gray-400">
+             <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Loader2 className="w-3 h-3 animate-spin" /> Checking availability...
              </div>
           ) : slots.length > 0 ? (
@@ -86,7 +86,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, setSheetExp
                Book Now - Next slot at {slots[0]}
              </button>
           ) : (
-             <div className="text-xs text-red-500 font-medium">Fully booked today</div>
+             <div className="text-xs text-red-600 font-medium">Fully booked today</div>
           )}
         </div>
       </div>
@@ -136,22 +136,22 @@ export default function ExplorePage() {
         {/* Search bar */}
         <div className="px-4 pt-2 pb-3 lg:px-5 lg:pt-5 shrink-0 bg-white">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               placeholder="Search barber shops..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-9 rounded-xl bg-gray-100 border border-gray-200 text-sm text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full h-10 pl-9 pr-9 rounded-xl bg-gray-100 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 <X size={14} />
               </button>
             )}
           </div>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-600">
               {filteredShops.length} shop{filteredShops.length !== 1 ? 's' : ''} available
             </p>
           </div>
@@ -167,7 +167,7 @@ export default function ExplorePage() {
             <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100 mt-2">
               <Store className="mx-auto h-10 w-10 text-gray-300 mb-3" />
               <h3 className="text-sm font-medium text-gray-900">No shops found</h3>
-              <p className="text-xs text-gray-500 mt-1">Try a different search term.</p>
+              <p className="text-xs text-gray-600 mt-1">Try a different search term.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2 mt-1">

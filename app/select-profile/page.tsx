@@ -1,7 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getServerUser } from "@/lib/get-server-user";
 import { redirect } from "next/navigation";
-import { Store, User, Scissors } from "lucide-react";
+import { Store, User } from "lucide-react";
 
 export default async function SelectProfilePage() {
   const user = await getServerUser();
@@ -17,8 +18,14 @@ export default async function SelectProfilePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
       <div className="mb-8 text-center">
-        <div className="flex justify-center mb-4 text-indigo-600">
-            <Scissors size={48} />
+        <div className="flex justify-center mb-4">
+          <Image
+            src="/logo.png"
+            alt="BarberBook"
+            width={56}
+            height={56}
+            className="rounded-xl"
+          />
         </div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome, {user.name}</h1>
         <p className="mt-2 text-gray-600">Which profile would you like to use today?</p>
@@ -30,7 +37,7 @@ export default async function SelectProfilePage() {
             <User size={32} className="text-blue-600" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Client Profile</h2>
-          <p className="text-sm text-gray-500">Browse shops, book appointments, and manage your haircuts.</p>
+          <p className="text-sm text-gray-600">Browse shops, book appointments, and manage your haircuts.</p>
         </Link>
 
         <Link href="/shop/dashboard" className="group relative rounded-2xl bg-white p-8 shadow-sm border border-gray-100 hover:shadow-md hover:indigo-300 transition-all text-center">
@@ -38,7 +45,7 @@ export default async function SelectProfilePage() {
             <Store size={32} className="text-indigo-600" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Shop Owner Profile</h2>
-          <p className="text-sm text-gray-500">Manage your barbershop, view bookings, and update services.</p>
+          <p className="text-sm text-gray-600">Manage your barbershop, view bookings, and update services.</p>
         </Link>
       </div>
     </div>

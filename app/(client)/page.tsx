@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Scissors, User, Map, LogIn } from "lucide-react";
+import Image from "next/image";
+import { User, Map, LogIn } from "lucide-react";
 import { getServerUser } from "@/lib/get-server-user";
 import { redirect } from "next/navigation";
 
@@ -18,7 +19,14 @@ export default async function WelcomePage() {
         {/* Left Side - Brand / Image */}
         <div className="md:w-1/2 bg-indigo-600 text-white p-12 flex flex-col justify-center items-center text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-          <Scissors size={64} className="mb-6 relative z-10" />
+          <Image
+            src="/logo.png"
+            alt="BarberBook"
+            width={80}
+            height={80}
+            priority
+            className="mb-6 relative z-10 rounded-2xl"
+          />
           <h1 className="text-4xl font-bold tracking-tight mb-4 relative z-10">BarberBook</h1>
           <p className="text-indigo-100 text-lg relative z-10">
             The premium platform to find and book the best local barber shops instantly.
@@ -36,7 +44,7 @@ export default async function WelcomePage() {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-bold text-gray-900">Login</h3>
-                <p className="text-sm text-gray-500">Access your account (All Roles)</p>
+                <p className="text-sm text-gray-600">Access your account (All Roles)</p>
               </div>
             </Link>
             
@@ -46,7 +54,7 @@ export default async function WelcomePage() {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-bold text-gray-900">Create Account</h3>
-                <p className="text-sm text-gray-500">For clients looking to book</p>
+                <p className="text-sm text-gray-600">For clients looking to book</p>
               </div>
             </Link>
             
@@ -56,7 +64,7 @@ export default async function WelcomePage() {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-bold text-gray-900">Continue as Guest</h3>
-                <p className="text-sm text-gray-500">Browse the map directory</p>
+                <p className="text-sm text-gray-600">Browse the map directory</p>
               </div>
             </Link>
           </div>

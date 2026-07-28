@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Scissors } from "lucide-react";
+import Image from "next/image";
 import { TopNavigation } from "@/components/TopNavigation";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { getServerUser } from "@/lib/get-server-user";
@@ -24,8 +24,14 @@ export default async function ClientLayout({ children }: { children: React.React
       <ClientNotificationProvider />
       <header className="bg-white border-b border-gray-200 shrink-0 z-50 relative hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-indigo-600">
-            <Scissors size={24} />
+          <Link href="/" className="flex items-center gap-2.5 text-indigo-600">
+            <Image
+              src="/logo.png"
+              alt="BarberBook"
+              width={32}
+              height={32}
+              className="rounded-lg"
+            />
             <span className="font-bold text-xl tracking-tight text-gray-900 hidden sm:block">BarberBook</span>
           </Link>
           
@@ -41,4 +47,3 @@ export default async function ClientLayout({ children }: { children: React.React
     </div>
   );
 }
-
