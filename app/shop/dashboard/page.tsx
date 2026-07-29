@@ -3,12 +3,13 @@ import { Scissors, CalendarCheck, TrendingUp, Users, Clock, ArrowRight } from "l
 import { getShopDashboardStats } from "@/app/actions/shop";
 import { getShopBookings } from "@/app/actions/bookings";
 import { TodaysSchedule } from "@/components/TodaysSchedule";
+import { getKolkataDateString } from "@/lib/timeUtils";
 
 export default async function ShopDashboard() {
   const data = await getShopDashboardStats();
   const allBookings = await getShopBookings();
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getKolkataDateString();
   const todaysBookings = allBookings.filter(
     (b: any) => b.slotDate === todayStr && (b.status === "confirmed" || b.status === "pending")
   );
@@ -91,52 +92,6 @@ export default async function ShopDashboard() {
         </div>
         <div className="max-h-[280px] overflow-y-auto">
           <TodaysSchedule initialBookings={todaysBookings} />
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-[15px] font-bold text-gray-900 mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-2 gap-2.5">
-          <Link
-            href="/shop/services"
-            className="p-3.5 border border-gray-200 rounded-xl text-left active:bg-gray-50 hover:border-indigo-300 transition-all flex flex-col items-start justify-between min-h-[72px]"
-          >
-            <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold mb-2">
-              +
-            </span>
-            <span className="text-sm font-medium text-gray-900">Add Service</span>
-          </Link>
-
-          <Link
-            href="/shop/bookings"
-            className="p-3.5 border border-gray-200 rounded-xl text-left active:bg-gray-50 hover:border-indigo-300 transition-all flex flex-col items-start justify-between min-h-[72px]"
-          >
-            <span className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold mb-2">
-              <CalendarCheck size={14} />
-            </span>
-            <span className="text-sm font-medium text-gray-900">View Bookings</span>
-          </Link>
-
-          <Link
-            href="/shop/settings"
-            className="p-3.5 border border-gray-200 rounded-xl text-left active:bg-gray-50 hover:border-indigo-300 transition-all flex flex-col items-start justify-between min-h-[72px]"
-          >
-            <span className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs font-bold mb-2">
-              <Users size={14} />
-            </span>
-            <span className="text-sm font-medium text-gray-900">Edit Profile</span>
-          </Link>
-
-          <Link
-            href="/shop/services"
-            className="p-3.5 border border-gray-200 rounded-xl text-left active:bg-gray-50 hover:border-indigo-300 transition-all flex flex-col items-start justify-between min-h-[72px]"
-          >
-            <span className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold mb-2">
-              <Clock size={14} />
-            </span>
-            <span className="text-sm font-medium text-gray-900">Manage Hours</span>
-          </Link>
         </div>
       </div>
     </div>

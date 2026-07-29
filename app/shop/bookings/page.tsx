@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Check, X, Clock, Loader2, Calendar, User, Scissors, ChevronDown, Filter } from "lucide-react";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
+import { getScheduleInfo } from "@/lib/timeUtils";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   all: { label: "All", color: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" },
@@ -172,24 +173,29 @@ export default function ShopBookingsPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  {booking.status === "confirmed" && (
+                  {booking.status === "confirmed" && (() => {
+                    const { hasStarted } = getScheduleInfo(booking.slotDate, booking.slotStartTime);
+                    return (
                     <div className="flex gap-2 mt-3">
                       <button
                         onClick={() => handleUpdateStatus(booking.id, "completed")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-green-50 text-green-700 text-sm font-medium hover:bg-green-100 active:bg-green-200 transition-colors"
+                        disabled={!hasStarted}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-green-50 text-green-700 text-sm font-medium hover:bg-green-100 active:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Check size={16} />
                         Complete
                       </button>
-                      <button
-                        onClick={() => handleUpdateStatus(booking.id, "cancelled")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100 active:bg-red-200 transition-colors"
-                      >
-                        <X size={16} />
-                        Cancel
-                      </button>
+                      {!hasStarted && (
+                        <button
+                          onClick={() => handleUpdateStatus(booking.id, "cancelled")}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100 active:bg-red-200 transition-colors"
+                        >
+                          <X size={16} />
+                          Cancel
+                        </button>
+                      )}
                     </div>
-                  )}
+                  )})()}
                   {booking.status !== "confirmed" && (
                     <div className="mt-3 py-2.5 text-center text-xs text-gray-400 bg-gray-50 rounded-lg">
                       {booking.status === "completed" ? "✓ Completed" : "✗ Cancelled"}
@@ -229,24 +235,29 @@ export default function ShopBookingsPage() {
                     </td>
                     <td className="px-6 py-4">{getStatusBadge(booking.status)}</td>
                     <td className="px-6 py-4 text-right">
-                      {booking.status === "confirmed" ? (
+                      {booking.status === "confirmed" ? (() => {
+                        const { hasStarted } = getScheduleInfo(booking.slotDate, booking.slotStartTime);
+                        return (
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleUpdateStatus(booking.id, "completed")}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg border border-transparent hover:border-green-200 transition-colors"
+                            disabled={!hasStarted}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg border border-transparent hover:border-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Mark Completed"
                           >
                             <Check size={18} />
                           </button>
-                          <button
-                            onClick={() => handleUpdateStatus(booking.id, "cancelled")}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-colors"
-                            title="Cancel Booking"
-                          >
-                            <X size={18} />
-                          </button>
+                          {!hasStarted && (
+                            <button
+                              onClick={() => handleUpdateStatus(booking.id, "cancelled")}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-colors"
+                              title="Cancel Booking"
+                            >
+                              <X size={18} />
+                            </button>
+                          )}
                         </div>
-                      ) : (
+                      )})() : (
                         <span className="text-sm text-gray-400">Locked</span>
                       )}
                     </td>

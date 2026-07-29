@@ -4,36 +4,8 @@ import { useState, useEffect } from "react";
 import { Clock, Check, X, Loader2 } from "lucide-react";
 import { updateBookingStatus } from "@/app/actions/bookings";
 import { useRouter } from "next/navigation";
+import { getScheduleInfo } from "@/lib/timeUtils";
 
-function getCountdown(slotDate: string, slotStartTime: string) {
-    const now = new Date();
-    // Parse "HH:mm AM/PM"
-    const match = slotStartTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-    if (!match) return "";
-    
-    let hours = parseInt(match[1], 10);
-    const minutes = parseInt(match[2], 10);
-    const ampm = match[3]?.toUpperCase();
-    
-    if (ampm === "PM" && hours < 12) hours += 12;
-    if (ampm === "AM" && hours === 12) hours = 0;
-    
-    const targetDate = new Date(slotDate);
-    targetDate.setHours(hours, minutes, 0, 0);
-    
-    const diffMs = targetDate.getTime() - now.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < -60) return "Started over an hour ago";
-    if (diffMins < 0) return `Started ${Math.abs(diffMins)}m ago`;
-    if (diffMins === 0) return "Starting now!";
-    
-    const h = Math.floor(diffMins / 60);
-    const m = diffMins % 60;
-    
-    if (h > 0) return `Starts in ${h}h ${m}m`;
-    return `Starts in ${m}m`;
-}
 
 export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) {
     const [bookings, setBookings] = useState(initialBookings);
@@ -100,7 +72,7 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                                       ? booking.services.reduce((acc: number, curr: any) => acc + (parseInt(curr.duration, 10) || 30), 0)
                                       : parseInt(booking.service?.duration || 30, 10);
                                       
-                const countdown = getCountdown(booking.slotDate, booking.slotStartTime);
+                const { text: countdown, hasStarted } = getScheduleInfo(booking.slotDate, booking.slotStartTime);
 
                 return (
                     <div key={booking.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-indigo-200 transition-colors">
@@ -127,20 +99,22 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                             <div className="flex items-center gap-2">
                                 <button 
                                     onClick={() => handleComplete(booking.id)}
-                                    disabled={processingId === booking.id}
-                                    className="px-3 py-1.5 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                                    disabled={processingId === booking.id || !hasStarted}
+                                    className="px-3 py-1.5 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {processingId === booking.id ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                                     Complete
                                 </button>
-                                <button 
-                                    onClick={() => setCancelModalId(booking.id)}
-                                    disabled={processingId === booking.id}
-                                    className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
-                                >
-                                    <X size={14} />
-                                    Cancel
-                                </button>
+                                {!hasStarted && (
+                                    <button 
+                                        onClick={() => setCancelModalId(booking.id)}
+                                        disabled={processingId === booking.id}
+                                        className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <X size={14} />
+                                        Cancel
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
