@@ -1,99 +1,237 @@
-import Link from "next/link";
-import { Scissors, CalendarCheck, TrendingUp, Users, Clock, ArrowRight } from "lucide-react";
-import { getShopDashboardStats } from "@/app/actions/shop";
-import { getShopBookings } from "@/app/actions/bookings";
-import { TodaysSchedule } from "@/components/TodaysSchedule";
-import { getKolkataDateString } from "@/lib/timeUtils";
+"use client";
 
-export default async function ShopDashboard() {
-  const data = await getShopDashboardStats();
-  const allBookings = await getShopBookings();
+import { useState, useEffect } from "react";
+import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide-react";
+import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
+import { getKolkataDateString, getScheduleInfo } from "@/lib/timeUtils";
 
-  const todayStr = getKolkataDateString();
-  const todaysBookings = allBookings.filter(
-    (b: any) => b.slotDate === todayStr && (b.status === "confirmed" || b.status === "pending")
-  );
+export default function ShopDashboard() {
+  const [todaysBookings, setTodaysBookings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [cancelModalId, setCancelModalId] = useState<string | null>(null);
+  const [, setTick] = useState(0);
 
-  const stats = [
-    {
-      label: "Total Bookings",
-      value: data?.totalBookings || "0",
-      icon: CalendarCheck,
-      color: "bg-blue-500",
-      lightColor: "bg-blue-50",
-      textColor: "text-blue-600",
-      href: "/shop/bookings",
-    },
-    {
-      label: "Active Services",
-      value: data?.activeServices || "0",
-      icon: Scissors,
-      color: "bg-indigo-500",
-      lightColor: "bg-indigo-50",
-      textColor: "text-indigo-600",
-      href: "/shop/services",
-    },
-    {
-      label: "Total Clients",
-      value: data?.totalClients || "0",
-      icon: Users,
-      color: "bg-purple-500",
-      lightColor: "bg-purple-50",
-      textColor: "text-purple-600",
-      href: "/shop/bookings",
-    },
-    {
-      label: "Revenue (All time)",
-      value: `$${(data?.revenue || 0).toFixed(2)}`,
-      icon: TrendingUp,
-      color: "bg-green-500",
-      lightColor: "bg-green-50",
-      textColor: "text-green-600",
-      href: "/shop/dashboard",
-    },
-  ];
+  // Refresh countdown every minute
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const allBookings = await getShopBookings();
+      const todayStr = getKolkataDateString();
+      const filtered = allBookings.filter(
+        (b: any) =>
+          b.slotDate === todayStr &&
+          (b.status === "confirmed" || b.status === "pending")
+      );
+      setTodaysBookings(filtered);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const handleComplete = async (id: string) => {
+    setProcessingId(id);
+    const result = await updateBookingStatus(id, "completed");
+    if (result.success) {
+      setTodaysBookings((prev) => prev.filter((b) => b.id !== id));
+    } else {
+      alert("Failed to update: " + result.error);
+    }
+    setProcessingId(null);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelModalId) return;
+    setProcessingId(cancelModalId);
+    const result = await updateBookingStatus(cancelModalId, "cancelled");
+    if (result.success) {
+      setTodaysBookings((prev) => prev.filter((b) => b.id !== cancelModalId));
+    } else {
+      alert("Failed to cancel: " + result.error);
+    }
+    setProcessingId(null);
+    setCancelModalId(null);
+  };
+
+  const formatDuration = (mins: number) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h} hr`;
+    return `${m} min`;
+  };
 
   return (
-    <div className="space-y-5 pb-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <Link
-              href={stat.href}
-              key={i}
-              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 active:scale-[0.98] transition-transform hover:border-indigo-200 group"
-            >
-              <div className={`p-2.5 rounded-xl ${stat.lightColor} ${stat.textColor} shrink-0`}>
-                <Icon size={20} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">{stat.label}</p>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mt-0.5">
-                  {stat.value}
-                </h3>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Today's Schedule */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
+    <div className="space-y-5">
+      {/* Today's Schedule Section */}
+      <div>
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Clock size={18} className="text-indigo-500" />
-            <h2 className="text-[15px] font-bold text-gray-900">Today's Schedule</h2>
+            <Clock size={18} className="text-violet-600" />
+            <h2 className="text-[17px] font-bold text-gray-900">Today's Schedule</h2>
           </div>
-          <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-3 py-1.5 rounded-full">
             {todaysBookings.length} Upcoming
           </span>
         </div>
-        <div className="max-h-[280px] overflow-y-auto">
-          <TodaysSchedule initialBookings={todaysBookings} />
-        </div>
+
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
+              <p className="text-sm text-gray-400">Loading schedule...</p>
+            </div>
+          </div>
+        ) : todaysBookings.length === 0 ? (
+          /* Empty State - Premium */
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+            <div className="w-16 h-16 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-4">
+              <CalendarCheck size={28} className="text-violet-400" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">No appointments scheduled for today.</h3>
+            <p className="text-sm text-gray-500">Once clients book, they&apos;ll appear here.</p>
+          </div>
+        ) : (
+          /* Appointment Cards */
+          <div className="space-y-3.5">
+            {todaysBookings.map((booking: any) => {
+              const servicesList =
+                booking.services && booking.services.length > 0
+                  ? booking.services.map((s: any) => s.name)
+                  : [booking.service?.name || "Service"];
+
+              const totalDuration =
+                booking.services && booking.services.length > 0
+                  ? booking.services.reduce(
+                      (acc: number, curr: any) => acc + (parseInt(curr.duration, 10) || 30),
+                      0
+                    )
+                  : parseInt(booking.service?.duration || 30, 10);
+
+              const { text: countdown, hasStarted } = getScheduleInfo(
+                booking.slotDate,
+                booking.slotStartTime
+              );
+
+              return (
+                <div
+                  key={booking.id}
+                  className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.05)] border border-gray-50 overflow-hidden active:scale-[0.99] transition-transform"
+                >
+                  <div className="p-4 space-y-3">
+                    {/* ═══ ROW 1: User Name + Avatar | Scheduled Time ═══ */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-sm shrink-0 ring-2 ring-white shadow-sm">
+                          {(booking.user?.name || "U").charAt(0).toUpperCase()}
+                        </div>
+                        <p className="text-[15px] font-bold text-gray-900">
+                          {booking.user?.name || "Unknown Client"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-xl">
+                        <Clock size={14} />
+                        {booking.slotStartTime}
+                      </div>
+                    </div>
+
+                    {/* ═══ ROW 2: Services Count | Total Duration | Countdown ═══ */}
+                    <div className="flex items-center justify-center gap-4 bg-gray-50 rounded-xl px-3.5 py-2.5">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <Scissors size={13} className="text-gray-400" />
+                        <span className="font-semibold text-gray-800">{servicesList.length}</span>
+                        <span className="text-gray-500">service{servicesList.length > 1 ? "s" : ""}</span>
+                      </div>
+                      <div className="w-px h-4 bg-gray-200" />
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <Timer size={13} className="text-gray-400" />
+                        <span className="font-semibold text-gray-800">{formatDuration(totalDuration)}</span>
+                      </div>
+                      <div className="w-px h-4 bg-gray-200" />
+                      <span className="text-xs font-bold text-violet-700">
+                        {countdown}
+                      </span>
+                    </div>
+
+                    {/* ═══ ROW 3: Complete / Cancel Buttons ═══ */}
+                    {hasStarted ? (
+                      <button
+                        onClick={() => handleComplete(booking.id)}
+                        disabled={processingId === booking.id}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-violet-200"
+                      >
+                        {processingId === booking.id ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Check size={18} />
+                        )}
+                        {processingId === booking.id ? "Completing..." : "Complete Appointment"}
+                      </button>
+                    ) : (
+                      <div className="flex gap-2.5">
+                        <button
+                          onClick={() => handleComplete(booking.id)}
+                          disabled={processingId === booking.id}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 active:bg-violet-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          <Check size={16} />
+                          Complete
+                        </button>
+                        <button
+                          onClick={() => setCancelModalId(booking.id)}
+                          disabled={processingId === booking.id}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 active:bg-red-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <X size={16} />
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {cancelModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel Booking?</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to cancel this booking? The client will be notified immediately.
+            </p>
+            <div className="flex items-center gap-3 w-full">
+              <button
+                onClick={() => setCancelModalId(null)}
+                disabled={processingId === cancelModalId}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+              >
+                Keep it
+              </button>
+              <button
+                onClick={handleConfirmCancel}
+                disabled={processingId === cancelModalId}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 text-sm"
+              >
+                {processingId === cancelModalId ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : null}
+                Confirm Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

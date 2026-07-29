@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-md border border-gray-100">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50">
         <div className="text-center">
           <h2 className="text-2xl font-bold tracking-tight text-gray-900">Reset your password</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <button
                     onClick={() => router.push("/signin")}
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="flex w-full justify-center rounded-2xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm shadow-violet-200 hover:bg-violet-700 active:bg-violet-800 transition-all"
                 >
                     Return to Sign In
                 </button>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
             <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+                className="flex w-full justify-center rounded-2xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm shadow-violet-200 hover:bg-violet-700 active:bg-violet-800 transition-all disabled:opacity-50"
             >
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Send reset link"}
             </button>
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
         )}
         
         <div className="mt-6 text-center">
-            <Link href="/signin" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/signin" className="text-sm font-medium text-violet-600 hover:text-violet-500">
               Back to sign in
             </Link>
         </div>

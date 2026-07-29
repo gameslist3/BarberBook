@@ -22,9 +22,11 @@ export default async function ClientLayout({ children }: { children: React.React
   return (
     <div className="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden w-full relative pb-16 md:pb-0">
       <ClientNotificationProvider />
+      
+      {/* Desktop Header */}
       <header className="bg-white border-b border-gray-200 shrink-0 z-50 relative hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 text-indigo-600">
+          <Link href="/" className="flex items-center gap-2.5 text-violet-600">
             <Image
               src="/logo.png"
               alt="BarberBook"
@@ -35,6 +37,23 @@ export default async function ClientLayout({ children }: { children: React.React
             <span className="font-bold text-xl tracking-tight text-gray-900 hidden sm:block">BarberBook</span>
           </Link>
           
+          <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
+        </div>
+      </header>
+      
+      {/* Mobile Compact Header */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 shrink-0 z-50 relative md:hidden">
+        <div className="h-14 flex items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image
+              src="/logo.png"
+              alt="BarberBook"
+              width={28}
+              height={28}
+              className="rounded-lg shrink-0"
+            />
+            <span className="text-base font-bold text-gray-900 tracking-tight">BarberBook</span>
+          </Link>
           <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
         </div>
       </header>

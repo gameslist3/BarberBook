@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info, ChevronRight } from "lucide-react";
+import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info } from "lucide-react";
 import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
@@ -31,7 +31,6 @@ export default function ShopSettingsPage() {
   const [isCropping, setIsCropping] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -152,9 +151,9 @@ export default function ShopSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20">
+      <div className="flex justify-center py-16">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
           <p className="text-sm text-gray-400">Loading settings...</p>
         </div>
       </div>
@@ -162,282 +161,220 @@ export default function ShopSettingsPage() {
   }
 
   return (
-    <div className="pb-20">
-      {/* Page Header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900">Shop Settings</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Update your shop&apos;s public profile and location.</p>
+    <div className="space-y-5">
+      {/* Alerts */}
+      {error && (
+        <div className="bg-red-50 text-red-700 p-3.5 rounded-2xl text-sm border border-red-100 flex items-start gap-2.5">
+          <X size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 text-green-700 p-3.5 rounded-2xl text-sm border border-green-100 flex items-center gap-2.5">
+          <Save size={16} className="shrink-0" />
+          <span>Profile updated successfully!</span>
+        </div>
+      )}
+
+      {/* Section: Shop Information */}
+      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50">
+          <div className="flex items-center gap-2.5">
+            <Store size={18} className="text-violet-600" />
+            <h2 className="text-[15px] font-bold text-gray-900">Shop Information</h2>
+          </div>
+        </div>
+        <div className="p-4 space-y-4">
+          {/* Shop Name */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Shop Name</label>
+            <input
+              required
+              type="text"
+              placeholder="Your barber shop name"
+              className="w-full h-12 px-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+              value={formData.shopName}
+              onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+            />
+          </div>
+
+          {/* About */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <Info size={14} className="text-gray-400" />
+                About the Shop
+              </div>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Tell clients about your barbershop..."
+              className="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 resize-none bg-gray-50 text-sm transition-all"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number</label>
+            <div className="relative">
+              <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                required
+                type="tel"
+                placeholder="(555) 123-4567"
+                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
+            <div className="relative">
+              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                required
+                type="text"
+                placeholder="123 Main St, City, State"
+                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Google Maps Link */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Google Maps Link</label>
+            <div className="relative">
+              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                required
+                type="text"
+                placeholder="https://maps.app.goo.gl/..."
+                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                value={formData.googleMapLink}
+                onChange={(e) => setFormData({ ...formData, googleMapLink: e.target.value })}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5 ml-1">
+              Paste a Google Maps link for your shop location.
+            </p>
+          </div>
+
+          {/* Lunch Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <Clock size={14} className="text-gray-400" />
+                Lunch Break Start Time
+              </div>
+            </label>
+            <input
+              type="time"
+              className="w-full h-12 px-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+              value={formData.lunchTime}
+              onChange={(e) => setFormData({ ...formData, lunchTime: e.target.value })}
+            />
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-4">
-        {/* Alerts */}
-        {error && (
-          <div className="bg-red-50 text-red-700 p-3.5 rounded-xl text-sm border border-red-100 flex items-start gap-2.5">
-            <X size={16} className="mt-0.5 shrink-0" />
-            <span>{error}</span>
+      {/* Section: Shop Logo */}
+      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50">
+          <h2 className="text-[15px] font-bold text-gray-900">Shop Logo</h2>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center gap-4">
+            {/* Logo Preview */}
+            {formData.logoUrl ? (
+              <div className="relative w-20 h-20 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-sm">
+                <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
+                <ImageIcon className="text-gray-300 w-7 h-7" />
+              </div>
+            )}
+            {/* Upload Button */}
+            <label className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 bg-violet-50 text-violet-700 hover:bg-violet-100 active:bg-violet-200 rounded-2xl text-sm font-semibold transition-all">
+              <Upload size={16} />
+              Upload
+              <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+            </label>
           </div>
-        )}
-        {success && (
-          <div className="bg-green-50 text-green-700 p-3.5 rounded-xl text-sm border border-green-100 flex items-center gap-2.5">
-            <Save size={16} className="shrink-0" />
-            <span>Profile updated successfully!</span>
+          <p className="text-xs text-gray-400 mt-3">Upload your shop logo. It will be cropped to a square.</p>
+        </div>
+      </div>
+
+      {/* Section: Gallery */}
+      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50">
+          <h2 className="text-[15px] font-bold text-gray-900">Gallery</h2>
+        </div>
+        <div className="p-4">
+          <p className="text-xs text-gray-500 mb-4">
+            Upload photos of your shop, your team, or your best haircuts.
+          </p>
+          <div className="grid grid-cols-3 gap-3">
+            {formData.images.map((img, idx) => (
+              <div
+                key={idx}
+                className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 shadow-sm group"
+              >
+                <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeGalleryImage(idx)}
+                  className="absolute top-1.5 right-1.5 bg-black/60 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+            {/* Add Image Button */}
+            <label className="relative aspect-square rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-400 bg-gray-50 flex flex-col items-center justify-center cursor-pointer transition-all group">
+              {isUploadingGallery ? (
+                <Loader2 className="w-5 h-5 animate-spin text-violet-500 mb-1" />
+              ) : (
+                <Upload className="w-5 h-5 text-gray-400 group-hover:text-violet-500 mb-1 transition-colors" />
+              )}
+              <span className="text-[10px] font-medium text-gray-400 group-hover:text-violet-600 transition-colors">
+                {isUploadingGallery ? "..." : "Add"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleGalleryUpload}
+                disabled={isUploadingGallery}
+              />
+            </label>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Section 1: Basic Info */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSection(activeSection === "basic" ? null : "basic")}
-            className="w-full flex items-center justify-between px-4 py-4 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <Store size={18} />
-              </div>
-              <div>
-                <h2 className="text-[15px] font-bold text-gray-900">Basic Info</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Shop name, logo, description</p>
-              </div>
-            </div>
-            <ChevronRight
-              size={18}
-              className={`text-gray-400 transition-transform ${activeSection === "basic" ? "rotate-90" : ""}`}
-            />
-          </button>
-          {activeSection === "basic" && (
-            <div className="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Shop Name</label>
-                <input
-                  required
-                  type="text"
-                  className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
-                  value={formData.shopName}
-                  onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Shop Logo</label>
-                <p className="text-xs text-gray-400 mb-3">Upload your shop logo. It will be cropped to a square.</p>
-                <div className="flex items-center gap-4">
-                  {formData.logoUrl ? (
-                    <div className="relative w-20 h-20 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-sm">
-                      <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
-                      <ImageIcon className="text-gray-300 w-7 h-7" />
-                    </div>
-                  )}
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:bg-indigo-200 rounded-xl text-sm font-medium transition-colors">
-                    <Upload size={16} />
-                    Upload
-                    <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Info size={14} />
-                    About the Shop
-                  </div>
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 resize-none bg-gray-50 text-sm"
-                  placeholder="Tell clients about your barbershop..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-            </div>
+      {/* Save Button */}
+      <div className="sticky bottom-0 pb-4 pt-2">
+        <button
+          type="submit"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 transition-all shadow-lg shadow-violet-200"
+        >
+          {isSaving ? (
+            <Loader2 className="animate-spin w-5 h-5" />
+          ) : (
+            <Save size={18} />
           )}
-        </div>
-
-        {/* Section 2: Contact */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSection(activeSection === "contact" ? null : "contact")}
-            className="w-full flex items-center justify-between px-4 py-4 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
-                <Phone size={18} />
-              </div>
-              <div>
-                <h2 className="text-[15px] font-bold text-gray-900">Contact</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Phone number, hours</p>
-              </div>
-            </div>
-            <ChevronRight
-              size={18}
-              className={`text-gray-400 transition-transform ${activeSection === "contact" ? "rotate-90" : ""}`}
-            />
-          </button>
-          {activeSection === "contact" && (
-            <div className="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
-                <div className="relative">
-                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    required
-                    type="tel"
-                    placeholder="(555) 123-4567"
-                    className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={14} />
-                    Lunch Break Start Time
-                  </div>
-                </label>
-                <input
-                  type="time"
-                  className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
-                  value={formData.lunchTime}
-                  onChange={(e) => setFormData({ ...formData, lunchTime: e.target.value })}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Section 3: Location */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSection(activeSection === "location" ? null : "location")}
-            className="w-full flex items-center justify-between px-4 py-4 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <MapPin size={18} />
-              </div>
-              <div>
-                <h2 className="text-[15px] font-bold text-gray-900">Location</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Address, Google Maps link</p>
-              </div>
-            </div>
-            <ChevronRight
-              size={18}
-              className={`text-gray-400 transition-transform ${activeSection === "location" ? "rotate-90" : ""}`}
-            />
-          </button>
-          {activeSection === "location" && (
-            <div className="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Text Address</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="123 Main St, City, State"
-                  className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Google Maps Link</label>
-                <p className="text-xs text-gray-400 mb-2">
-                  Paste a Google Maps link for your shop location.
-                </p>
-                <input
-                  required
-                  type="text"
-                  placeholder="https://maps.app.goo.gl/..."
-                  className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
-                  value={formData.googleMapLink}
-                  onChange={(e) => setFormData({ ...formData, googleMapLink: e.target.value })}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Section 4: Gallery */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setActiveSection(activeSection === "gallery" ? null : "gallery")}
-            className="w-full flex items-center justify-between px-4 py-4 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <ImageIcon size={18} />
-              </div>
-              <div>
-                <h2 className="text-[15px] font-bold text-gray-900">Gallery</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Photos of your shop and work</p>
-              </div>
-            </div>
-            <ChevronRight
-              size={18}
-              className={`text-gray-400 transition-transform ${activeSection === "gallery" ? "rotate-90" : ""}`}
-            />
-          </button>
-          {activeSection === "gallery" && (
-            <div className="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
-              <p className="text-xs text-gray-500">
-                Upload photos of your shop, your team, or your best haircuts.
-              </p>
-              <div className="grid grid-cols-3 gap-3">
-                {formData.images.map((img, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm group">
-                    <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeGalleryImage(idx)}
-                      className="absolute top-1.5 right-1.5 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-                <label className="relative aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-indigo-400 bg-gray-50 flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                  {isUploadingGallery ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-indigo-500 mb-1" />
-                  ) : (
-                    <Upload className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 mb-1 transition-colors" />
-                  )}
-                  <span className="text-[10px] font-medium text-gray-400 group-hover:text-indigo-600 transition-colors">
-                    {isUploadingGallery ? "..." : "Add"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleGalleryUpload}
-                    disabled={isUploadingGallery}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Save Button */}
-        <div className="pt-2 sticky bottom-0 bg-gray-50 pb-4">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 h-12 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors shadow-lg shadow-indigo-200"
-          >
-            {isSaving ? <Loader2 className="animate-spin w-5 h-5" /> : <Save size={18} />}
-            {isSaving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </form>
+          {isSaving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       {/* Cropper Modal */}
       {isCropping && imageSrc && (
@@ -455,7 +392,9 @@ export default function ShopSettingsPage() {
           </div>
           <div className="bg-white p-5 flex flex-col gap-4 shrink-0 rounded-t-2xl">
             <div>
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Zoom</label>
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                Zoom
+              </label>
               <input
                 type="range"
                 value={zoom}
@@ -463,14 +402,17 @@ export default function ShopSettingsPage() {
                 max={3}
                 step={0.1}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-violet-600"
               />
             </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => { setIsCropping(false); setImageSrc(null); }}
-                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                onClick={() => {
+                  setIsCropping(false);
+                  setImageSrc(null);
+                }}
+                className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
@@ -478,7 +420,7 @@ export default function ShopSettingsPage() {
                 type="button"
                 onClick={handleCropSave}
                 disabled={isUploadingLogo}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 active:bg-indigo-800 flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                className="flex-1 py-3 rounded-2xl bg-violet-600 text-white font-medium text-sm hover:bg-violet-700 active:bg-violet-800 flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
               >
                 {isUploadingLogo && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isUploadingLogo ? "Uploading..." : "Crop & Save"}

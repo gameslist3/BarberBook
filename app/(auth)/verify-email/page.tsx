@@ -69,17 +69,17 @@ export default function VerifyEmailPage() {
   if (!email) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-md text-center border border-gray-100">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 text-center">
         <div className="flex justify-center">
-            <div className="bg-indigo-50 p-4 rounded-full">
-                <Mail className="w-10 h-10 text-indigo-600" />
+            <div className="bg-violet-50 p-4 rounded-full">
+                <Mail className="w-10 h-10 text-violet-600" />
             </div>
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">Verify your email</h2>
@@ -97,7 +97,7 @@ export default function VerifyEmailPage() {
           <button
             onClick={handleCheckVerification}
             disabled={isLoading}
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+            className="flex w-full justify-center rounded-2xl bg-violet-600 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-200 hover:bg-violet-700 active:bg-violet-800 transition-all disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "I've clicked the link"}
           </button>
@@ -105,7 +105,7 @@ export default function VerifyEmailPage() {
           <button
             onClick={handleResend}
             disabled={isLoading}
-            className="text-sm text-indigo-600 font-medium hover:text-indigo-800"
+            className="text-sm text-violet-600 font-medium hover:text-violet-800"
           >
               Resend email
           </button>

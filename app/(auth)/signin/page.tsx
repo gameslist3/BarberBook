@@ -58,7 +58,7 @@ export default function SignInPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-xl border border-gray-100">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50">
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <Image
@@ -89,7 +89,7 @@ export default function SignInPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
+                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +99,7 @@ export default function SignInPage() {
             <div>
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700" htmlFor="password">Password</label>
-                <Link href="/forgot-password" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+                <Link href="/forgot-password" className="text-sm font-medium text-violet-600 hover:text-violet-500 transition-colors">
                   Forgot password?
                 </Link>
               </div>
@@ -110,7 +110,7 @@ export default function SignInPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
+                  className="flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -129,7 +129,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full justify-center rounded-lg bg-indigo-600 px-3 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex w-full justify-center rounded-2xl bg-violet-600 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-200 hover:bg-violet-700 active:bg-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
           </button>
@@ -137,7 +137,7 @@ export default function SignInPage() {
 
         <p className="mt-2 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+          <Link href="/signup" className="font-medium text-violet-600 hover:text-violet-500 transition-colors">
             Sign up
           </Link>
         </p>

@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #7C3AED;
+  --accent-light: #F5F3FF;
+  --accent-dark: #6D28D9;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 @theme inline {
@@ -70,7 +75,7 @@ body {
 }
 
 /* ======================= */
-/* Mobile App Animations  */
+/* Premium Design Animations */
 /* ======================= */
 
 @keyframes slideInLeft {
@@ -86,7 +91,7 @@ body {
 
 @keyframes slideInRight {
   from {
-    transform: translateX(100%);
+    transform: translateX(120%);
     opacity: 0;
   }
   to {
@@ -117,14 +122,43 @@ body {
   }
 }
 
-@keyframes toastIn {
+@keyframes fadeInUp {
   from {
-    transform: translateX(120%);
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
   }
 }
 
@@ -144,8 +178,16 @@ body {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-toastIn {
-  animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Safe area handling for mobile devices */
@@ -180,11 +222,61 @@ body {
 /* Mobile Text Size - 25% Bigger Everywhere    */
 /* ========================================== */
 @media (max-width: 767px) {
-  /* Scale ALL rem-based sizes uniformly by 25%.
-     This affects every Tailwind text, padding, margin,
-     and spacing class — making everything easier to
-     read and tap on small screens */
   html {
     font-size: 125%;
   }
+}
+
+/* ========================================== */
+/* Premium Shadow Utilities                    */
+/* ========================================== */
+.shadow-premium-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-premium-md {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-premium-lg {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-premium-xl {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* ========================================== */
+/* Purple Accent Utility Classes               */
+/* ========================================== */
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.border-accent {
+  border-color: var(--accent);
+}
+
+/* ========================================== */
+/* Toggle Switch Animation                     */
+/* ========================================== */
+.toggle-active {
+  background-color: var(--accent);
+}
+
+.toggle-inactive {
+  background-color: #e5e7eb;
+}
+
+/* ========================================== */
+/* Floating Nav                                */
+/* ========================================== */
+.nav-floating {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }

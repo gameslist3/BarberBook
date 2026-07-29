@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, User, Settings } from "lucide-react";
+import { Map, User, Store } from "lucide-react";
 
 export function BottomNavigation({ userRole }: { userRole?: string }) {
   const pathname = usePathname();
@@ -13,14 +13,14 @@ export function BottomNavigation({ userRole }: { userRole?: string }) {
   ];
 
   if (userRole === "SHOP_OWNER") {
-    mainItems.push({ name: "Shop", href: "/shop/dashboard", icon: Settings });
+    mainItems.push({ name: "Shop", href: "/shop/dashboard", icon: Store });
   } else if (userRole === "ADMIN" || userRole === "APP_OWNER") {
-    mainItems.push({ name: "Admin", href: "/admin/dashboard", icon: Settings });
+    mainItems.push({ name: "Admin", href: "/admin/dashboard", icon: Store });
   }
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-[100] pb-[env(safe-area-inset-bottom)]">
-      <div className="flex justify-around items-center h-16">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden">
+      <div className="bg-white/90 backdrop-blur-xl rounded-full px-5 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-100/80 flex items-center gap-2">
         {mainItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -28,16 +28,17 @@ export function BottomNavigation({ userRole }: { userRole?: string }) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-                isActive ? "text-indigo-600" : "text-gray-600 hover:text-gray-900"
+              className={`flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all duration-200 ${
+                isActive
+                  ? "bg-violet-600 text-white shadow-lg shadow-violet-200 scale-105"
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 active:scale-95"
               }`}
             >
-              <Icon size={20} className={isActive ? "fill-indigo-50" : ""} />
-              <span className="text-[10px] font-medium">{item.name}</span>
+              <Icon size={22} />
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

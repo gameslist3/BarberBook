@@ -81,20 +81,20 @@ function AuthActionHandler() {
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-violet-600" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 text-center">
         {status === 'success' && mode === 'verifyEmail' && (
             <>
                 <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h1>
                 <p className="text-gray-600 mb-6">{message}</p>
-                <Link href="/explore" className="inline-block w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                <Link href="/explore" className="inline-block w-full bg-violet-600 text-white font-semibold py-3 rounded-2xl hover:bg-violet-700 transition-all shadow-sm shadow-violet-200">
                     Continue to App
                 </Link>
             </>
@@ -113,10 +113,10 @@ function AuthActionHandler() {
                             minLength={6}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full h-11 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                            className="w-full h-12 px-4 rounded-2xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-violet-500 outline-none" 
                         />
                     </div>
-                    <button type="submit" className="w-full h-11 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                    <button type="submit" className="w-full h-12 bg-violet-600 text-white font-semibold rounded-2xl hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200">
                         Update Password
                     </button>
                 </form>
@@ -128,7 +128,7 @@ function AuthActionHandler() {
                 <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Password Reset!</h1>
                 <p className="text-gray-600 mb-6">{message}</p>
-                <Link href="/signin" className="inline-block w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                <Link href="/signin" className="inline-block w-full bg-violet-600 text-white font-semibold py-3 rounded-2xl hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200">
                     Sign In
                 </Link>
             </>
@@ -139,7 +139,7 @@ function AuthActionHandler() {
                 <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Action Failed</h1>
                 <p className="text-gray-600 mb-6">{message}</p>
-                <Link href="/signin" className="inline-block w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                <Link href="/signin" className="inline-block w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-2xl hover:bg-gray-200 transition-colors">
                     Return to Sign In
                 </Link>
             </>

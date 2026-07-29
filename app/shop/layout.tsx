@@ -2,23 +2,34 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, Menu, X, User, Store } from "lucide-react";
+import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, User, Store } from "lucide-react";
 import { TopNavigation } from "@/components/TopNavigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { ShopStatCards } from "@/components/ShopStatCards";
+import { ShopBottomNav } from "@/components/ShopBottomNav";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Reset new booking badge when visiting Bookings page
+  useEffect(() => {
+    if (pathname === "/shop/bookings") {
+      setNewBookingCount(0);
+    }
+  }, [pathname]);
+
   const [toasts, setToasts] = useState<{ id: string; message: string; type: "info" | "warning" | "success" }[]>([]);
   const [shopData, setShopData] = useState<any>(null);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [shopId, setShopId] = useState<string>("");
+  const [newBookingCount, setNewBookingCount] = useState(0);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const [userEmail, setUserEmail] = useState("");
 
   const addToast = (message: string, type: "info" | "warning" | "success" = "info") => {
     const id = Math.random().toString(36).substring(7);
@@ -31,12 +42,15 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setUserEmail(user.email || "");
         const shopQ = query(collection(db, "shops"), where("ownerId", "==", user.uid));
         const unsubscribeShop = onSnapshot(shopQ, (snap) => {
           if (!snap.empty) {
             const shop = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
             setShopData(shop);
+            setShopId(shop.id);
 
+            // Monitor bookings for new booking badge and notifications
             if (shop.isActive !== false) {
               const bookingsQ = query(collection(db, "bookings"), where("shopId", "==", shop.id));
               let isInitialRender = true;
@@ -49,8 +63,12 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 snapshot.docChanges().forEach((change) => {
                   if (change.type === "added") {
                     const b = change.doc.data();
-                    if (b.status === "confirmed") {
-                      addToast(`New Booking Received for ${b.slotStartTime}!`, "success");
+                    // Only count confirmed/pending as new
+                    if (b.status === "confirmed" || b.status === "pending") {
+                      setNewBookingCount((prev) => prev + 1);
+                      if (b.status === "confirmed") {
+                        addToast(`New Booking Received for ${b.slotStartTime}!`, "success");
+                      }
                     }
                   }
                 });
@@ -108,8 +126,6 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     { name: "Settings", href: "/shop/settings", icon: Settings },
   ];
 
-  const currentPageName = navItems.find((i) => i.href === pathname)?.name || "Barber Portal";
-
   return (
     <div className="flex h-[100dvh] bg-gray-50 overflow-hidden w-full relative">
       {/* Deactivated Overlay */}
@@ -124,7 +140,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           </p>
           <div className="bg-gray-100 p-6 rounded-xl border border-gray-200">
             <p className="text-gray-900 font-medium mb-2">To activate your account, please contact the App Owner:</p>
-            <p className="text-lg font-bold text-indigo-600 mb-1">📞 +1 (555) 123-4567</p>
+            <p className="text-lg font-bold text-violet-600 mb-1">📞 +1 (555) 123-4567</p>
             <p className="text-lg font-bold text-green-600">💬 WhatsApp: +1 (555) 123-4567</p>
           </div>
           <button onClick={handleSignOut} className="mt-12 text-gray-600 hover:text-gray-900 underline underline-offset-4">
@@ -135,32 +151,37 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
       {/* ========== MOBILE LAYOUT ========== */}
       <div className="flex flex-col h-full w-full md:hidden">
-        {/* Mobile Top Header */}
-        <header className="shrink-0 bg-white border-b border-gray-200 px-4 h-14 flex items-center justify-between z-30">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-1.5 -ml-1.5 rounded-lg text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-            >
-              {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
-            </button>
-            <h1 className="text-[17px] font-semibold text-gray-900">{currentPageName}</h1>
+        {/* Premium Compact Header */}
+        <header className="shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between z-30">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo.png"
+              alt="BarberBook"
+              width={28}
+              height={28}
+              className="rounded-lg shrink-0"
+            />
+            <span className="text-base font-bold text-gray-900 tracking-tight">BarberBook</span>
           </div>
+
+          {/* Right side: Notification + Profile */}
           <div className="flex items-center gap-1">
-            <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors">
+            <button className="relative p-2 rounded-full text-gray-500 hover:bg-violet-50 hover:text-violet-600 active:bg-violet-100 transition-all">
               <Bell size={20} />
             </button>
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-sm hover:bg-indigo-200 active:bg-indigo-300 transition-colors"
+                className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-semibold text-sm hover:bg-violet-200 active:bg-violet-300 transition-all ring-2 ring-white shadow-sm"
               >
                 <User size={16} />
               </button>
               {showProfileMenu && (
-                <div className="absolute right-0 top-11 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-fadeIn">
+                <div className="absolute right-0 top-11 w-52 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-fadeIn">
                   <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
                     <p className="text-sm font-bold text-gray-900 truncate">Shop Owner</p>
+                    <p className="text-xs text-gray-500 truncate">{userEmail}</p>
                   </div>
                   <div className="py-1">
                     <Link
@@ -189,101 +210,17 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Mobile Slide-out Menu */}
-        {showMobileMenu && (
-          <div className="fixed inset-0 z-20" onClick={() => setShowMobileMenu(false)}>
-            <div className="absolute inset-0 bg-black/40" />
-            <div
-              className="absolute left-0 top-14 bottom-0 w-64 bg-white shadow-2xl animate-slideInLeft"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/logo.png"
-                    alt="BarberBook"
-                    width={36}
-                    height={36}
-                    className="rounded-lg shrink-0"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Shop Portal</p>
-                    <p className="text-xs text-gray-600">{shopData?.shopName || "Your Shop"}</p>
-                  </div>
-                </div>
-              </div>
-              <nav className="p-3 space-y-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setShowMobileMenu(false)}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                        isActive
-                          ? "bg-indigo-50 text-indigo-700 font-semibold"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
-                    >
-                      <div
-                        className={`p-1.5 rounded-lg ${
-                          isActive ? "bg-indigo-100 text-indigo-600" : "text-gray-500"
-                        }`}
-                      >
-                        <Icon size={20} />
-                      </div>
-                      <span className="text-sm">{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
-                <button
-                  onClick={() => {
-                    setShowMobileMenu(false);
-                    handleSignOut();
-                  }}
-                  className="flex items-center gap-3 px-3 py-3 w-full text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                >
-                  <LogOut size={20} className="text-red-400" />
-                  <span className="font-medium">Log Out</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Mobile Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 pb-16">
-          <div className="px-4 py-4">{children}</div>
+        <main className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+          <div className="px-4 pt-4 pb-4">
+            {/* Stat Cards - shown on every page */}
+            {shopId && <ShopStatCards shopId={shopId} />}
+            {children}
+          </div>
         </main>
 
-        {/* Mobile Bottom Tab Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-          <div className="flex items-center justify-around h-16">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 relative ${
-                    isActive ? "text-indigo-600" : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {isActive && (
-                    <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-indigo-500 rounded-full" />
-                  )}
-                  <Icon size={22} className={isActive ? "fill-indigo-50" : ""} />
-                  <span className="text-[10px] font-medium">{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+        {/* Floating Circular Bottom Navigation */}
+        <ShopBottomNav newBookingCount={newBookingCount} />
       </div>
 
       {/* ========== DESKTOP LAYOUT ========== */}
@@ -307,7 +244,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 key={item.name}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  isActive ? "bg-indigo-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  isActive ? "bg-violet-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
                 title={item.name}
               >
@@ -332,11 +269,16 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       {/* Desktop Main Content */}
       <main className="hidden md:flex flex-1 overflow-y-auto bg-gray-50 flex-col relative">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
-          <h1 className="text-xl font-semibold text-gray-800">{currentPageName}</h1>
+          <h1 className="text-xl font-semibold text-gray-800">
+            {navItems.find((i) => i.href === pathname)?.name || "Barber Portal"}
+          </h1>
           <TopNavigation serverRole="SHOP_OWNER" />
         </header>
         <div className="flex-1 overflow-auto p-8">
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto">
+            {shopId && <ShopStatCards shopId={shopId} />}
+            {children}
+          </div>
         </div>
       </main>
 
@@ -345,7 +287,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`px-5 py-3 rounded-xl shadow-lg border text-sm font-medium flex items-center gap-3 min-w-[280px] max-w-[360px] animate-slideInRight ${
+            className={`px-5 py-3 rounded-2xl shadow-lg border text-sm font-medium flex items-center gap-3 min-w-[280px] max-w-[360px] animate-slideInRight ${
               toast.type === "success"
                 ? "bg-green-50 text-green-800 border-green-200"
                 : toast.type === "warning"
