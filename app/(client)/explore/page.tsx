@@ -2,8 +2,112 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getAllActiveShops, getAvailableSlots } from "@/app/actions/client";
-import { MapPin, Search, X, Loader2, Map, Phone, Scissors } from "lucide-react";
+import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell } from "lucide-react";
+import { SkeletonExploreList } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { db, auth } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+
+// ─── Helper: check if booking time hasn't passed yet ────────────
+function isBookingStillActive(slotDate: string, slotStartTime: string): boolean {
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  
+  // Future date → still active
+  if (slotDate > today) return true;
+  // Past date → not active
+  if (slotDate < today) return false;
+  
+  // Today — check if time has passed
+  const match = slotStartTime?.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return true;
+  
+  let h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const ampm = match[3]?.toUpperCase();
+  if (ampm === "PM" && h < 12) h += 12;
+  if (ampm === "AM" && h === 12) h = 0;
+  
+  const slotMins = h * 60 + m;
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  
+  // Booking alert shows until the service start time
+  return nowMins < slotMins;
+}
+
+// ─── Countdown timer hook ───────────────────────────────────────
+function useCountdown(targetTime: string | null) {
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    if (!targetTime) { setText(""); return; }
+
+    const update = () => {
+      const match = targetTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) { setText(targetTime); return; }
+
+      let h = parseInt(match[1], 10);
+      const m = parseInt(match[2], 10);
+      const ampm = match[3].toUpperCase();
+      if (ampm === "PM" && h < 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+
+      const now = new Date();
+      const target = new Date();
+      target.setHours(h, m, 0, 0);
+
+      const diffMs = target.getTime() - now.getTime();
+      if (diffMs <= 0) { setText("Starting now!"); return; }
+
+      const hours = Math.floor(diffMs / 3600000);
+      const mins = Math.floor((diffMs % 3600000) / 60000);
+
+      if (hours > 0) setText(`in ${hours}h ${mins}m`);
+      else if (mins > 0) setText(`in ${mins}m`);
+      else setText("Starting now!");
+    };
+
+    update();
+    const interval = setInterval(update, 30000); // update every 30s
+    return () => clearInterval(interval);
+  }, [targetTime]);
+
+  return text;
+}
+
+// ─── Upcoming booking alert ─────────────────────────────────────
+function UpcomingBookingAlert({ booking }: { booking: any }) {
+  const countdownText = useCountdown(booking?.slotStartTime || null);
+  if (!booking) return null;
+
+  return (
+    <Link
+      href={`/shop/${booking.shop?.id || ""}`}
+      className="block bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-4 text-white mb-3 shadow-lg shadow-violet-200/50 active:scale-[0.99] transition-transform"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur">
+          <Bell size={20} className="text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold">Upcoming Appointment</p>
+          <p className="text-xs text-white/80 mt-0.5">
+            {booking.shop?.shopName || "Barber Shop"} • {booking.slotStartTime}
+          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <Clock size={12} className="text-white/80" />
+            <span className="text-sm font-semibold">
+              {countdownText || booking.slotStartTime}
+            </span>
+          </div>
+        </div>
+        <ChevronRight size={18} className="text-white/60 shrink-0 mt-1" />
+      </div>
+    </Link>
+  );
+}
 
 function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
   const [slots, setSlots] = useState<string[]>([]);
@@ -84,7 +188,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/shop/${shop.id}`);
+              router.push(`/book/${shop.id}`);
             }}
             className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm shadow-violet-200 active:scale-[0.98] flex items-center justify-center gap-2"
           >
@@ -117,8 +221,8 @@ export default function ExplorePage() {
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 1024);
-    // Set default panel height on mobile
-    setPanelHeight(window.innerHeight * 0.55);
+    // Map takes ~38vh, panel takes remaining space below
+    setPanelHeight(window.innerHeight * 0.62);
 
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -130,6 +234,70 @@ export default function ExplorePage() {
   useEffect(() => {
     panelHeightRef.current = panelHeight;
   }, [panelHeight]);
+
+  // ── Upcoming bookings — real-time Firestore listener ────
+  const [upcomingBooking, setUpcomingBooking] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setUpcomingBooking(null);
+        return;
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+      const bookingsQ = query(
+        collection(db, "bookings"),
+        where("userId", "==", user.uid),
+        where("slotDate", ">=", today),
+        where("status", "in", ["confirmed", "pending"])
+      );
+
+      const unsubBookings = onSnapshot(bookingsQ, async (snapshot) => {
+        if (snapshot.empty) {
+          setUpcomingBooking(null);
+          return;
+        }
+
+        // Fetch shop names for each booking
+        const shopIds = [...new Set(snapshot.docs.map((d) => d.data().shopId))];
+        const shopsMap: Record<string, any> = {};
+        
+        // Use server action for shop data (avoids needing shops structured query)
+        const allShopsData = await getAllActiveShops();
+        for (const s of allShopsData) {
+          shopsMap[s.id] = s;
+        }
+
+        // Build booking list sorted by date+time, only active ones
+        const todayStr = new Date().toISOString().split("T")[0];
+        const bookings = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const shop = shopsMap[data.shopId];
+            return {
+              id: doc.id,
+              ...data,
+              shop: shop
+                ? { shopName: shop.shopName, logoUrl: shop.logoUrl, id: shop.id }
+                : null,
+            } as any;
+          })
+          .filter((b: any) => isBookingStillActive(b.slotDate || todayStr, b.slotStartTime))
+          .sort((a: any, b: any) => {
+            if (a.slotDate === b.slotDate)
+              return (a.slotStartTime || "").localeCompare(b.slotStartTime || "");
+            return a.slotDate.localeCompare(b.slotDate);
+          });
+
+        setUpcomingBooking(bookings.length > 0 ? bookings[0] : null);
+      });
+
+      return () => unsubBookings();
+    });
+
+    return () => unsubAuth();
+  }, []);
 
   // Fetch shops
   useEffect(() => {
@@ -145,7 +313,7 @@ export default function ExplorePage() {
   const handleDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     startYRef.current = clientY;
-    startHeightRef.current = panelHeightRef.current ?? window.innerHeight * 0.55;
+    startHeightRef.current = panelHeightRef.current ?? window.innerHeight * 0.62;
     isDraggingRef.current = true;
     setIsDragging(true);
   }, []);
@@ -155,8 +323,8 @@ export default function ExplorePage() {
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const deltaY = startYRef.current - clientY;
     const newHeight = Math.min(
-      Math.max(startHeightRef.current + deltaY, 180),
-      window.innerHeight - 80
+      Math.max(startHeightRef.current + deltaY, 200),
+      window.innerHeight - 100
     );
     setPanelHeight(newHeight);
   }, []);
@@ -165,28 +333,15 @@ export default function ExplorePage() {
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
-    const currentHeight = panelHeightRef.current ?? window.innerHeight * 0.55;
+    const currentHeight = panelHeightRef.current ?? window.innerHeight * 0.62;
     const snapThreshold = window.innerHeight * 0.35;
 
     if (currentHeight > window.innerHeight - snapThreshold) {
-      setPanelHeight(window.innerHeight - 80);
+      setPanelHeight(window.innerHeight - 100);
     } else {
-      setPanelHeight(window.innerHeight * 0.55);
+      setPanelHeight(window.innerHeight * 0.62);
     }
   }, []);
-
-  // Mouse drag support
-  useEffect(() => {
-    if (!isMobile) return;
-    const handleMouseMove = (e: MouseEvent) => handleDragMove(e as any);
-    const handleMouseUp = () => handleDragEnd();
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isMobile]);
 
   const filteredShops = allShops.filter(s => {
     if (!searchQuery) return true;
@@ -235,9 +390,7 @@ export default function ExplorePage() {
       {/* Shop list */}
       <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-6 lg:px-5 custom-scrollbar">
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
-          </div>
+          <SkeletonExploreList />
         ) : filteredShops.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100 mt-2">
             <Scissors className="mx-auto h-10 w-10 text-gray-300 mb-3" />
@@ -264,61 +417,90 @@ export default function ExplorePage() {
   return (
     <div className="relative flex-1 w-full h-full flex flex-col lg:flex-row overflow-hidden">
       
+      {/* ── Upcoming booking alert — fixed at top below navbar ── */}
+      {upcomingBooking && (
+        <div className="fixed top-14 left-0 right-0 z-30 px-4 pt-2 pb-1 bg-gradient-to-b from-black/10 to-transparent pointer-events-none">
+          <div className="pointer-events-auto">
+            <UpcomingBookingAlert booking={upcomingBooking} />
+          </div>
+        </div>
+      )}
+
       {/* Google Maps Embed */}
-      <div className="flex-1 lg:relative lg:flex-1 lg:h-full bg-gray-100 shrink-0">
-        <div className={`${isMobile ? 'h-full' : 'h-full'} w-full relative overflow-hidden`}>
+      {/* On mobile: map takes fixed top portion (non-overlapping with panel) */}
+      {/* On desktop: map takes flex-1 left side */}
+      {isMobile ? (
+        <div style={{ height: '38vh' }} className="w-full bg-gray-100 shrink-0 relative overflow-hidden">
           <iframe
             src={(() => {
               let q = "barber shops near me";
               const selectedShop = allShops.find(s => s.id === selectedShopId);
-              
               if (selectedShop) {
                 const link = selectedShop.googleMapLink;
                 if (link) {
                   if (link.includes("/embed?") || link.includes("/embed/")) {
-                    const match = link.match(/src="([^"]+)"/);
-                    return match ? match[1] : link;
+                    const m = link.match(/src="([^"]+)"/);
+                    return m ? m[1] : link;
                   }
-                  
-                  const coordMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                  if (coordMatch) {
-                    q = `${coordMatch[1]},${coordMatch[2]}`;
-                  } else if (link.startsWith("http")) {
-                    q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
-                  } else {
-                    q = link;
-                  }
+                  const cm = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                  if (cm) q = `${cm[1]},${cm[2]}`;
+                  else if (link.startsWith("http")) q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
+                  else q = link;
                 } else {
-                   q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
+                  q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
                 }
               }
-              
               return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
             })()}
             className="absolute inset-0 w-full h-full border-0"
             loading="lazy"
             allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+          />
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 lg:relative lg:flex-1 lg:h-full bg-gray-100 shrink-0">
+          <div className="w-full h-full relative overflow-hidden">
+            <iframe
+              src={(() => {
+                let q = "barber shops near me";
+                const selectedShop = allShops.find(s => s.id === selectedShopId);
+                if (selectedShop) {
+                  const link = selectedShop.googleMapLink;
+                  if (link) {
+                    if (link.includes("/embed?") || link.includes("/embed/")) {
+                      const m = link.match(/src="([^"]+)"/);
+                      return m ? m[1] : link;
+                    }
+                    const cm = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                    if (cm) q = `${cm[1]},${cm[2]}`;
+                    else if (link.startsWith("http")) q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
+                    else q = link;
+                  } else {
+                    q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
+                  }
+                }
+                return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+              })()}
+              className="absolute inset-0 w-full h-full border-0"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      )}
 
-      {/* Mobile: Draggable bottom sheet */}
+      {/* Mobile: Draggable bottom sheet (below map, non-overlapping) */}
       {isMobile && (
         <div
-          className="flex flex-col overflow-hidden"
+          className="flex flex-col overflow-hidden bg-white"
           style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: panelHeight ?? '55vh',
-            backgroundColor: 'white',
-            borderTopLeftRadius: '24px',
-            borderTopRightRadius: '24px',
-            boxShadow: '0 -8px 30px rgba(0,0,0,0.08)',
-            zIndex: 20,
-            transition: isDragging ? 'none' : 'height 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+            flex: 1,
+            borderTopLeftRadius: '20px',
+            borderTopRightRadius: '20px',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
+            zIndex: 10,
           }}
         >
           {panelContent}

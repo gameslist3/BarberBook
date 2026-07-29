@@ -60,7 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-1">
             <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors">
-              <Bell size={20} />
+              <Bell size={20} className="animate-icon-hover" />
             </button>
             <div className="relative" ref={profileMenuRef}>
               <button
@@ -145,7 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           isActive ? "bg-indigo-100 text-indigo-600" : "text-gray-500"
                         }`}
                       >
-                        <Icon size={20} />
+                        <Icon size={20} className="animate-icon-hover" />
                       </div>
                       <span className="text-sm">{item.name}</span>
                     </Link>
@@ -190,7 +190,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {isActive && (
                     <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-indigo-500 rounded-full" />
                   )}
-                  <Icon size={22} className={isActive ? "fill-indigo-50" : ""} />
+                  <Icon size={22} className={`animate-icon-hover ${isActive ? "fill-indigo-50" : ""}`} />
                   <span className="text-[10px] font-medium">{item.name}</span>
                 </Link>
               );
@@ -226,7 +226,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <Icon size={18} />
+                <Icon size={18} className="animate-icon-hover" />
                 {item.name}
               </Link>
             );

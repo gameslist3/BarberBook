@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info } from "lucide-react";
+import { SkeletonForm } from "@/components/Skeleton";
 import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
@@ -23,6 +24,12 @@ export default function ShopSettingsPage() {
     images: [] as string[],
   });
 
+  const initialRef = useRef<typeof formData | null>(null);
+
+  const hasChanges = initialRef.current
+    ? JSON.stringify(formData) !== JSON.stringify(initialRef.current)
+    : false;
+
   // Cropper State
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -36,7 +43,7 @@ export default function ShopSettingsPage() {
     const fetchProfile = async () => {
       const data = await getShopProfile();
       if (data) {
-        setFormData({
+        const initial = {
           shopName: data.shopName || "",
           address: data.address || "",
           phone: data.phone || "",
@@ -45,7 +52,9 @@ export default function ShopSettingsPage() {
           logoUrl: data.logoUrl || "",
           lunchTime: data.lunchTime || "13:00",
           images: data.images || [],
-        });
+        };
+        setFormData(initial);
+        initialRef.current = initial;
       }
       setIsLoading(false);
     };
@@ -141,6 +150,7 @@ export default function ShopSettingsPage() {
 
     if (result.success) {
       setSuccess(true);
+      initialRef.current = JSON.parse(JSON.stringify(formData));
       setTimeout(() => setSuccess(false), 3000);
     } else {
       setError(result.error || "Failed to update profile.");
@@ -151,11 +161,8 @@ export default function ShopSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-16">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
-          <p className="text-sm text-gray-400">Loading settings...</p>
-        </div>
+      <div className="space-y-5">
+        <SkeletonForm />
       </div>
     );
   }
@@ -359,22 +366,24 @@ export default function ShopSettingsPage() {
         </div>
       </div>
 
-      {/* Save Button */}
-      <div className="sticky bottom-0 pb-4 pt-2">
-        <button
-          type="submit"
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 transition-all shadow-lg shadow-violet-200"
-        >
-          {isSaving ? (
-            <Loader2 className="animate-spin w-5 h-5" />
-          ) : (
-            <Save size={18} />
-          )}
-          {isSaving ? "Saving..." : "Save Changes"}
-        </button>
-      </div>
+      {/* Save Button — only visible after changes */}
+      {hasChanges && (
+        <div className="sticky bottom-0 pb-4 pt-2 animate-fadeIn">
+          <button
+            type="submit"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 transition-all shadow-lg shadow-violet-200"
+          >
+            {isSaving ? (
+              <Loader2 className="animate-spin w-5 h-5" />
+            ) : (
+              <Save size={18} />
+            )}
+            {isSaving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      )}
 
       {/* Cropper Modal */}
       {isCropping && imageSrc && (

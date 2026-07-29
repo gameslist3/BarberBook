@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { SkeletonStatCard } from "@/components/Skeleton";
 
 interface Stats {
   totalBookings: number;
@@ -99,7 +100,7 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
     },
     {
       label: "Revenue",
-      value: `$${stats.revenue.toFixed(0)}`,
+      value: `₹${stats.revenue.toFixed(0)}`,
       href: "/shop/dashboard",
     },
   ];
@@ -107,15 +108,7 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
   if (loading) {
     return (
       <div className="grid grid-cols-4 gap-2.5 mb-5">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 animate-pulse"
-          >
-            <div className="h-6 w-12 bg-gray-100 rounded mb-1" />
-            <div className="h-3 w-14 bg-gray-100 rounded" />
-          </div>
-        ))}
+        {[1, 2, 3, 4].map((i) => <SkeletonStatCard key={i} />)}
       </div>
     );
   }

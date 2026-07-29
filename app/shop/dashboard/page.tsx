@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide-react";
+import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { getKolkataDateString, getScheduleInfo } from "@/lib/timeUtils";
 
@@ -83,11 +84,8 @@ export default function ShopDashboard() {
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
-              <p className="text-sm text-gray-400">Loading schedule...</p>
-            </div>
+          <div className="space-y-3.5">
+            {[1, 2, 3].map((i) => <SkeletonBookingCard key={i} />)}
           </div>
         ) : todaysBookings.length === 0 ? (
           /* Empty State - Premium */

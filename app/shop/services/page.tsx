@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, X, Loader2, Scissors, Clock, DollarSign } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Scissors, Clock, IndianRupee } from "lucide-react";
+import { SkeletonServiceCard } from "@/components/Skeleton";
 import { getServices, addService, deleteService, toggleServiceStatus } from "@/app/actions/services";
 
 export default function ShopServicesPage() {
@@ -68,10 +69,21 @@ export default function ShopServicesPage() {
   };
 
   const handleToggle = async (id: string, currentStatus: boolean) => {
+    // Optimistically update UI immediately
+    setServices((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, isActive: !currentStatus } : s
+      )
+    );
+
     const result = await toggleServiceStatus(id, !currentStatus);
-    if (result.success) {
-      fetchServices();
-    } else {
+    if (!result.success) {
+      // Revert on failure
+      setServices((prev) =>
+        prev.map((s) =>
+          s.id === id ? { ...s, isActive: currentStatus } : s
+        )
+      );
       alert("Failed to update status.");
     }
   };
@@ -144,7 +156,7 @@ export default function ShopServicesPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price</label>
                 <div className="relative">
-                  <DollarSign size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <IndianRupee size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     required
                     type="number"
@@ -210,11 +222,8 @@ export default function ShopServicesPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
-            <p className="text-sm text-gray-400">Loading services...</p>
-          </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => <SkeletonServiceCard key={i} />)}
         </div>
       ) : services.length === 0 ? (
         /* Empty State */
@@ -250,7 +259,7 @@ export default function ShopServicesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-bold text-gray-900">
-                        ${Number(service.price).toFixed(2)}
+                        ₹{Number(service.price).toFixed(2)}
                       </span>
                       <span className="text-xs text-gray-400">|</span>
                       <span className="text-xs font-medium text-gray-600">

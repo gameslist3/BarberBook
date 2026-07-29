@@ -120,6 +120,51 @@ function formatMinutesToTime(minutes: number): string {
   return `${displayH}:${displayM} ${ampm}`;
 }
 
+export async function getMyUpcomingBookings() {
+  try {
+    const user = await getServerUser();
+    if (!user) return [];
+
+    const today = new Date().toISOString().split("T")[0];
+    const bookingsSnapshot = await adminDb.collection("bookings")
+      .where("userId", "==", user.id)
+      .where("slotDate", ">=", today)
+      .where("status", "in", ["confirmed", "pending"])
+      .get();
+
+    const shopIds = [...new Set(bookingsSnapshot.docs.map(d => d.data().shopId))];
+    const shopsData: Record<string, any> = {};
+    for (const id of shopIds) {
+      const doc = await adminDb.collection("shops").doc(id).get();
+      if (doc.exists) shopsData[id] = { id: doc.id, ...doc.data() };
+    }
+
+    const bookings = await Promise.all(bookingsSnapshot.docs.map(async (doc: any) => {
+      const data = doc.data();
+      const shop = shopsData[data.shopId];
+      return {
+        id: doc.id,
+        ...data,
+        shop: shop ? { shopName: shop.shopName, logoUrl: shop.logoUrl, id: shop.id } : null,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+      };
+    }));
+
+    // Sort by date then time
+    bookings.sort((a: any, b: any) => {
+      if (a.slotDate === b.slotDate) {
+        return (a.slotStartTime || "").localeCompare(b.slotStartTime || "");
+      }
+      return a.slotDate.localeCompare(b.slotDate);
+    });
+
+    return bookings;
+  } catch (error) {
+    console.error("Failed to fetch upcoming bookings:", error);
+    return [];
+  }
+}
+
 export async function getAvailableSlots(shopId: string, dateStr: string, serviceDurationMinutes: number) {
   try {
     const shopDoc = await adminDb.collection("shops").doc(shopId).get();

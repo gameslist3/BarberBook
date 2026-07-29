@@ -9,8 +9,9 @@ export const metadata: Metadata = {
   title: "BarberBook",
   description: "Book your next haircut with ease.",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/fav.png",
+    apple: "/fav.png",
+    shortcut: "/fav.png",
   },
 };
 

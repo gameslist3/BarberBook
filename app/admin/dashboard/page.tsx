@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
     },
     {
       label: "Revenue (Est)",
-      value: `$${revenue}`,
+      value: `₹${revenue}`,
       icon: TrendingUp,
       color: "bg-orange-500",
       lightColor: "bg-orange-50",

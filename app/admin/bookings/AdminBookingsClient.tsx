@@ -126,7 +126,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <User size={13} className="text-blue-400 shrink-0" />
-                      <span>{b.service?.name || "Unknown Service"} (${Number(b.service?.price || 0).toFixed(2)})</span>
+                      <span>{b.service?.name || "Unknown Service"} (₹{Number(b.service?.price || 0).toFixed(2)})</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={13} className="text-gray-400 shrink-0" />
@@ -168,7 +168,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                             <Store size={14} className="text-indigo-600" /> {b.shop?.shopName || 'Unknown Shop'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {b.service?.name || 'Unknown Service'} (${Number(b.service?.price || 0).toFixed(2)})
+                          {b.service?.name || 'Unknown Service'} (₹{Number(b.service?.price || 0).toFixed(2)})
                         </div>
                       </td>
                       <td className="px-6 py-4">

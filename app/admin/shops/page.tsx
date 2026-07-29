@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Power, Calendar, Trash2, X, Loader2, Store, Phone, Mail, User, Clock, ChevronRight, PowerOff } from "lucide-react";
+import { SkeletonCard, SkeletonTableRow } from "@/components/Skeleton";
 import { createShop, getShops, deleteShop, toggleShopStatus } from "@/app/actions/shop";
 
 export default function ShopsPage() {
@@ -162,12 +163,27 @@ export default function ShopsPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-            <p className="text-sm text-gray-400">Loading shops...</p>
+        <>
+          {/* Mobile skeleton */}
+          <div className="md:hidden space-y-3">
+            {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
           </div>
-        </div>
+          {/* Desktop skeleton */}
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <table className="w-full min-w-[900px] text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  {['Shop Name', 'Owner', 'Contact', 'Timeline', 'Status', 'Actions'].map((h) => (
+                    <th key={h} className="px-6 py-4 text-sm font-semibold text-gray-600">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3, 4, 5].map((i) => <SkeletonTableRow key={i} />)}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : shops.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">

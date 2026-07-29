@@ -1,319 +1,223 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { getShopDetails, createBooking, getAvailableSlots } from "@/app/actions/client";
-import { Scissors, MapPin, Clock, Loader2, Calendar, User as UserIcon, ChevronLeft, Phone } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { useParams, useRouter } from "next/navigation";
+import { getShopDetails } from "@/app/actions/client";
+import { Scissors, MapPin, Clock, ChevronLeft, Phone, Calendar, Star, Map as MapIcon } from "lucide-react";
+import { SkeletonShopDetail } from "@/components/Skeleton";
 import Link from "next/link";
+
+function formatDuration(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+}
 
 export default function ShopDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const shopId = params.id as string;
-  const [session, setSession] = useState<User | null>(null);
-  
+
   const [shop, setShop] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedServices, setSelectedServices] = useState<any[]>([]);
-  const [time, setTime] = useState("");
-  const [isBooking, setIsBooking] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   useEffect(() => {
-    const fetchShop = async () => {
+    (async () => {
       const data = await getShopDetails(shopId);
       setShop(data);
       setIsLoading(false);
-    };
-    fetchShop();
-    
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setSession(currentUser);
-    });
-    return () => unsubscribe();
+    })();
   }, [shopId]);
 
-  useEffect(() => {
-    if (selectedServices.length === 0) {
-        setAvailableSlots([]);
-        return;
-    }
-    const fetchSlots = async () => {
-      setIsLoadingSlots(true);
-      const today = new Date().toISOString().split('T')[0];
-      const totalDuration = selectedServices.reduce((acc, curr) => acc + (parseInt(curr.duration, 10) || 30), 0);
-      const slots = await getAvailableSlots(shopId, today, totalDuration);
-      setAvailableSlots(slots);
-      setIsLoadingSlots(false);
-    };
-    fetchSlots();
-  }, [selectedServices, shopId]);
-
-  const toggleService = (service: any) => {
-    setSelectedServices(prev => {
-        const exists = prev.find(s => s.id === service.id);
-        if (exists) return prev.filter(s => s.id !== service.id);
-        return [...prev, service];
-    });
-  };
-
-  const handleBook = async () => {
-    if (!session) {
-      setError("Please sign in to book an appointment.");
-      return;
-    }
-    if (selectedServices.length === 0 || !time) {
-      setError("Please select at least one service and a time.");
-      return;
-    }
-    
-    setIsBooking(true);
-    setError("");
-    
-    const result = await createBooking({
-      shopId,
-      serviceIds: selectedServices.map(s => s.id),
-      time
-    });
-    
-    if (result.success) {
-      setSuccess(true);
-      setSelectedServices([]);
-      setTime("");
-    } else {
-      setError(result.error || "An unknown error occurred");
-    }
-    
-    setIsBooking(false);
-  };
-
-  if (isLoading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
-  }
-
+  if (isLoading) return <SkeletonShopDetail />;
   if (!shop) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><h2 className="text-2xl font-bold text-gray-900">Shop not found</h2></div>;
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <Scissors size={40} className="mx-auto text-gray-300 mb-3" />
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Shop not found</h2>
+          <Link href="/explore" className="text-sm text-violet-600 font-medium hover:text-violet-800">Back to Explore</Link>
+        </div>
+      </div>
+    );
   }
+
+  const serviceCount = shop.services?.filter((s: any) => s.isActive !== false).length || 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12 relative">
-      <Link href="/explore" className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 mb-6 transition-colors">
-        <ChevronLeft size={16} /> Back to Map
-      </Link>
-      
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* Hero Section */}
-        <div className="relative h-64 md:h-80 w-full overflow-hidden">
-          <div className="absolute inset-0 bg-indigo-900 z-0">
-            {shop.logoUrl ? (
-                <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full object-cover opacity-60" />
-            ) : (
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-800 to-indigo-600 opacity-90"></div>
-            )}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent z-10"></div>
-          
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 z-20">
-            <div className="max-w-4xl mx-auto flex items-end gap-5">
-              {shop.logoUrl && (
-                <div className="w-24 h-24 rounded-2xl bg-white p-1 shrink-0 shadow-lg hidden sm:block">
-                  <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full object-cover rounded-xl" />
-                </div>
-              )}
-              <h1 className="text-4xl font-bold text-white mb-2">{shop.shopName}</h1>
-            </div>
-          </div>
-        </div>
-        
-        <div className="p-8">
-          <div className="flex flex-wrap gap-6 mb-8 text-sm text-gray-700">
-            <div className="flex items-center gap-2 text-gray-700"><MapPin size={18} className="text-gray-500" /> {shop.address || "No address provided"}</div>
-            {shop.phone && (
-                <a href={`tel:${shop.phone}`} className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
-                    <Phone size={18} /> {shop.phone}
-                </a>
-            )}
-            <div className="flex items-center gap-2 text-gray-700"><Clock size={18} className="text-gray-500" /> {shop.openTime || "9:00 AM"} - {shop.closeTime || "6:00 PM"}</div>
-            <div className="flex items-center gap-2 font-medium text-gray-900">Owner: {shop.owner?.name || 'Unknown'}</div>
-          </div>
-          
-          {success && (
-            <div className="mb-8 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg flex items-center gap-3">
-              <div className="bg-green-100 p-2 rounded-full"><Calendar size={20} className="text-green-600"/></div>
-              <div>
-                <p className="font-bold">Booking Confirmed!</p>
-                <p className="text-sm">We'll see you today at {time}.</p>
-              </div>
+    <div className="max-w-4xl mx-auto px-0 sm:px-4 lg:px-6 pb-24 sm:pb-12 relative">
+      {/* ── Back ─────────────────────────────────────────────── */}
+      <div className="sm:mb-4">
+        <Link
+          href="/explore"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-4 sm:px-0 h-12 sm:h-auto"
+        >
+          <ChevronLeft size={18} />
+          Back
+        </Link>
+      </div>
+
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <div className="bg-white sm:rounded-2xl shadow-sm border-b sm:border border-gray-200 overflow-hidden">
+        {/* Cover */}
+        <div className="relative h-52 sm:h-64 w-full overflow-hidden bg-gradient-to-br from-violet-900 to-indigo-800">
+          {shop.logoUrl && (
+            <img
+              src={shop.logoUrl}
+              alt={shop.shopName}
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+          {/* Logo floating */}
+          {shop.logoUrl && (
+            <div className="absolute bottom-4 left-4 w-20 h-20 rounded-2xl border-2 border-white/60 overflow-hidden shadow-lg bg-white">
+              <img src={shop.logoUrl} alt="" className="w-full h-full object-cover" />
             </div>
           )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2 space-y-12">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Services</h2>
-                {(!shop.services || shop.services.filter((s:any) => s.isActive !== false).length === 0) ? (
-                  <p className="text-gray-600">This shop hasn't added any services yet.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {shop.services.filter((s:any) => s.isActive !== false).map((service: any) => (
-                      <div 
-                        key={service.id} 
-                        onClick={() => toggleService(service)}
-                        className={`p-4 border rounded-xl cursor-pointer transition-all ${selectedServices.some(s => s.id === service.id) ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-gray-200 hover:border-indigo-300'}`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-bold text-gray-900">{service.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1 flex items-center gap-1"><Clock size={14} className="text-gray-500"/> {service.duration} mins</p>
-                          </div>
-                          <div className="text-lg font-bold text-gray-900">${Number(service.price).toFixed(2)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us</h2>
-                <div className="bg-gray-50 rounded-2xl p-6 text-gray-700 leading-relaxed border border-gray-100">
-                  {shop.description || "Welcome to our shop! We provide premium grooming services."}
-                </div>
-              </div>
-
-              {shop.images && shop.images.length > 0 && (
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Gallery</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {shop.images.map((img: string, idx: number) => (
-                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                        <img src={img} alt={`${shop.shopName} gallery ${idx + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Location</h2>
-                <div className="bg-gray-100 rounded-xl overflow-hidden h-[300px] border border-gray-200">
-                  <iframe
-                    src={(() => {
-                      let q = "barber shops near me";
-                      const link = shop.googleMapLink;
-                      
-                      if (link) {
-                        if (link.includes("/embed?") || link.includes("/embed/")) {
-                          const match = link.match(/src="([^"]+)"/);
-                          return match ? match[1] : link;
-                        }
-                        
-                        const coordMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                        if (coordMatch) {
-                          q = `${coordMatch[1]},${coordMatch[2]}`;
-                        } else if (link.startsWith("http")) {
-                          q = `${shop.shopName} ${shop.address || ""}`.trim();
-                        } else {
-                          q = link;
-                        }
-                      } else {
-                        q = `${shop.shopName} ${shop.address || ""}`.trim();
-                      }
-                      
-                      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
-                    })()}
-                    className="w-full h-full border-0"
-                    style={{ touchAction: 'none' }}
-                    loading="lazy"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 sticky top-24">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Book Appointment</h2>
-                
-                {error && <div className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
-                
-                {session ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Selected Services</label>
-                      <div className="p-3 bg-white border border-gray-300 rounded-md text-sm text-gray-900 min-h-[40px]">
-                        {selectedServices.length > 0 ? (
-                            <div>
-                                <ul className="mb-2 space-y-1">
-                                    {selectedServices.map(s => <li key={s.id}>• {s.name} (${s.price})</li>)}
-                                </ul>
-                                <div className="pt-2 border-t border-gray-100 flex justify-between font-bold text-indigo-700">
-                                    <span>Total: ${selectedServices.reduce((acc, curr) => acc + Number(curr.price), 0).toFixed(2)}</span>
-                                    <span>{selectedServices.reduce((acc, curr) => acc + (parseInt(curr.duration, 10) || 30), 0)} mins</span>
-                                </div>
-                            </div>
-                        ) : "Select one or more services"}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                      <div className="h-10 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600">
-                        Today ({new Date().toLocaleDateString()})
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                      <select 
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-900 disabled:opacity-50" 
-                        value={time} 
-                        onChange={e => setTime(e.target.value)}
-                        disabled={selectedServices.length === 0 || isLoadingSlots}
-                      >
-                        <option value="">{isLoadingSlots ? "Loading slots..." : "Select a time..."}</option>
-                        {availableSlots.length > 0 ? (
-                            availableSlots.map((slot, idx) => (
-                                <option key={idx} value={slot}>{slot}</option>
-                            ))
-                        ) : (
-                            selectedServices.length > 0 && !isLoadingSlots && <option value="" disabled>No available slots for today</option>
-                        )}
-                      </select>
-                    </div>
-                    
-                    <button 
-                      onClick={handleBook}
-                      disabled={isBooking || selectedServices.length === 0}
-                      className="w-full mt-4 h-12 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center"
-                    >
-                      {isBooking ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm Booking"}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-4 p-6 bg-white border border-gray-200 rounded-xl text-center">
-                    <UserIcon className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Guest Mode</h3>
-                    <p className="text-sm text-gray-600 mb-6">
-                      You are viewing this shop as a guest. Please create an account or sign in to book an appointment.
-                    </p>
-                    <a href="/signup" className="inline-block w-full bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 mb-3">
-                      Create Account
-                    </a>
-                    <a href="/signin" className="inline-block w-full bg-white text-gray-700 font-medium py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50">
-                      Sign In
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            {shop.googleMapLink && (
+              <a
+                href={shop.googleMapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur flex items-center justify-center text-violet-600 shadow-lg hover:bg-white transition-colors"
+              >
+                <MapIcon size={18} />
+              </a>
+            )}
+            {shop.phone && (
+              <a
+                href={`tel:${shop.phone}`}
+                className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur flex items-center justify-center text-gray-700 shadow-lg hover:bg-white transition-colors"
+              >
+                <Phone size={18} />
+              </a>
+            )}
           </div>
         </div>
+
+        {/* Info */}
+        <div className="px-4 sm:px-6 py-4">
+          <h1 className="text-2xl font-bold text-gray-900">{shop.shopName}</h1>
+          <div className="flex flex-wrap items-center gap-3 mt-1.5 text-sm text-gray-500">
+            <span className="flex items-center gap-1">
+              <MapPin size={14} className="text-gray-400" />
+              {shop.address || "No address"}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock size={14} className="text-gray-400" />
+              {shop.openTime || "9:00 AM"} – {shop.closeTime || "6:00 PM"}
+            </span>
+            <span className="flex items-center gap-1 text-violet-600 font-medium">
+              <Star size={14} />
+              {serviceCount} service{serviceCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Content ──────────────────────────────────────────── */}
+      <div className="mt-4 space-y-4 px-4 sm:px-0">
+        {/* Description */}
+        {shop.description && (
+          <div className="bg-white sm:rounded-2xl rounded-xl border border-gray-100 p-4">
+            <h3 className="text-sm font-bold text-gray-900 mb-1.5">About</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">{shop.description}</p>
+          </div>
+        )}
+
+        {/* Services preview */}
+        {serviceCount > 0 && (
+          <div className="bg-white sm:rounded-2xl rounded-xl border border-gray-100 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">Services</h3>
+              <span className="text-xs font-medium text-gray-500">{serviceCount} available</span>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {shop.services
+                .filter((s: any) => s.isActive !== false)
+                .slice(0, 5)
+                .map((service: any) => (
+                  <div key={service.id} className="flex items-center justify-between px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{service.name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{formatDuration(service.duration)}</p>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">₹{Number(service.price).toFixed(2)}</span>
+                  </div>
+                ))}
+              {serviceCount > 5 && (
+                <div className="px-4 py-2.5 text-center">
+                  <span className="text-xs font-medium text-gray-400">+{serviceCount - 5} more services</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Gallery */}
+        {shop.images && shop.images.length > 0 && (
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 mb-2 px-1">Gallery</h3>
+            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
+              {shop.images.map((img: string, idx: number) => (
+                <div
+                  key={idx}
+                  className="snap-start shrink-0 w-48 h-32 rounded-xl overflow-hidden border border-gray-100 bg-gray-50"
+                >
+                  <img
+                    src={img}
+                    alt={`${shop.shopName} ${idx + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Location map */}
+        <div className="bg-gray-100 rounded-xl overflow-hidden h-48 border border-gray-100">
+          <iframe
+            src={(() => {
+              let q = "barber shops near me";
+              const link = shop.googleMapLink;
+              if (link) {
+                if (link.includes("/embed?") || link.includes("/embed/")) {
+                  const m = link.match(/src="([^"]+)"/);
+                  return m ? m[1] : link;
+                }
+                const cm = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (cm) q = `${cm[1]},${cm[2]}`;
+                else if (link.startsWith("http")) q = `${shop.shopName} ${shop.address || ""}`.trim();
+                else q = link;
+              } else {
+                q = `${shop.shopName} ${shop.address || ""}`.trim();
+              }
+              return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+            })()}
+            className="w-full h-full border-0"
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      </div>
+
+      {/* ── Sticky Book Now CTA ──────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 sm:sticky sm:bottom-4 sm:left-auto sm:right-auto bg-white border-t sm:border sm:border-gray-200 sm:rounded-2xl sm:shadow-lg px-4 py-3 sm:py-3 sm:max-w-4xl sm:mx-auto z-10">
+        <button
+          onClick={() => router.push(`/book/${shopId}`)}
+          disabled={serviceCount === 0}
+          className="w-full h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-violet-200/50 active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <Calendar size={16} />
+          {serviceCount > 0 ? "Book Now" : "No Services"}
+        </button>
       </div>
     </div>
   );

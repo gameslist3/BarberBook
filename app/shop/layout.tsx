@@ -168,7 +168,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           {/* Right side: Notification + Profile */}
           <div className="flex items-center gap-1">
             <button className="relative p-2 rounded-full text-gray-500 hover:bg-violet-50 hover:text-violet-600 active:bg-violet-100 transition-all">
-              <Bell size={20} />
+              <Bell size={20} className="animate-icon-hover" />
             </button>
             <div className="relative" ref={profileMenuRef}>
               <button
@@ -248,7 +248,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 }`}
                 title={item.name}
               >
-                <Icon size={20} className="shrink-0" />
+                <Icon size={20} className="shrink-0 animate-icon-hover" />
                 <span className="font-medium hidden lg:block">{item.name}</span>
               </Link>
             );

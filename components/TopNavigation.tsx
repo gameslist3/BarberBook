@@ -62,8 +62,8 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
   if (!user) {
     return (
       <nav className="flex items-center gap-3">
-        <Link href="/signin" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Sign In</Link>
-        <Link href="/signup" className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Sign Up</Link>
+        <Link href="/signin" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-all duration-200 hover:-translate-y-0.5">Sign In</Link>
+        <Link href="/signup" className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]">Sign Up</Link>
       </nav>
     );
   }
@@ -109,17 +109,17 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
       <div className="relative" ref={notifRef}>
         <button
           onClick={() => { setShowNotifications(!showNotifications); setShowSettings(false); }}
-          className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+          className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
           title="Notifications"
         >
-          <Bell size={20} />
+          <Bell size={20} className={`animate-icon-hover ${showNotifications ? 'animate-ringBell' : ''}`} />
           {notifications.length > 0 && (
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-popIn"></span>
           )}
         </button>
 
         {showNotifications && (
-          <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
               <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
               <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600">
@@ -150,14 +150,14 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
       <div className="relative" ref={settingsRef}>
         <button
           onClick={() => { setShowSettings(!showSettings); setShowNotifications(false); }}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
           title="Settings"
         >
-          <Settings size={20} />
+          <Settings size={20} className="animate-icon-spin-hover" />
         </button>
 
         {showSettings && (
-          <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
               <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || user.email?.split('@')[0]}</p>
               <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -165,29 +165,29 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
             <div className="py-1">
               {settingsItems.map((item, i) => {
                 const Icon = item.icon;
-                const baseClasses = `flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                const baseClasses = `flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm transition-all duration-200 hover:pl-5 ${
                   item.danger 
-                    ? 'text-red-600 hover:bg-red-50' 
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'text-red-600 hover:bg-red-50/80' 
+                    : 'text-gray-700 hover:bg-gray-50/80'
                 }`;
 
                 const content = (
                   <>
-                    <Icon size={16} className={item.danger ? 'text-red-400' : 'text-gray-400'} />
+                    <Icon size={16} className={`animate-icon-hover ${item.danger ? 'text-red-400' : 'text-gray-400'}`} />
                     <span className="font-medium">{item.label}</span>
                   </>
                 );
 
                 return (
-                  <div key={i}>
+                  <div key={i} style={{ animation: `fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.04}s both` }}>
                     {item.divider && <div className="border-t border-gray-100 my-1"></div>}
                     {item.label && (
                       item.href ? (
-                        <Link href={item.href} className={baseClasses} onClick={() => setShowSettings(false)}>
+                        <Link href={item.href} className={`${baseClasses} group`} onClick={() => setShowSettings(false)}>
                           {content}
                         </Link>
                       ) : (
-                        <button className={baseClasses} onClick={() => { setShowSettings(false); item.onClick?.(); }}>
+                        <button className={`${baseClasses} group`} onClick={() => { setShowSettings(false); item.onClick?.(); }}>
                           {content}
                         </button>
                       )
