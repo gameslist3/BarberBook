@@ -20,7 +20,7 @@ export default async function ClientLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden w-full relative pb-16 md:pb-0">
+    <div className="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden w-full relative">
       <ClientNotificationProvider />
       
       {/* Desktop Header */}

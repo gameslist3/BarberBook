@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getShopDetails, createBooking, getAvailableSlots } from "@/app/actions/client";
+import { getShopDetails, createBooking, getAvailableSlots, checkUserActiveBooking } from "@/app/actions/client";
 import {
-  Scissors, Clock, Loader2, ChevronLeft, Phone,
+  Scissors,  Clock, Loader2, ChevronLeft, ChevronUp, ChevronDown, Phone,
   Search, X, Check, Map as MapIcon
 } from "lucide-react";
 import { SkeletonForm } from "@/components/Skeleton";
@@ -135,6 +135,30 @@ function formatDuration(mins: number) {
   return `${m}m`;
 }
 
+function formatCustomTime(hour: number, minute: number, ampm: 'AM' | 'PM'): string {
+  return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+}
+
+// Convert 12h format to minutes from midnight for comparison
+function customTimeToMinutes(hour: number, minute: number, ampm: 'AM' | 'PM'): number {
+  let h = hour;
+  if (ampm === 'PM' && h < 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h * 60 + minute;
+}
+
+// Convert "HH:mm AM/PM" string to minutes from midnight
+function parseTimeStrToMinutes(timeStr: string): number {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return 0;
+  let h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const ampm = match[3]?.toUpperCase();
+  if (ampm === 'PM' && h < 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h * 60 + m;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // PAGE COMPONENT
 // ═══════════════════════════════════════════════════════════════════
@@ -158,6 +182,70 @@ export default function BookingPage() {
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [timeMode, setTimeMode] = useState<'available' | 'custom'>('available');
+  const [customHour, setCustomHour] = useState(9);
+  const [customMinute, setCustomMinute] = useState(0);
+  const [customAmPm, setCustomAmPm] = useState<'AM' | 'PM'>('AM');
+
+  // ── Drag-to-scroll & tap-to-edit ────────────────────────
+  const dragState = useRef<{ type: 'hour' | 'minute'; startY: number; accumulated: number; lastTime: number; speed: number } | null>(null);
+  const [editingType, setEditingType] = useState<'hour' | 'minute' | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const customHourRef = useRef(customHour);
+  const customMinuteRef = useRef(customMinute);
+  const customAmPmRef = useRef(customAmPm);
+
+  // ── Shop hours for custom time validation ────────────────
+  const shopHours = useMemo(() => {
+    if (!shop) return { openMinutes: 540, closeMinutes: 1080 }; // default 9AM–6PM
+    const open = shop.openTime || "9:00 AM";
+    const close = shop.closeTime || "6:00 PM";
+    return {
+      openMinutes: parseTimeStrToMinutes(open),
+      closeMinutes: parseTimeStrToMinutes(close),
+      openTimeStr: open,
+      closeTimeStr: close,
+    };
+  }, [shop]);
+
+  // Initialize custom time when tab switches to custom
+  useEffect(() => {
+    if (timeMode === 'custom') {
+      if (selectedTime) {
+        const match = selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (match) {
+          setCustomHour(parseInt(match[1], 10));
+          setCustomMinute(parseInt(match[2], 10));
+          setCustomAmPm(match[3].toUpperCase() as 'AM' | 'PM');
+        }
+      } else {
+        // Default to shop opening time or current time (whichever is later)
+        const now = new Date();
+        let h = now.getHours();
+        const m = Math.ceil(now.getMinutes() / 5) * 5;
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) h -= 12;
+        if (h === 0) h = 12;
+        const currentMins = customTimeToMinutes(h, m >= 60 ? 0 : m, ampm);
+        // Default to the max of current time and shop opening time
+        if (currentMins < shopHours.openMinutes) {
+          // Set to shop opening time
+          const openH = Math.floor(shopHours.openMinutes / 60);
+          const openM = shopHours.openMinutes % 60;
+          const openAmPm = openH >= 12 ? 'PM' : 'AM';
+          const displayH = openH > 12 ? openH - 12 : openH === 0 ? 12 : openH;
+          setCustomHour(displayH);
+          setCustomMinute(openM);
+          setCustomAmPm(openAmPm as 'AM' | 'PM');
+        } else {
+          setCustomHour(h);
+          setCustomMinute(m >= 60 ? 0 : m);
+          setCustomAmPm(ampm);
+        }
+      }
+    }
+  }, [timeMode]);
 
   useEffect(() => {
     (async () => {
@@ -216,6 +304,131 @@ export default function BookingPage() {
     [selectedServices]
   );
 
+  // ── Refs kept in sync for drag handler ───────────────────
+  useEffect(() => { customHourRef.current = customHour; }, [customHour]);
+  useEffect(() => { customMinuteRef.current = customMinute; }, [customMinute]);
+  useEffect(() => { customAmPmRef.current = customAmPm; }, [customAmPm]);
+  const shopHoursRef = useRef(shopHours);
+  useEffect(() => { shopHoursRef.current = shopHours; }, [shopHours]);
+  const totalDurationRef = useRef(totalDuration);
+  useEffect(() => { totalDurationRef.current = totalDuration; }, [totalDuration]);
+
+  // Focus & select input when entering edit mode
+  useEffect(() => {
+    if (editingType && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingType]);
+
+  // Check time stays within shop hours (accounting for total duration)
+  const isValidTime = useCallback((hour: number, minute: number, ampm: 'AM' | 'PM') => {
+    const mins = customTimeToMinutes(hour, minute, ampm);
+    const latestStart = shopHoursRef.current.closeMinutes - totalDurationRef.current;
+    return mins >= shopHoursRef.current.openMinutes && mins + totalDurationRef.current <= shopHoursRef.current.closeMinutes;
+  }, []);
+
+  // ── Drag-to-scroll for hour/minute digits ────────────────
+  const handleDigitPointerDown = useCallback((type: 'hour' | 'minute', e: React.MouseEvent | React.TouchEvent) => {
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    dragState.current = {
+      type,
+      startY: clientY,
+      accumulated: 0,
+      lastTime: Date.now(),
+      speed: 1,
+    };
+    e.preventDefault();
+
+    const handleMove = (me: MouseEvent | TouchEvent) => {
+      if (!dragState.current) return;
+      me.preventDefault();
+      const clientY2 = 'touches' in me ? (me as TouchEvent).touches[0].clientY : (me as MouseEvent).clientY;
+      const deltaY = dragState.current.startY - clientY2;
+      const now = Date.now();
+      const dt = now - dragState.current.lastTime;
+
+      // Gentle speed multiplier: slightly faster when dragging quickly
+      if (dt > 0) {
+        const pxPerSec = Math.abs(deltaY - dragState.current.accumulated) / (dt / 1000);
+        dragState.current.speed = Math.max(1, Math.min(3, Math.floor(pxPerSec / 250) + 1));
+      }
+      dragState.current.lastTime = now;
+
+      const threshold = 12 / dragState.current.speed;
+      const totalChanges = Math.floor(deltaY / threshold);
+      const changes = totalChanges - dragState.current.accumulated;
+
+      if (changes !== 0) {
+        dragState.current.accumulated = totalChanges;
+
+        if (type === 'hour') {
+          setCustomHour(prev => {
+            let newH = prev + changes;
+            if (newH > 12) newH = 12;
+            if (newH < 1) newH = 1;
+            return isValidTime(newH, customMinuteRef.current, customAmPmRef.current) ? newH : prev;
+          });
+        } else {
+          setCustomMinute(prev => {
+            let newM = prev + changes;
+            if (newM > 59) newM = 59;
+            if (newM < 0) newM = 0;
+            return isValidTime(customHourRef.current, newM, customAmPmRef.current) ? newM : prev;
+          });
+        }
+      }
+    };
+
+    const handleUp = () => {
+      const wasDragged = dragState.current && Math.abs(dragState.current.accumulated) >= 1;
+      if (dragState.current && !wasDragged) {
+        // Tap (no significant drag) → open edit
+        setEditingType(type);
+        setEditValue(type === 'hour'
+          ? customHourRef.current.toString()
+          : customMinuteRef.current.toString().padStart(2, '0')
+        );
+      }
+      dragState.current = null;
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleUp);
+    };
+
+    document.addEventListener('mousemove', handleMove, { passive: false });
+    document.addEventListener('mouseup', handleUp);
+    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('touchend', handleUp);
+  }, [isValidTime]);
+
+  // ── Commit edited value on blur / Enter ─────────────────
+  const commitEdit = useCallback(() => {
+    if (!editingType) return;
+    const raw = editValue.trim();
+    const num = parseInt(raw, 10);
+    if (isNaN(num)) { setEditingType(null); return; }
+
+    if (editingType === 'hour') {
+      if (num >= 1 && num <= 12 && isValidTime(num, customMinuteRef.current, customAmPmRef.current)) {
+        setCustomHour(num);
+      }
+    } else {
+      if (num >= 0 && num <= 59 && isValidTime(customHourRef.current, num, customAmPmRef.current)) {
+        setCustomMinute(num);
+      }
+    }
+    setEditingType(null);
+  }, [editingType, editValue, isValidTime]);
+
+  // Check if the current custom time is within shop hours (accounting for total duration)
+  const isCustomTimeValid = useMemo(() => {
+    const customMins = customTimeToMinutes(customHour, customMinute, customAmPm);
+    const latestStart = shopHours.closeMinutes - totalDuration;
+    return customMins >= shopHours.openMinutes && customMins <= latestStart;
+  }, [customHour, customMinute, customAmPm, shopHours, totalDuration]);
+
   useEffect(() => {
     if (selectedServiceIds.size === 0) {
       setAvailableSlots([]);
@@ -252,6 +465,14 @@ export default function BookingPage() {
 
     setIsBooking(true);
     setError("");
+
+    // Client-side check for existing active booking
+    const activeCheck = await checkUserActiveBooking();
+    if (activeCheck.hasActive) {
+      setError(translate("activeBookingExists"));
+      setIsBooking(false);
+      return;
+    }
 
     const result = await createBooking({
       shopId,
@@ -494,38 +715,285 @@ export default function BookingPage() {
       {showTimePicker && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowTimePicker(false)} />
-          <div className="relative bg-white rounded-t-3xl px-5 pt-5 pb-[calc(env(safe-area-inset-bottom,16px)+8px)] max-h-[55vh] flex flex-col animate-slideUp">
+          <div className="relative bg-white rounded-t-3xl px-5 pt-5 pb-[calc(env(safe-area-inset-bottom,16px)+8px)] max-h-[70vh] flex flex-col animate-slideUp">
             <div className="flex justify-center mb-4">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[17px] font-bold text-gray-900">{translate("chooseTimeSlot")}</h3>
+
+            {/* ── Mode Tabs ── */}
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-4">
+              <button
+                onClick={() => setTimeMode('available')}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                  timeMode === 'available'
+                    ? 'bg-white text-violet-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {translate("nextSchedule")}
+              </button>
+              <button
+                onClick={() => setTimeMode('custom')}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+                  timeMode === 'custom'
+                    ? 'bg-white text-violet-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {translate("customTime")}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[17px] font-bold text-gray-900">
+                {timeMode === 'available' ? translate("nextSchedule") : translate("customTime")}
+              </h3>
               <p className="text-xs text-gray-500">{todayFormatted}</p>
             </div>
+
             <div className="flex-1 overflow-y-auto -mx-5 px-5">
-              {availableSlots.length === 0 ? (
-                <div className="text-center py-10">
-                  <Clock size={28} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-sm font-medium text-gray-500">{translate("noSlotsToday")}</p>
-                </div>
+              {timeMode === 'available' ? (
+                /* ═══ Next Schedule: show single next available slot ═══ */
+                availableSlots.length === 0 ? (
+                  <div className="text-center py-10">
+                    <Clock size={28} className="mx-auto text-gray-300 mb-3" />
+                    <p className="text-sm font-medium text-gray-500">{translate("noSlotsToday")}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center py-6 px-2">
+                    <div className="w-16 h-16 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+                      <Clock size={32} className="text-violet-600" />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                      {translate("nextAvailable")}
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 mb-1">{availableSlots[0]}</p>
+                    <p className="text-xs text-gray-400 mb-6">{todayFormatted}</p>
+                    <button
+                      onClick={() => { setSelectedTime(availableSlots[0]); setShowTimePicker(false); }}
+                      className="w-full max-w-[200px] h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 transition-all shadow-md shadow-violet-200 flex items-center justify-center gap-2"
+                    >
+                      <Check size={16} />
+                      {translate("select")} {availableSlots[0]}
+                    </button>
+                  </div>
+                )
               ) : (
-                <div className="flex flex-wrap gap-2.5 pb-2">
-                  {availableSlots.map((slot) => {
-                    const isSelected = selectedTime === slot;
-                    return (
+                <div className="flex flex-col items-center py-4">
+                  {/* Shop hours indicator */}
+                  <div className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
+                    <Clock size={12} />
+                    {translate("shopHours")} {shopHours.openTimeStr} — {shopHours.closeTimeStr}
+                  </div>
+
+                  {/* Big time display with steppers */}
+                  <div className="flex items-center gap-3 mb-6">
+                    {/* Hours */}
+                    <div className="flex flex-col items-center">
                       <button
-                        key={slot}
-                        onClick={() => { setSelectedTime(slot); setShowTimePicker(false); }}
-                        className={`px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-95 ${
-                          isSelected
-                            ? "bg-violet-600 text-white shadow-md shadow-violet-200"
-                            : "bg-gray-50 text-gray-700 border border-gray-200 hover:border-violet-300 hover:bg-violet-50/40"
-                        }`}
+                        onClick={() => {
+                          const newH = customHour === 12 ? 1 : customHour + 1;
+                          const newMins = customTimeToMinutes(newH, customMinute, customAmPm);
+                          const latestStart = shopHours.closeMinutes - totalDuration;
+                          if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                            setCustomHour(newH);
+                          }
+                        }}
+                        className="w-16 h-10 flex items-center justify-center text-gray-400 hover:text-violet-600 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                       >
-                        {slot}
+                        <ChevronUp size={24} />
                       </button>
-                    );
-                  })}
+                      {editingType === 'hour' ? (
+                        <input
+                          ref={editInputRef}
+                          type="number"
+                          min={1}
+                          max={12}
+                          value={editValue}
+                          onChange={e => setEditValue(e.target.value)}
+                          onBlur={commitEdit}
+                          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingType(null); }}
+                          className={`w-20 h-16 rounded-2xl flex items-center justify-center text-4xl font-bold text-center outline-none ${
+                            isCustomTimeValid ? 'bg-violet-50 text-violet-700' : 'bg-red-50 text-red-400'
+                          }`}
+                          style={{ caretColor: '#7c3aed' }}
+                        />
+                      ) : (
+                        <div
+                          onMouseDown={e => handleDigitPointerDown('hour', e)}
+                          onTouchStart={e => handleDigitPointerDown('hour', e)}
+                          className={`w-20 h-16 rounded-2xl flex items-center justify-center text-4xl font-bold select-none cursor-pointer transition-colors active:scale-95 ${
+                            isCustomTimeValid ? 'bg-violet-50 text-violet-700 active:bg-violet-100' : 'bg-red-50 text-red-400 active:bg-red-100'
+                          }`}
+                        >
+                          {customHour.toString().padStart(2, '0')}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          const newH = customHour === 1 ? 12 : customHour - 1;
+                          const newMins = customTimeToMinutes(newH, customMinute, customAmPm);
+                          const latestStart = shopHours.closeMinutes - totalDuration;
+                          if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                            setCustomHour(newH);
+                          }
+                        }}
+                        className="w-16 h-10 flex items-center justify-center text-gray-400 hover:text-violet-600 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                      >
+                        <ChevronDown size={24} />
+                      </button>
+                    </div>
+
+                    <span className="text-4xl font-bold text-gray-300 mt-8">:</span>
+
+                    {/* Minutes */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={() => {
+                          const newM = customMinute === 59 ? 0 : customMinute + 1;
+                          const newMins = customTimeToMinutes(customHour, newM, customAmPm);
+                          const latestStart = shopHours.closeMinutes - totalDuration;
+                          if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                            setCustomMinute(newM);
+                          }
+                        }}
+                        className="w-16 h-10 flex items-center justify-center text-gray-400 hover:text-violet-600 transition-colors"
+                      >
+                        <ChevronUp size={24} />
+                      </button>
+                      {editingType === 'minute' ? (
+                        <input
+                          ref={editInputRef}
+                          type="number"
+                          min={0}
+                          max={59}
+                          value={editValue}
+                          onChange={e => setEditValue(e.target.value)}
+                          onBlur={commitEdit}
+                          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingType(null); }}
+                          className={`w-20 h-16 rounded-2xl flex items-center justify-center text-4xl font-bold text-center outline-none ${
+                            isCustomTimeValid ? 'bg-violet-50 text-violet-700' : 'bg-red-50 text-red-400'
+                          }`}
+                          style={{ caretColor: '#7c3aed' }}
+                        />
+                      ) : (
+                        <div
+                          onMouseDown={e => handleDigitPointerDown('minute', e)}
+                          onTouchStart={e => handleDigitPointerDown('minute', e)}
+                          className={`w-20 h-16 rounded-2xl flex items-center justify-center text-4xl font-bold select-none cursor-pointer transition-colors active:scale-95 ${
+                            isCustomTimeValid ? 'bg-violet-50 text-violet-700 active:bg-violet-100' : 'bg-red-50 text-red-400 active:bg-red-100'
+                          }`}
+                        >
+                          {customMinute.toString().padStart(2, '0')}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          const newM = customMinute === 0 ? 59 : customMinute - 1;
+                          const newMins = customTimeToMinutes(customHour, newM, customAmPm);
+                          const latestStart = shopHours.closeMinutes - totalDuration;
+                          if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                            setCustomMinute(newM);
+                          }
+                        }}
+                        className="w-16 h-10 flex items-center justify-center text-gray-400 hover:text-violet-600 transition-colors"
+                      >
+                        <ChevronDown size={24} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* AM / PM Toggle */}
+                  <div className="flex bg-gray-100 rounded-xl p-1 mb-5">
+                    <button
+                      onClick={() => {
+                        const newMins = customTimeToMinutes(customHour, customMinute, 'AM');
+                        const latestStart = shopHours.closeMinutes - totalDuration;
+                        if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                          setCustomAmPm('AM');
+                        }
+                      }}
+                      className={`px-8 py-2 text-sm font-semibold rounded-lg transition-all ${
+                        customAmPm === 'AM'
+                          ? 'bg-white text-violet-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      AM
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newMins = customTimeToMinutes(customHour, customMinute, 'PM');
+                        const latestStart = shopHours.closeMinutes - totalDuration;
+                        if (newMins >= shopHours.openMinutes && newMins + totalDuration <= shopHours.closeMinutes) {
+                          setCustomAmPm('PM');
+                        }
+                      }}
+                      className={`px-8 py-2 text-sm font-semibold rounded-lg transition-all ${
+                        customAmPm === 'PM'
+                          ? 'bg-white text-violet-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      PM
+                    </button>
+                  </div>
+
+                  {/* Quick minute snaps */}
+                  <div className="flex gap-2 mb-6">
+                    {['00', '15', '30', '45'].map(m => {
+                      const snapMin = parseInt(m);
+                      const snapMins = customTimeToMinutes(customHour, snapMin, customAmPm);
+                      const latestStart = shopHours.closeMinutes - totalDuration;
+                      const isSnapValid = snapMins >= shopHours.openMinutes && snapMins + totalDuration <= shopHours.closeMinutes;
+                      return (
+                        <button
+                          key={m}
+                          onClick={() => isSnapValid && setCustomMinute(snapMin)}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                            !isSnapValid
+                              ? 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
+                              : customMinute === snapMin
+                                ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                                : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-600'
+                          }`}
+                        >
+                          :{m}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Out-of-range warning */}
+                  {!isCustomTimeValid && (
+                    <div className="text-xs text-red-500 bg-red-50 rounded-xl px-4 py-2.5 mb-3 flex items-center gap-2">
+                      <X size={14} />
+                      <span>{translate("customTimeOutsideRange").replace('{open}', shopHours.openTimeStr).replace('{close}', shopHours.closeTimeStr)}</span>
+                    </div>
+                  )}
+
+                  {/* Select Button */}
+                  <button
+                    onClick={() => {
+                      if (!isCustomTimeValid) return;
+                      const time = formatCustomTime(customHour, customMinute, customAmPm);
+                      setSelectedTime(time);
+                      setShowTimePicker(false);
+                    }}
+                    disabled={!isCustomTimeValid}
+                    className={`w-full max-w-[240px] h-12 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
+                      isCustomTimeValid
+                        ? 'bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-violet-200'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Check size={16} />
+                    {isCustomTimeValid ? (
+                      <>{translate("select")} {formatCustomTime(customHour, customMinute, customAmPm)}</>
+                    ) : (
+                      <>{translate("unavailable")}</>
+                    )}
+                  </button>
                 </div>
               )}
             </div>

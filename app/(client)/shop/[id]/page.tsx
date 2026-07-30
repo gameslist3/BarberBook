@@ -62,7 +62,7 @@ export default function ShopDetailsPage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <div className="bg-white sm:rounded-2xl shadow-sm border-b sm:border border-gray-200 overflow-hidden">
         {/* Cover */}
-        <div className="relative h-52 sm:h-64 w-full overflow-hidden bg-gradient-to-br from-violet-900 to-indigo-800">
+        <div className="relative h-36 sm:h-48 w-full overflow-hidden bg-gradient-to-br from-violet-900 to-indigo-800">
           {shop.logoUrl && (
             <img
               src={shop.logoUrl}
@@ -74,11 +74,11 @@ export default function ShopDetailsPage() {
 
           {/* Logo floating */}
           {shop.logoUrl && (
-            <div className="absolute bottom-4 left-4 w-20 h-20 rounded-2xl border-2 border-white/60 overflow-hidden shadow-lg bg-white">
+            <div className="absolute bottom-3 left-4 w-14 h-14 rounded-2xl border-2 border-white/60 overflow-hidden shadow-lg bg-white">
               <img src={shop.logoUrl} alt="" className="w-full h-full object-cover" />
             </div>
           )}
-          <div className="absolute bottom-4 right-4 flex gap-2">
+          <div className="absolute bottom-3 right-4 flex gap-2">
             {shop.googleMapLink && (
               <a
                 href={shop.googleMapLink}

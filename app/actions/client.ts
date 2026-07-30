@@ -64,11 +64,91 @@ export async function getShopDetails(shopId: string) {
   }
 }
 
+/**
+ * Checks if the current user already has an active (confirmed/pending) booking
+ * that hasn't ended yet (slotEndTime is still in the future, or the booking
+ * is on a future date).
+ */
+export async function checkUserActiveBooking(): Promise<{ hasActive: boolean; booking?: any }> {
+  const user = await getServerUser();
+  if (!user) return { hasActive: false };
+
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const bookingsSnapshot = await adminDb.collection("bookings")
+      .where("userId", "==", user.id)
+      .where("slotDate", ">=", today)
+      .where("status", "in", ["confirmed", "pending"])
+      .get();
+
+    if (bookingsSnapshot.empty) return { hasActive: false };
+
+    // Gather all unique service IDs to resolve durations
+    const allServiceIds = [...new Set(
+      bookingsSnapshot.docs.flatMap(doc => doc.data().serviceIds || [])
+    )];
+    const servicesMap: Record<string, number> = {};
+    if (allServiceIds.length > 0) {
+      for (let i = 0; i < allServiceIds.length; i += 10) {
+        const chunk = allServiceIds.slice(i, i + 10);
+        const servicesSnapshot = await adminDb.collection("services").where("__name__", "in", chunk).get();
+        servicesSnapshot.docs.forEach(doc => {
+          servicesMap[doc.id] = parseInt(doc.data().duration, 10) || 30;
+        });
+      }
+    }
+
+    // Get current time in IST for comparison
+    const options = { timeZone: 'Asia/Kolkata' };
+    const now = new Date();
+    const istString = now.toLocaleString('en-US', options);
+    const istDate = new Date(istString);
+    const currentMinutes = istDate.getHours() * 60 + istDate.getMinutes();
+
+    // Check each booking to see if it's still active
+    for (const doc of bookingsSnapshot.docs) {
+      const data = doc.data();
+      const startMins = parseTimeToMinutes(data.slotStartTime);
+      const bookingServiceIds: string[] = data.serviceIds || [];
+      const duration = bookingServiceIds.reduce((total, id) => total + (servicesMap[id] || 30), 0) || 30;
+      const endMins = startMins + duration;
+
+      // A booking is still active if:
+      // - It's on a future date (hasn't occurred yet), OR
+      // - It's today and the end time is still ahead
+      const isFutureDate = data.slotDate > today;
+      const isActiveToday = data.slotDate === today && endMins > currentMinutes;
+
+      if (isFutureDate || isActiveToday) {
+        return { 
+          hasActive: true, 
+          booking: { 
+            id: doc.id, 
+            ...data,
+            createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+          }
+        };
+      }
+    }
+
+    return { hasActive: false };
+  } catch (error) {
+    console.error("Failed to check active bookings:", error);
+    return { hasActive: false };
+  }
+}
+
 export async function createBooking(data: { shopId: string, serviceIds: string[], time: string }) {
   const user = await getServerUser();
   
   if (!user) {
     return { success: false, error: "You must be signed in to book an appointment." };
+  }
+  
+  // Check if user already has an active booking
+  const activeCheck = await checkUserActiveBooking();
+  if (activeCheck.hasActive) {
+    return { success: false, error: "You already have an active booking that hasn't ended yet. Please wait until it finishes." };
   }
   
   try {

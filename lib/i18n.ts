@@ -264,11 +264,48 @@ export const translations: Translations = {
     bn: 'আমার পরিষেবা',
     hi: 'मेरी सेवाएं',
   },
+  // Time picker modes
+  nextSchedule: {
+    en: 'Next Schedule',
+    bn: 'পরবর্তী সময়সূচী',
+    hi: 'अगला समय',
+  },
+  nextAvailable: {
+    en: 'Next available',
+    bn: 'পরবর্তী উপলব্ধ',
+    hi: 'अगला उपलब्ध',
+  },
+  customTime: {
+    en: 'Custom Time',
+    bn: 'কাস্টম সময়',
+    hi: 'कस्टम समय',
+  },
+  unavailable: {
+    en: 'Unavailable',
+    bn: 'অনুপলব্ধ',
+    hi: 'अनुपलब्ध',
+  },
   // Upcoming booking alert
   upcomingAppointment: {
     en: 'Upcoming Appointment',
     bn: 'নতুন বুকিং',
     hi: 'आगामी अपॉइंटमेंट',
+  },
+  // Custom time validation
+  shopHours: {
+    en: 'Shop hours:',
+    bn: 'দোকানের সময়:',
+    hi: 'दुकान के घंटे:',
+  },
+  activeBookingExists: {
+    en: 'You already have an active booking that hasn\'t ended yet. Please wait until it finishes.',
+    bn: 'আপনার ইতিমধ্যে একটি সক্রিয় বুকিং আছে যা এখনও শেষ হয়নি। এটি শেষ না হওয়া পর্যন্ত অপেক্ষা করুন।',
+    hi: 'आपके पास पहले से एक सक्रिय बुकिंग है जो अभी समाप्त नहीं हुई है। कृपया इसके समाप्त होने तक प्रतीक्षा करें।',
+  },
+  customTimeOutsideRange: {
+    en: 'Please select a time between {open} and {close}',
+    bn: '{open} থেকে {close} এর মধ্যে একটি সময় নির্বাচন করুন',
+    hi: 'कृपया {open} और {close} के बीच एक समय चुनें',
   },
 };
 

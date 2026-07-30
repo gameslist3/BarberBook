@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getAllActiveShops, getAvailableSlots } from "@/app/actions/client";
-import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell } from "lucide-react";
+import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell, ArrowLeft } from "lucide-react";
 import { SkeletonExploreList } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { db, auth } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useLanguage } from "@/components/LanguageContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 // ─── Helper: check if booking time hasn't passed yet ────────────
 function isBookingStillActive(slotDate: string, slotStartTime: string): boolean {
@@ -110,7 +111,7 @@ function UpcomingBookingAlert({ booking }: { booking: any }) {
   );
 }
 
-function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
+function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick }: any) {
   const { translate: tr } = useLanguage();
   const [slots, setSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,6 +153,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
                 e.stopPropagation(); 
                 if (shop.googleMapLink) {
                   setSelectedShopId(shop.id);
+                  onMapClick?.(shop.id);
                 }
               }}
               className={`p-2 rounded-xl transition-colors flex items-center justify-center ${shop.googleMapLink ? (selectedShopId === shop.id ? 'bg-violet-600 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100') : 'bg-gray-50 text-gray-400 cursor-not-allowed'}`}
@@ -211,32 +213,20 @@ export default function ExplorePage() {
   const { translate } = useLanguage();
   const [allShops, setAllShops] = useState<any[]>([]);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
+  const [expandedShop, setExpandedShop] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [panelHeight, setPanelHeight] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const startYRef = useRef(0);
-  const startHeightRef = useRef(0);
-  const isDraggingRef = useRef(false);
-  const panelHeightRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 1024);
-    // Map takes ~38vh, panel takes remaining space below
-    setPanelHeight(window.innerHeight * 0.62);
-
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
-    };    window.addEventListener("resize", handleResize);
+    };
+    window.addEventListener("resize", handleResize);
+    setIsMobile(window.innerWidth < 1024);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  // Keep panelHeightRef in sync with state
-  useEffect(() => {
-    panelHeightRef.current = panelHeight;
-  }, [panelHeight]);
 
   // ── Upcoming bookings — real-time Firestore listener ────
   const [upcomingBooking, setUpcomingBooking] = useState<any>(null);
@@ -312,40 +302,6 @@ export default function ExplorePage() {
     load();
   }, []);
 
-  // Touch drag handlers for the drag handle only
-  const handleDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    startYRef.current = clientY;
-    startHeightRef.current = panelHeightRef.current ?? window.innerHeight * 0.62;
-    isDraggingRef.current = true;
-    setIsDragging(true);
-  }, []);
-
-  const handleDragMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = startYRef.current - clientY;
-    const newHeight = Math.min(
-      Math.max(startHeightRef.current + deltaY, 200),
-      window.innerHeight - 100
-    );
-    setPanelHeight(newHeight);
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    const currentHeight = panelHeightRef.current ?? window.innerHeight * 0.62;
-    const snapThreshold = window.innerHeight * 0.35;
-
-    if (currentHeight > window.innerHeight - snapThreshold) {
-      setPanelHeight(window.innerHeight - 100);
-    } else {
-      setPanelHeight(window.innerHeight * 0.62);
-    }
-  }, []);
-
   const filteredShops = allShops.filter(s => {
     if (!searchQuery) return true;
     return s.shopName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -354,18 +310,6 @@ export default function ExplorePage() {
   // Mobile Panel Content
   const panelContent = (
     <>
-      {/* Drag Handle */}
-      <div
-        className="flex justify-center pt-3 pb-1 shrink-0 bg-white cursor-grab active:cursor-grabbing select-none"
-        style={{ touchAction: 'none' }}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-        onMouseDown={handleDragStart}
-      >
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-      </div>
-
       {/* Search bar */}
       <div className="px-4 pb-2 lg:px-5 shrink-0 bg-white">
         <div className="relative">
@@ -409,7 +353,11 @@ export default function ExplorePage() {
                   shop={shop} 
                   router={router} 
                   selectedShopId={selectedShopId} 
-                  setSelectedShopId={setSelectedShopId} 
+                  setSelectedShopId={setSelectedShopId}
+                  onMapClick={(id: string) => {
+                    const shop = allShops.find(s => s.id === id);
+                    if (isMobile && shop) setExpandedShop(shop);
+                  }}
               />
             ))}
           </div>
@@ -431,38 +379,9 @@ export default function ExplorePage() {
       )}
 
       {/* Google Maps Embed */}
-      {/* On mobile: map takes fixed top portion (non-overlapping with panel) */}
-      {/* On desktop: map takes flex-1 left side */}
-      {isMobile ? (
-        <div style={{ height: '38vh' }} className="w-full bg-gray-100 shrink-0 relative overflow-hidden">
-          <iframe
-            src={(() => {
-              let q = "barber shops near me";
-              const selectedShop = allShops.find(s => s.id === selectedShopId);
-              if (selectedShop) {
-                const link = selectedShop.googleMapLink;
-                if (link) {
-                  if (link.includes("/embed?") || link.includes("/embed/")) {
-                    const m = link.match(/src="([^"]+)"/);
-                    return m ? m[1] : link;
-                  }
-                  const cm = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                  if (cm) q = `${cm[1]},${cm[2]}`;
-                  else if (link.startsWith("http")) q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
-                  else q = link;
-                } else {
-                  q = `${selectedShop.shopName} ${selectedShop.address || ""}`.trim();
-                }
-              }
-              return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
-            })()}
-            className="absolute inset-0 w-full h-full border-0"
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
-      ) : (
+      {/* Desktop: map takes flex-1 left side */}
+      {/* Mobile: no map by default, shown as overlay on map icon click */}
+      {!isMobile && (
         <div className="flex-1 lg:relative lg:flex-1 lg:h-full bg-gray-100 shrink-0">
           <div className="w-full h-full relative overflow-hidden">
             <iframe
@@ -495,7 +414,7 @@ export default function ExplorePage() {
         </div>
       )}
 
-      {/* Mobile: Draggable bottom sheet (below map, non-overlapping) */}
+      {/* Mobile: panel with animated list → detail transition */}
       {isMobile && (
         <div
           className="flex flex-col overflow-hidden bg-white"
@@ -507,7 +426,142 @@ export default function ExplorePage() {
             zIndex: 10,
           }}
         >
-          {panelContent}
+          <AnimatePresence mode="wait">
+            {expandedShop ? (
+              <motion.div
+                key="expanded-shop"
+                initial={{ scale: 0.88, y: 60, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.88, y: 60, opacity: 0 }}
+                transition={{ type: "spring", damping: 24, stiffness: 220 }}
+                className="flex flex-col h-full"
+              >
+                {/* ── Header: Back + Shop Name ── */}
+                <div className="px-4 py-3 flex items-center gap-3 bg-white shrink-0 border-b border-gray-100">
+                  <button
+                    onClick={() => setExpandedShop(null)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors -ml-1"
+                  >
+                    <ArrowLeft size={20} className="text-gray-700" />
+                  </button>
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
+                      {expandedShop.logoUrl ? (
+                        <img src={expandedShop.logoUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Scissors size={16} className="text-violet-500" />
+                      )}
+                    </div>
+                    <h3 className="text-[17px] font-bold text-gray-900 truncate notranslate">{expandedShop.shopName}</h3>
+                  </div>
+                </div>
+
+                {/* ── Map Section ── */}
+                <div className="h-44 shrink-0 bg-gray-100 relative overflow-hidden">
+                  <iframe
+                    src={(() => {
+                      let q = "barber shops near me";
+                      const link = expandedShop.googleMapLink;
+                      if (link) {
+                        if (link.includes("/embed?") || link.includes("/embed/")) {
+                          const m = link.match(/src="([^"]+)"/);
+                          return m ? m[1] : link;
+                        }
+                        const cm = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                        if (cm) q = `${cm[1]},${cm[2]}`;
+                        else if (link.startsWith("http")) q = `${expandedShop.shopName} ${expandedShop.address || ""}`.trim();
+                        else q = link;
+                      } else {
+                        q = `${expandedShop.shopName} ${expandedShop.address || ""}`.trim();
+                      }
+                      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+                    })()}
+                    className="absolute inset-0 w-full h-full border-0"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  {/* Gradient overlay at bottom of map for visual separation */}
+                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/60 to-transparent pointer-events-none" />
+                </div>
+
+                {/* ── Shop Details ── */}
+                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+                  {/* Address */}
+                  {expandedShop.address && (
+                    <div className="flex items-start gap-3">
+                      <MapPin size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{translate("address")}</p>
+                        <p className="text-sm text-gray-900 mt-0.5">{expandedShop.address}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hours */}
+                  <div className="flex items-start gap-3">
+                    <Clock size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{translate("hours")}</p>
+                      <p className="text-sm text-gray-900 mt-0.5 font-medium">
+                        {expandedShop.openTime || "9:00 AM"} — {expandedShop.closeTime || "6:00 PM"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  {expandedShop.phone && (
+                    <div className="flex items-start gap-3">
+                      <Phone size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{translate("phone")}</p>
+                        <a href={`tel:${expandedShop.phone}`} className="text-sm text-violet-600 mt-0.5 block font-medium hover:underline">
+                          {expandedShop.phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Directions & Book Buttons */}
+                  <div className="flex gap-3 pt-2">
+                    {(() => {
+                      const cm = expandedShop.googleMapLink?.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                      const dest = cm ? `${cm[1]},${cm[2]}` : encodeURIComponent(`${expandedShop.shopName} ${expandedShop.address || ''}`);
+                      return (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${dest}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 h-11 rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-all"
+                        >
+                          <Map size={16} />
+                          {translate("directions")}
+                        </a>
+                      );
+                    })()}
+                    <button
+                      onClick={() => router.push(`/book/${expandedShop.id}`)}
+                      className="flex-1 h-11 rounded-2xl bg-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200"
+                    >
+                      <Scissors size={16} />
+                      {translate("bookNow")}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="shop-list"
+                initial={{ scale: 0.96, y: 15, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.96, y: 15, opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex flex-col flex-1 overflow-hidden"
+              >
+                {panelContent}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
