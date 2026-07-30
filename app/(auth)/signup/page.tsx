@@ -221,7 +221,7 @@ export default function SignUpPage() {
                 transition={{ delay: 0.5 }}
                 className="text-sm text-gray-600"
               >
-                A verification link has been sent to your email. Verify before booking.
+                Welcome to Barber Book. We value your time. Book → Go → Take service. No time waste.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0 }}
