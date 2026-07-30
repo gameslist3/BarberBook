@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, Check, X, Loader2 } from "lucide-react";
+import { Clock, Check, X, Loader2, Timer } from "lucide-react";
 import { updateBookingStatus } from "@/app/actions/bookings";
 import { useRouter } from "next/navigation";
-import { getScheduleInfo } from "@/lib/timeUtils";
+import { getScheduleInfo, getOvertimeInfo, formatOvertime } from "@/lib/timeUtils";
 
 
 export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) {
@@ -19,8 +19,8 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
     }, [initialBookings]);
 
     useEffect(() => {
-        // Update countdown every minute
-        const interval = setInterval(() => setTick(t => t + 1), 60000);
+        // Update countdown and overtime timer every second
+        const interval = setInterval(() => setTick(t => t + 1), 1000);
         return () => clearInterval(interval);
     }, []);
 
@@ -73,9 +73,14 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                                       : parseInt(booking.service?.duration || 30, 10);
                                       
                 const { text: countdown, hasStarted } = getScheduleInfo(booking.slotDate, booking.slotStartTime);
+                const { isOvertime, overtimeSeconds } = getOvertimeInfo(booking.slotDate, booking.slotStartTime, totalDuration);
 
                 return (
-                    <div key={booking.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-indigo-200 transition-colors">
+                    <div key={booking.id} className={`p-4 rounded-xl border transition-colors ${
+                      isOvertime 
+                        ? "border-red-200 bg-red-50" 
+                        : "border-gray-100 bg-gray-50 hover:border-indigo-200"
+                    }`}>
                         <div className="flex items-start justify-between mb-3">
                             <div>
                                 <p className="font-bold text-gray-900">{booking.user?.name || "Unknown Client"}</p>
@@ -84,7 +89,11 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                                 </p>
                             </div>
                             <div className="text-right">
-                                <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md inline-flex items-center gap-1.5 border border-indigo-100">
+                                <div className={`font-bold px-3 py-1 rounded-md inline-flex items-center gap-1.5 border ${
+                                  isOvertime
+                                    ? "text-red-600 bg-red-50 border-red-200"
+                                    : "text-indigo-600 bg-indigo-50 border-indigo-100"
+                                }`}>
                                     <Clock size={14} />
                                     {booking.slotStartTime}
                                 </div>
@@ -92,9 +101,16 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                         </div>
                         
                         <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                            <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
-                                {countdown}
-                            </span>
+                            {isOvertime ? (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-100 px-2.5 py-1 rounded-md animate-pulse">
+                                <Timer size={14} className="text-red-500" />
+                                Over Time • {formatOvertime(overtimeSeconds)}
+                              </span>
+                            ) : (
+                              <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                                  {countdown}
+                              </span>
+                            )}
                             
                             <div className="flex items-center gap-2">
                                 <button 

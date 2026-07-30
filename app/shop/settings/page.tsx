@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info } from "lucide-react";
 import { SkeletonForm } from "@/components/Skeleton";
 import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
+import { TimeSelectDropdown } from "@/components/TimeSelectDropdown";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 
@@ -20,7 +21,10 @@ export default function ShopSettingsPage() {
     description: "",
     googleMapLink: "",
     logoUrl: "",
-    lunchTime: "13:00",
+    lunchStartTime: "1:00 PM",
+    lunchEndTime: "2:00 PM",
+    openTime: "9:00 AM",
+    closeTime: "6:00 PM",
     images: [] as string[],
   });
 
@@ -50,7 +54,10 @@ export default function ShopSettingsPage() {
           description: data.description || "",
           googleMapLink: data.googleMapLink || "",
           logoUrl: data.logoUrl || "",
-          lunchTime: data.lunchTime || "13:00",
+          lunchStartTime: data.lunchStartTime || data.lunchTime || "1:00 PM",
+          lunchEndTime: data.lunchEndTime || "2:00 PM",
+          openTime: data.openTime || "9:00 AM",
+          closeTime: data.closeTime || "6:00 PM",
           images: data.images || [],
         };
         setFormData(initial);
@@ -273,20 +280,62 @@ export default function ShopSettingsPage() {
             </p>
           </div>
 
-          {/* Lunch Time */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              <div className="flex items-center gap-1.5">
-                <Clock size={14} className="text-gray-400" />
-                Lunch Break Start Time
+          {/* ═══════════════════════════════════════════ */}
+          {/* Business Hours */}
+          {/* ═══════════════════════════════════════════ */}
+          <div className="pt-2">
+            <div className="flex items-center gap-2.5 mb-4">
+              <Clock size={16} className="text-violet-500" />
+              <span className="text-sm font-semibold text-gray-800">Business Hours</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening</label>
+                <TimeSelectDropdown
+                  value={formData.openTime}
+                  onChange={(v) => setFormData({ ...formData, openTime: v })}
+                />
               </div>
-            </label>
-            <input
-              type="time"
-              className="w-full h-12 px-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
-              value={formData.lunchTime}
-              onChange={(e) => setFormData({ ...formData, lunchTime: e.target.value })}
-            />
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Closing</label>
+                <TimeSelectDropdown
+                  value={formData.closeTime}
+                  onChange={(v) => setFormData({ ...formData, closeTime: v })}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-gray-100" />
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* Lunch Break */}
+          {/* ═══════════════════════════════════════════ */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <Clock size={16} className="text-amber-500" />
+              <span className="text-sm font-semibold text-gray-800">Lunch Break</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Starts at</label>
+                <TimeSelectDropdown
+                  value={formData.lunchStartTime}
+                  onChange={(v) => setFormData({ ...formData, lunchStartTime: v })}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5">Ends at</label>
+                <TimeSelectDropdown
+                  value={formData.lunchEndTime}
+                  onChange={(v) => setFormData({ ...formData, lunchEndTime: v })}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2 ml-0.5">
+              No appointments will be scheduled during this break.
+            </p>
           </div>
         </div>
       </div>

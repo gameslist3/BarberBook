@@ -1,9 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Power, Calendar, Trash2, X, Loader2, Store, Phone, Mail, User, Clock, ChevronRight, PowerOff } from "lucide-react";
+import { Plus, Power, Calendar, Trash2, X, Loader2, Store, Phone, Mail, User, Clock, ChevronRight, PowerOff, Timer } from "lucide-react";
 import { SkeletonCard, SkeletonTableRow } from "@/components/Skeleton";
 import { createShop, getShops, deleteShop, toggleShopStatus } from "@/app/actions/shop";
+
+// Convert "h:mm AM/PM" to HTML time input format "HH:mm"
+function convertToTimeInput(timeStr: string): string {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!match) return timeStr;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const ampm = match[3]?.toUpperCase();
+  if (ampm === "PM" && hours < 12) hours += 12;
+  if (ampm === "AM" && hours === 12) hours = 0;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+// Convert HTML time input format "HH:mm" to "h:mm AM/PM"
+function convertFromTimeInput(timeStr: string): string {
+  const [hoursStr, minutesStr] = timeStr.split(":");
+  let hours = parseInt(hoursStr, 10);
+  const minutes = parseInt(minutesStr, 10);
+  const ampm = hours >= 12 ? "PM" : "AM";
+  if (hours > 12) hours -= 12;
+  if (hours === 0) hours = 12;
+  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
+}
 
 export default function ShopsPage() {
   const [shops, setShops] = useState<any[]>([]);
@@ -13,7 +36,8 @@ export default function ShopsPage() {
   const [error, setError] = useState("");
 
   const [newShop, setNewShop] = useState({
-    name: "", owner: "", email: "", phone: "", password: "", expiryDays: 30
+    name: "", owner: "", email: "", phone: "", password: "", expiryDays: 30,
+    openTime: "9:00 AM", closeTime: "6:00 PM"
   });
 
   const fetchShops = async () => {
@@ -37,7 +61,7 @@ export default function ShopsPage() {
     if (result.success) {
       alert("Shop and User Account created successfully!");
       setShowAddModal(false);
-      setNewShop({ name: "", owner: "", email: "", phone: "", password: "", expiryDays: 30 });
+      setNewShop({ name: "", owner: "", email: "", phone: "", password: "", expiryDays: 30, openTime: "9:00 AM", closeTime: "6:00 PM" });
       fetchShops();
     } else {
       setError(result.error || "Failed to create shop.");
@@ -151,6 +175,28 @@ export default function ShopsPage() {
                 <input required type="number" min="1" className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.expiryDays} onChange={e => setNewShop({...newShop, expiryDays: parseInt(e.target.value)})} />
               </div>
 
+              {/* Business Hours */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Opening Time</label>
+                  <input
+                    type="time"
+                    className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    value={convertToTimeInput(newShop.openTime)}
+                    onChange={e => setNewShop({...newShop, openTime: convertFromTimeInput(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Closing Time</label>
+                  <input
+                    type="time"
+                    className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    value={convertToTimeInput(newShop.closeTime)}
+                    onChange={e => setNewShop({...newShop, closeTime: convertFromTimeInput(e.target.value)})}
+                  />
+                </div>
+              </div>
+
               <div className="pt-2">
                 <button type="submit" disabled={isCreating} className="w-full flex justify-center items-center h-12 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors shadow-sm">
                   {isCreating ? <Loader2 className="animate-spin w-5 h-5" /> : "Create Shop & Send Email"}
@@ -238,6 +284,10 @@ export default function ShopsPage() {
                         <span>{shop.phone || "N/A"}</span>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Timer size={12} className="text-gray-400 shrink-0" />
+                        <span>{shop.openTime || "9:00 AM"} – {shop.closeTime || "6:00 PM"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <Clock size={12} className="text-gray-400 shrink-0" />
                         <span>Active for {getDaysSince(shop.createdAt)} days</span>
                       </div>
@@ -279,7 +329,8 @@ export default function ShopsPage() {
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%]">Owner</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%]">Contact</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[20%]">Timeline</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%]">Status</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[12%]">Hours</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[12%]">Status</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%] text-right">Actions</th>
                 </tr>
               </thead>
@@ -299,6 +350,9 @@ export default function ShopsPage() {
                       <div className="text-sm text-gray-500 mt-1">
                         <span className="font-semibold">Initial Access:</span> {shop.accessExpiresAt && shop.createdAt ? Math.round((new Date(shop.accessExpiresAt).getTime() - new Date(shop.createdAt).getTime()) / (1000 * 3600 * 24)) : 30} days
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {shop.openTime || "9:00 AM"} – {shop.closeTime || "6:00 PM"}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${shop.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

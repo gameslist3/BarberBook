@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide-react";
 import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
-import { getKolkataDateString, getScheduleInfo } from "@/lib/timeUtils";
+import { getKolkataDateString, getScheduleInfo, getOvertimeInfo, formatOvertime } from "@/lib/timeUtils";
 import { useLanguage } from "@/components/LanguageContext";
 
 export default function ShopDashboard() {
@@ -15,9 +15,9 @@ export default function ShopDashboard() {
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
   const [, setTick] = useState(0);
 
-  // Refresh countdown every minute
+  // Refresh countdown and overtime timer every second
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 60000);
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -119,11 +119,18 @@ export default function ShopDashboard() {
                 booking.slotDate,
                 booking.slotStartTime
               );
+              const { isOvertime, overtimeSeconds } = getOvertimeInfo(
+                booking.slotDate,
+                booking.slotStartTime,
+                totalDuration
+              );
 
               return (
                 <div
                   key={booking.id}
-                  className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.05)] border border-gray-50 overflow-hidden active:scale-[0.99] transition-transform"
+                  className={`bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.05)] overflow-hidden active:scale-[0.99] transition-transform ${
+                    isOvertime ? "border-2 border-red-300" : "border border-gray-50"
+                  }`}
                 >
                   <div className="p-4 space-y-3">
                     {/* ═══ ROW 1: User Name + Avatar | Scheduled Time ═══ */}
@@ -155,9 +162,16 @@ export default function ShopDashboard() {
                         <span className="font-semibold text-gray-800">{formatDuration(totalDuration)}</span>
                       </div>
                       <div className="w-px h-4 bg-gray-200" />
-                      <span className="text-xs font-bold text-violet-700">
-                        {countdown}
-                      </span>
+                      {isOvertime ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-100 px-2.5 py-1 rounded-full animate-pulse">
+                          <Timer size={13} className="text-red-500" />
+                          Over Time • {formatOvertime(overtimeSeconds)}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-violet-700">
+                          {countdown}
+                        </span>
+                      )}
                     </div>
 
                     {/* ═══ ROW 3: Complete / Cancel Buttons ═══ */}

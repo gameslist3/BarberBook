@@ -12,11 +12,12 @@ interface LanguageContextProps {
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 /**
- * Reads the Google Translate cookie to determine the current language.
- * Cookie format: "googtrans=/en/bn" or "/en/hi" or "/en/en"
+ * Reads the preferred language from localStorage, falling back to "en".
  */
-function getLanguageFromCookie(): Language {
-  if (typeof document === "undefined") return "en";
+function getInitialLanguage(): Language {
+  if (typeof window === "undefined") return "en";
+  const stored = localStorage.getItem("app_language") as Language | null;
+  if (stored === "bn" || stored === "hi") return stored;
   const match = document.cookie.match(/googtrans=(?:\/[a-z]+\/)?([a-z]+)/);
   const lang = match?.[1];
   if (lang === "bn") return "bn";
@@ -24,33 +25,22 @@ function getLanguageFromCookie(): Language {
   return "en";
 }
 
-/**
- * Sets the googtrans cookie and reloads the page to trigger Google Translate.
- */
-function setGoogleTranslateLanguage(lang: Language) {
-  document.cookie = `googtrans=/en/${lang}; path=/; max-age=31536000`;
-  // Small delay allows React to flush the loading spinner before the page unloads
-  setTimeout(() => window.location.reload(), 150);
-}
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>("en");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // First check the googtrans cookie (Google Translate's state)
-    const cookieLang = getLanguageFromCookie();
-    setLanguageState(cookieLang);
-    // Also save to localStorage for persistence across sessions
-    localStorage.setItem("app_language", cookieLang);
+    const initialLang = getInitialLanguage();
+    setLanguageState(initialLang);
     setIsLoaded(true);
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("app_language", lang);
-    // Trigger Google Translate via cookie + reload
-    setGoogleTranslateLanguage(lang);
+    // Set Google Translate cookie then reload to apply site-wide translation
+    document.cookie = `googtrans=/en/${lang}; path=/; max-age=31536000`;
+    window.location.reload();
   };
 
   const translate = (key: string) => {

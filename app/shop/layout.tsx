@@ -99,19 +99,26 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
 
   // Lunch time monitor
   useEffect(() => {
-    if (!shopData?.lunchTime) return;
+    const lunchTimeStr = shopData?.lunchStartTime || shopData?.lunchTime;
+    if (!lunchTimeStr) return;
     const interval = setInterval(() => {
       const now = new Date();
-      const lunchParts = shopData.lunchTime.split(":");
+      const match = lunchTimeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+      if (!match) return;
+      let hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const ampm = match[3]?.toUpperCase();
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
       const lunchDate = new Date();
-      lunchDate.setHours(parseInt(lunchParts[0]), parseInt(lunchParts[1]), 0);
+      lunchDate.setHours(hours, minutes, 0);
       const diffMins = (lunchDate.getTime() - now.getTime()) / (1000 * 60);
       if (diffMins > 14 && diffMins <= 15) {
-        addToast("Lunch time starts in 15 minutes!", "warning");
+        addToast("Lunch break starts in 15 minutes!", "warning");
       }
     }, 60000);
     return () => clearInterval(interval);
-  }, [shopData?.lunchTime]);
+  }, [shopData?.lunchStartTime, shopData?.lunchTime]);
 
   // Close dropdowns on outside click
   useEffect(() => {

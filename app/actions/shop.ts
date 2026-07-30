@@ -4,7 +4,7 @@ import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 
 export async function createShop(formData: any) {
-  const { name, owner, email, password, phone, expiryDays } = formData;
+  const { name, owner, email, password, phone, expiryDays, openTime, closeTime } = formData;
   
   try {
     // 1. Create the user using Firebase Admin Auth
@@ -38,6 +38,8 @@ export async function createShop(formData: any) {
         phone: phone,
         ownerId: userId,
         isActive: true,
+        openTime: openTime || "9:00 AM",
+        closeTime: closeTime || "6:00 PM",
         accessExpiresAt: expiryDate,
         createdAt: new Date(),
     });
@@ -189,7 +191,11 @@ export async function getShopProfile() {
       description: shopData.description || "",
       logoUrl: shopData.logoUrl || "",
       images: shopData.images || [],
-      lunchTime: shopData.lunchTime || "13:00"
+      lunchStartTime: shopData.lunchStartTime || shopData.lunchTime || "1:00 PM",
+      lunchEndTime: shopData.lunchEndTime || "2:00 PM",
+      lunchTime: shopData.lunchTime || shopData.lunchStartTime || "13:00",
+      openTime: shopData.openTime || "9:00 AM",
+      closeTime: shopData.closeTime || "6:00 PM",
     };
   } catch (error) {
     console.error("Error fetching shop profile:", error);
@@ -197,7 +203,7 @@ export async function getShopProfile() {
   }
 }
 
-export async function updateShopProfile(data: { shopName: string; address: string; phone: string; description: string; googleMapLink: string; lunchTime?: string; logoUrl?: string; images?: string[] }) {
+export async function updateShopProfile(data: { shopName: string; address: string; phone: string; description: string; googleMapLink: string; lunchTime?: string; lunchStartTime?: string; lunchEndTime?: string; openTime?: string; closeTime?: string; logoUrl?: string; images?: string[] }) {
   try {
     const user = await getServerUser();
     if (!user || user.role !== "SHOP_OWNER") throw new Error("Unauthorized");
@@ -215,7 +221,11 @@ export async function updateShopProfile(data: { shopName: string; address: strin
       googleMapLink: data.googleMapLink,
       ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
       ...(data.images !== undefined && { images: data.images }),
+      ...(data.lunchStartTime !== undefined && { lunchStartTime: data.lunchStartTime }),
+      ...(data.lunchEndTime !== undefined && { lunchEndTime: data.lunchEndTime }),
       ...(data.lunchTime !== undefined && { lunchTime: data.lunchTime }),
+      ...(data.openTime !== undefined && { openTime: data.openTime }),
+      ...(data.closeTime !== undefined && { closeTime: data.closeTime }),
       updatedAt: new Date()
     });
     
