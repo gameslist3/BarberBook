@@ -48,26 +48,31 @@ export default function SignUpPage() {
         body: JSON.stringify({ idToken }),
       });
       
-      // Send email verification link
-      const { sendEmailVerification } = await import('firebase/auth');
-      await sendEmailVerification(user, {
-        url: window.location.origin + '/explore',
-        handleCodeInApp: true
-      });
+      // Send email verification link (non-blocking — don't prevent signup if it fails)
+      try {
+        const { sendEmailVerification } = await import('firebase/auth');
+        await sendEmailVerification(user, {
+          url: window.location.origin + '/explore',
+          handleCodeInApp: true
+        });
+      } catch (verifyErr) {
+        console.warn("Failed to send verification email:", verifyErr);
+        // Continue regardless — account was created successfully
+      }
       
       // Show success animation before redirecting
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/explore");
       }, 2000);
+
+      return; // Exit early so the catch below only handles pre-redirect errors
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
           setError("This email is already registered. Please sign in instead.");
       } else if (err.code === 'auth/weak-password') {
           setError("Password should be at least 6 characters.");
-      } else if (err.code === 'auth/unauthorized-continue-uri' || (err.message && err.message.includes('auth/unauthorized-continue-uri'))) {
-          setError("Unable to send verification email. Please try again later.");
       } else {
           setError(err.message || "Failed to create account.");
       }

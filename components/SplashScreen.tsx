@@ -4,23 +4,15 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function SplashScreen({ children }: { children: React.ReactNode }) {
-  // Initialize synchronously so the splash is shown immediately on first session load
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const seen = sessionStorage.getItem("splash_seen");
-    if (!seen) {
-      sessionStorage.setItem("splash_seen", "true");
-      return true;
-    }
-    return false;
-  });
+  // Always show the splash on every page load / reload
+  const [showSplash, setShowSplash] = useState(true);
 
   // Fallback in case video doesn't end properly, takes too long to load, or user skips
   useEffect(() => {
     if (!showSplash) return;
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 6000); // 6 seconds max fallback
+    }, 7000); // 7 seconds max fallback
     return () => clearTimeout(timer);
   }, [showSplash]);
 
