@@ -4,10 +4,11 @@ import { useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +55,11 @@ export default function SignUpPage() {
         handleCodeInApp: true
       });
       
-      // We can just alert and go to explore or signin
-      alert("A verification link has been sent to your email. Please verify your email before booking.");
-      router.push("/explore");
+      // Show success animation before redirecting
+      setShowSuccess(true);
+      setTimeout(() => {
+        router.push("/explore");
+      }, 2000);
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
@@ -63,7 +67,7 @@ export default function SignUpPage() {
       } else if (err.code === 'auth/weak-password') {
           setError("Password should be at least 6 characters.");
       } else if (err.code === 'auth/unauthorized-continue-uri' || (err.message && err.message.includes('auth/unauthorized-continue-uri'))) {
-          setError("Domain configuration error. Please contact the administrator.");
+          setError("Unable to send verification email. Please try again later.");
       } else {
           setError(err.message || "Failed to create account.");
       }
@@ -74,7 +78,7 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 relative overflow-hidden">
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <Image
@@ -167,6 +171,65 @@ export default function SignUpPage() {
           </Link>
         </p>
       </div>
+
+      {/* ── Success overlay animation ── */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 200 }}
+              className="bg-white rounded-3xl p-10 mx-4 max-w-sm w-full text-center shadow-2xl"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.15, type: "spring", damping: 15, stiffness: 200 }}
+                className="w-20 h-20 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-5"
+              >
+                <motion.div
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                  <CheckCircle2 size={40} className="text-emerald-600" />
+                </motion.div>
+              </motion.div>
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-xl font-bold text-gray-900 mb-2"
+              >
+                Account Created! 🎉
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-gray-600"
+              >
+                A verification link has been sent to your email. Verify before booking.
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="mt-6 flex justify-center"
+              >
+                <div className="w-6 h-6 rounded-full border-2 border-violet-600 border-t-transparent animate-spin" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
