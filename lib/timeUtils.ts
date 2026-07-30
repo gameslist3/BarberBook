@@ -1,4 +1,6 @@
-export function getScheduleInfo(slotDate: string, slotStartTime: string) {
+export function getScheduleInfo(slotDate: string, slotStartTime?: string | null) {
+    if (!slotStartTime) return { text: "", hasStarted: false };
+
     const nowStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
     const now = new Date(nowStr);
     
@@ -55,9 +57,11 @@ function parseTimeToMinutes(timeStr: string): { hours: number; minutes: number }
 
 export function getOvertimeInfo(
   slotDate: string,
-  slotStartTime: string,
-  totalDurationMinutes: number
+  slotStartTime?: string | null,
+  totalDurationMinutes: number = 30
 ): { isOvertime: boolean; overtimeSeconds: number } {
+  if (!slotStartTime) return { isOvertime: false, overtimeSeconds: 0 };
+
   const nowStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
   const now = new Date(nowStr);
 

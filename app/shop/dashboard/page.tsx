@@ -24,15 +24,22 @@ export default function ShopDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const allBookings = await getShopBookings();
-      const todayStr = getKolkataDateString();
-      const filtered = allBookings.filter(
-        (b: any) =>
-          b.slotDate === todayStr &&
-          (b.status === "confirmed" || b.status === "pending")
-      );
-      setTodaysBookings(filtered);
-      setIsLoading(false);
+      try {
+        const allBookings = await getShopBookings();
+        const todayStr = getKolkataDateString();
+        const filtered = allBookings.filter(
+          (b: any) =>
+            b.slotDate === todayStr &&
+            (b.status === "confirmed" || b.status === "pending") &&
+            b.slotStartTime // Make sure slotStartTime exists to prevent render crash
+        );
+        setTodaysBookings(filtered);
+      } catch (error) {
+        console.error("Failed to fetch today's bookings:", error);
+        setTodaysBookings([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
