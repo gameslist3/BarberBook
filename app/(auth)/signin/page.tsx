@@ -66,11 +66,11 @@ export default function SignInPage() {
               alt="BarberBook"
               width={56}
               height={56}
-              className="rounded-xl"
+              className="notranslate rounded-xl"
             />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">Sign in to your account</h2>
-          <p className="mt-2 text-sm text-gray-600">Welcome back to BarberBook</p>
+          <p className="mt-2 text-sm text-gray-600">Welcome back to <span className="notranslate">BarberBook</span></p>
         </div>
 
         {error && (

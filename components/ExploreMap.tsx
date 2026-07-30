@@ -107,7 +107,7 @@ export default function ExploreMap({ shops, selectedShopId, defaultQuery = "barb
           >
             <Popup>
               <div className="text-center min-w-[140px]">
-                <p className="font-bold text-gray-900 text-sm">{shop.shopName}</p>
+                <p className="font-bold text-gray-900 text-sm"><span className="notranslate">{shop.shopName}</span></p>
                 {shop.address && (
                   <p className="text-xs text-gray-500 mt-0.5">{shop.address}</p>
                 )}

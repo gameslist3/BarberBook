@@ -9,6 +9,7 @@ import Link from "next/link";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { useLanguage } from "@/components/LanguageContext";
 
 // ─── Helper: check if booking time hasn't passed yet ────────────
 function isBookingStillActive(slotDate: string, slotStartTime: string): boolean {
@@ -94,7 +95,7 @@ function UpcomingBookingAlert({ booking }: { booking: any }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold">Upcoming Appointment</p>
           <p className="text-xs text-white/80 mt-0.5">
-            {booking.shop?.shopName || "Barber Shop"} • {booking.slotStartTime}
+            <span className="notranslate">{booking.shop?.shopName || "Barber Shop"}</span> • {booking.slotStartTime}
           </p>
           <div className="flex items-center gap-1.5 mt-2">
             <Clock size={12} className="text-white/80" />
@@ -110,6 +111,7 @@ function UpcomingBookingAlert({ booking }: { booking: any }) {
 }
 
 function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
+  const { translate: tr } = useLanguage();
   const [slots, setSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,13 +136,13 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
               {shop.logoUrl ? (
-                <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full object-cover" />
+                <img src={shop.logoUrl} alt={shop.shopName} className="notranslate w-full h-full object-cover" />
               ) : (
                 <Scissors className="h-6 w-6 text-violet-500" />
               )}
             </div>
             <div className="min-w-0">
-              <h3 className="text-[17px] font-bold text-gray-900 truncate">{shop.shopName}</h3>
+              <h3 className="notranslate text-[17px] font-bold text-gray-900 truncate">{shop.shopName}</h3>
             </div>
           </div>
 
@@ -182,7 +184,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
         {/* ═══ ROW 3: Status / Action ═══ */}
         {isLoading ? (
           <div className="flex items-center justify-center py-2.5 text-xs text-gray-500 bg-gray-50 rounded-xl">
-            <Loader2 className="w-4 h-4 animate-spin mr-2" /> Checking availability...
+            <Loader2 className="w-4 h-4 animate-spin mr-2" /> {tr("checkingAvailability")}
           </div>
         ) : slots.length > 0 ? (
           <button
@@ -192,11 +194,11 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
             }}
             className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm shadow-violet-200 active:scale-[0.98] flex items-center justify-center gap-2"
           >
-            Book Now - Next slot at {slots[0]}
+            {tr("bookNow")} - Next slot at {slots[0]}
           </button>
         ) : (
           <div className="text-center py-2.5 text-xs font-semibold text-red-600 bg-red-50 rounded-xl">
-            Fully booked today
+            {tr("fullyBooked")}
           </div>
         )}
       </div>
@@ -206,6 +208,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId }: any) {
 
 export default function ExplorePage() {
   const router = useRouter();
+  const { translate } = useLanguage();
   const [allShops, setAllShops] = useState<any[]>([]);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,10 +372,11 @@ export default function ExplorePage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
-            placeholder="Search barber shops..."
+            placeholder={translate("searchShops")}
+            translate="no"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-9 pr-9 rounded-2xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+            className="notranslate w-full h-10 pl-9 pr-9 rounded-2xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
           />
           {searchQuery && (
             <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
@@ -382,7 +386,7 @@ export default function ExplorePage() {
         </div>
         <div className="flex items-center justify-between mt-2 pb-1">
           <p className="text-xs text-gray-600">
-            {filteredShops.length} shop{filteredShops.length !== 1 ? 's' : ''} available
+            {filteredShops.length} {translate("shopsAvailable")}
           </p>
         </div>
       </div>
@@ -394,8 +398,8 @@ export default function ExplorePage() {
         ) : filteredShops.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100 mt-2">
             <Scissors className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-            <h3 className="text-sm font-medium text-gray-900">No shops found</h3>
-            <p className="text-xs text-gray-600 mt-1">Try a different search term.</p>
+            <h3 className="text-sm font-medium text-gray-900">{translate("noShopsFound")}</h3>
+            <p className="text-xs text-gray-600 mt-1">{translate("tryDifferentSearch")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2 mt-2">

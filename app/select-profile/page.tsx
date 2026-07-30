@@ -24,7 +24,7 @@ export default async function SelectProfilePage() {
             alt="BarberBook"
             width={64}
             height={64}
-            className="rounded-2xl shadow-[0_4px_12px_rgba(124,58,237,0.2)]"
+            className="notranslate rounded-2xl shadow-[0_4px_12px_rgba(124,58,237,0.2)]"
           />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Welcome, {user.name}</h1>

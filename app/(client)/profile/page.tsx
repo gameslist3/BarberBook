@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { User, Mail, Calendar, Settings, Shield } from "lucide-react";
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ProfilePhotoManager } from "@/components/ProfilePhotoManager";
 
 export default async function ProfilePage() {
   const user = await getServerUser();
@@ -16,10 +17,8 @@ export default async function ProfilePage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Your Profile</h1>
       
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-        <div className="p-6 md:p-8 flex items-center gap-4 border-b border-gray-100">
-          <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl shrink-0">
-            {user.name?.charAt(0) || 'U'}
-          </div>
+        <div className="p-6 md:p-8 flex items-center gap-6 border-b border-gray-100">
+          <ProfilePhotoManager user={user} />
           <div>
             <h2 className="text-xl font-bold text-gray-900">{user.name || "User"}</h2>
             <p className="text-gray-600 flex items-center gap-1 mt-1 text-sm"><Mail size={14} /> {user.email}</p>

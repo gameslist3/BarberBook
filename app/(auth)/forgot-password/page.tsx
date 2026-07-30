@@ -27,7 +27,11 @@ export default function ForgotPasswordPage() {
       setSuccess(true);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to send reset email.");
+      if (err.code === 'auth/unauthorized-continue-uri' || (err.message && err.message.includes('auth/unauthorized-continue-uri'))) {
+        setError("Domain configuration error. Please contact the administrator.");
+      } else {
+        setError(err.message || "Failed to send reset email.");
+      }
     } finally {
       setIsLoading(false);
     }

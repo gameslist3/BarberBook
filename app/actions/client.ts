@@ -213,11 +213,20 @@ export async function getAvailableSlots(shopId: string, dateStr: string, service
     // Generate slots every 30 minutes
     const slots: string[] = [];
     
-    // Check if the requested date is today to filter out past slots
+    // Check if the requested date is today to filter out past slots (in IST)
+    const options = { timeZone: 'Asia/Kolkata' };
     const today = new Date();
-    // Assuming dateStr is "YYYY-MM-DD"
-    const isToday = dateStr === today.toISOString().split('T')[0];
-    const currentMinutes = today.getHours() * 60 + today.getMinutes();
+    const istString = today.toLocaleString('en-US', options);
+    const istDate = new Date(istString);
+    
+    // Extract YYYY-MM-DD in IST
+    const istYear = istDate.getFullYear();
+    const istMonth = String(istDate.getMonth() + 1).padStart(2, '0');
+    const istDay = String(istDate.getDate()).padStart(2, '0');
+    const istDateStr = `${istYear}-${istMonth}-${istDay}`;
+    
+    const isToday = dateStr === istDateStr;
+    const currentMinutes = istDate.getHours() * 60 + istDate.getMinutes();
     
     for (let currentSlotMins = openMinutes; currentSlotMins + serviceDurationMinutes <= closeMinutes; currentSlotMins += 30) {
       // Filter out past times if it's today

@@ -11,6 +11,7 @@ import { SkeletonForm } from "@/components/Skeleton";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageContext";
 
 // ─── Success overlay ─────────────────────────────────────────────
 function BookingSuccess({ shopName, time, onDone }: {
@@ -18,6 +19,7 @@ function BookingSuccess({ shopName, time, onDone }: {
   time: string;
   onDone: () => void;
 }) {
+  const { translate } = useLanguage();
   const [show, setShow] = useState(false);
   const [showContent, setShowContent] = useState(false);
 
@@ -55,7 +57,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          Booking Confirmed!
+          {translate("bookingConfirmed")}
         </h2>
         <p
           className={`text-gray-600 mb-1 transition-all duration-500 ${
@@ -63,7 +65,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           }`}
           style={{ transitionDelay: "500ms" }}
         >
-          We&apos;ll see you at <strong>{time}</strong>
+          {translate("seeYouAt")} <strong>{time}</strong>
         </p>
         <p
           className={`text-sm text-gray-400 mb-8 transition-all duration-500 ${
@@ -71,7 +73,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           }`}
           style={{ transitionDelay: "600ms" }}
         >
-          at {shopName}
+          at <span className="notranslate">{shopName}</span>
         </p>
 
         <button
@@ -81,7 +83,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           }`}
           style={{ transitionDelay: "700ms" }}
         >
-          Back to Explore
+          {translate("backToExplore")}
         </button>
       </div>
     </div>
@@ -140,6 +142,7 @@ export default function BookingPage() {
   const params = useParams();
   const router = useRouter();
   const shopId = params.shopId as string;
+  const { translate } = useLanguage();
 
   const [shop, setShop] = useState<any>(null);
   const [isLoadingShop, setIsLoadingShop] = useState(true);
@@ -243,9 +246,9 @@ export default function BookingPage() {
   };
 
   const handleConfirm = async () => {
-    if (!session) { setError("Please sign in to book."); return; }
-    if (selectedServiceIds.size === 0) { setError("Please select at least one service."); return; }
-    if (!selectedTime) { setError("Please select a time slot."); return; }
+    if (!session) { setError(translate("signInToBook")); return; }
+    if (selectedServiceIds.size === 0) { setError(translate("selectService")); return; }
+    if (!selectedTime) { setError(translate("chooseTime")); return; }
 
     setIsBooking(true);
     setError("");
@@ -287,8 +290,8 @@ export default function BookingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Shop not found</h2>
-          <Link href="/explore" className="text-violet-600 font-medium">Back to Explore</Link>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{translate("shopNotFound")}</h2>
+          <Link href="/explore" className="text-violet-600 font-medium">{translate("backToExplore")}</Link>
         </div>
       </div>
     );
@@ -310,7 +313,7 @@ export default function BookingPage() {
         >
           <ChevronLeft size={20} className="text-gray-700" />
         </button>
-        <h1 className="text-[17px] font-bold text-gray-900 truncate">Book Appointment</h1>
+        <h1 className="text-[17px] font-bold text-gray-900 truncate">{translate("bookAppointment")}</h1>
       </div>
 
       {/* ── Scrollable content ───────────────────────────────── */}
@@ -321,14 +324,14 @@ export default function BookingPage() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
                 {shop.logoUrl ? (
-                  <img src={shop.logoUrl} alt={shop.shopName} className="w-full h-full object-cover" />
+                  <img src={shop.logoUrl} alt={shop.shopName} className="notranslate w-full h-full object-cover" />
                 ) : (
                   <Scissors size={22} className="text-violet-500" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-base font-bold text-gray-900 truncate">{shop.shopName}</h2>
-                <p className="text-[11px] text-gray-500 truncate mt-0.5">{shop.address || "Local Shop"}</p>
+                <h2 className="notranslate text-base font-bold text-gray-900 truncate">{shop.shopName}</h2>
+                <p className="text-[11px] text-gray-500 truncate mt-0.5">{shop.address || translate("localShop")}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {shop.googleMapLink && (
@@ -353,7 +356,7 @@ export default function BookingPage() {
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search services..."
+                placeholder={translate("searchServices")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-11 pl-10 pr-9 rounded-2xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
@@ -367,7 +370,7 @@ export default function BookingPage() {
             </div>
             {!searchQuery && (
               <p className="text-[11px] text-gray-400 mt-1.5 ml-1">
-                {services.length} service{services.length !== 1 ? "s" : ""} available
+                {services.length} {translate("servicesAvailable")}
               </p>
             )}
           </div>
@@ -377,8 +380,8 @@ export default function BookingPage() {
             {filteredServices.length === 0 ? (
               <div className="col-span-2 text-center py-12">
                 <Scissors size={32} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-sm font-medium text-gray-500">No services found</p>
-                {searchQuery && <p className="text-xs text-gray-400 mt-1">Try a different search term.</p>}
+                <p className="text-sm font-medium text-gray-500">{translate("noServicesFound")}</p>
+                {searchQuery && <p className="text-xs text-gray-400 mt-1">{translate("tryDifferentSearch")}</p>}
               </div>
             ) : (
               filteredServices.map((service: any) => {
@@ -434,8 +437,8 @@ export default function BookingPage() {
           {/* Row 1: Date | Time | Total */}
           <div className="flex items-center gap-2 mb-2.5">
             <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-center">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Date</p>
-              <p className="text-sm font-bold text-gray-900">Today</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("date")}</p>
+              <p className="text-sm font-bold text-gray-900">{translate("today")}</p>
             </div>
 
             <button
@@ -451,15 +454,15 @@ export default function BookingPage() {
                     : "bg-gray-50 border border-dashed border-gray-200 opacity-50"
               }`}
             >
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Time</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("time")}</p>
               <p className={`text-sm font-bold flex items-center justify-center gap-1 ${selectedTime ? "text-violet-700" : "text-gray-400"}`}>
-                {isLoadingSlots ? "Loading..." : selectedTime ? selectedTime : selectedServiceIds.size === 0 ? "Select" : "Choose"}
+                {isLoadingSlots ? translate("loading") : selectedTime ? selectedTime : selectedServiceIds.size === 0 ? translate("select") : translate("choose")}
                 <Clock size={13} />
               </p>
             </button>
 
             <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-center">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Total</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("total")}</p>
               <p className="text-sm font-bold text-gray-900">₹{totalPrice.toFixed(2)}</p>
             </div>
           </div>
@@ -477,11 +480,11 @@ export default function BookingPage() {
             {isBooking ? (
               <Loader2 size={18} className="animate-spin" />
             ) : selectedServiceIds.size === 0 ? (
-              "Select a Service"
+              translate("selectService")
             ) : !selectedTime ? (
-              "Choose a Time"
+              translate("chooseTime")
             ) : (
-              "Confirm Booking"
+              translate("confirmBooking")
             )}
           </button>
         </div>
@@ -496,14 +499,14 @@ export default function BookingPage() {
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[17px] font-bold text-gray-900">Choose a time</h3>
+              <h3 className="text-[17px] font-bold text-gray-900">{translate("chooseTimeSlot")}</h3>
               <p className="text-xs text-gray-500">{todayFormatted}</p>
             </div>
             <div className="flex-1 overflow-y-auto -mx-5 px-5">
               {availableSlots.length === 0 ? (
                 <div className="text-center py-10">
                   <Clock size={28} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-sm font-medium text-gray-500">No slots available today</p>
+                  <p className="text-sm font-medium text-gray-500">{translate("noSlotsToday")}</p>
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2.5 pb-2">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Scissors, CalendarCheck, Settings } from "lucide-react";
+import { useLanguage } from "./LanguageContext";
 
 interface ShopBottomNavProps {
   newBookingCount?: number;
@@ -10,12 +11,13 @@ interface ShopBottomNavProps {
 
 export function ShopBottomNav({ newBookingCount = 0 }: ShopBottomNavProps) {
   const pathname = usePathname();
+  const { translate } = useLanguage();
 
   const navItems = [
-    { name: "Dashboard", href: "/shop/dashboard", icon: LayoutDashboard },
-    { name: "Services", href: "/shop/services", icon: Scissors },
-    { name: "Bookings", href: "/shop/bookings", icon: CalendarCheck, badge: newBookingCount },
-    { name: "Settings", href: "/shop/settings", icon: Settings },
+    { name: translate("dashboard"), href: "/shop/dashboard", icon: LayoutDashboard },
+    { name: translate("services"), href: "/shop/services", icon: Scissors },
+    { name: translate("bookings"), href: "/shop/bookings", icon: CalendarCheck, badge: newBookingCount },
+    { name: translate("settings"), href: "/shop/settings", icon: Settings },
   ];
 
   return (

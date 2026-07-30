@@ -5,6 +5,8 @@ import Link from "next/link";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { SkeletonStatCard } from "@/components/Skeleton";
+import { getKolkataDateString } from "@/lib/timeUtils";
+import { useLanguage } from "@/components/LanguageContext";
 
 interface Stats {
   totalBookings: number;
@@ -43,11 +45,14 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
       if (!servicesReady || !bookingsReady) return;
       setLoading(false);
 
+      const todayStr = getKolkataDateString();
+      const todaysBookings = bookingsData.filter((b: any) => b.slotDate === todayStr);
+
       const uniqueClients = new Set(bookingsData.map((b: any) => b.userId)).size;
 
       let totalRevenue = 0;
-      const completedBookings = bookingsData.filter((b: any) => b.status === "completed");
-      for (const b of completedBookings) {
+      const completedTodayBookings = todaysBookings.filter((b: any) => b.status === "completed");
+      for (const b of completedTodayBookings) {
         const svc = servicesData.filter((s: any) =>
           b.serviceIds?.includes(s.id) || s.id === b.serviceId
         );
@@ -57,7 +62,7 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
       }
 
       setStats({
-        totalBookings: bookingsData.length,
+        totalBookings: todaysBookings.length,
         activeServices: servicesData.filter((s: any) => s.isActive !== false).length,
         totalClients: uniqueClients,
         revenue: totalRevenue,
@@ -82,24 +87,26 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
     };
   }, [shopId]);
 
+  const { translate } = useLanguage();
+
   const cards = [
     {
-      label: "Bookings",
+      label: translate("bookings"),
       value: stats.totalBookings,
       href: "/shop/bookings",
     },
     {
-      label: "Services",
+      label: translate("services"),
       value: stats.activeServices,
       href: "/shop/services",
     },
     {
-      label: "Clients",
+      label: translate("clients"),
       value: stats.totalClients,
       href: "/shop/bookings",
     },
     {
-      label: "Revenue",
+      label: translate("revenue"),
       value: `₹${stats.revenue.toFixed(0)}`,
       href: "/shop/dashboard",
     },
@@ -119,7 +126,7 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
         <Link
           key={i}
           href={card.href}
-          className="bg-white rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 active:scale-[0.97] transition-all hover:border-violet-200 hover:shadow-md text-center block"
+          className="bg-white rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 active:scale-[0.97] transition-all hover:border-violet-200 hover:shadow-md text-center flex flex-col items-center justify-center"
         >
           <p className="text-lg font-bold text-gray-900 leading-tight">
             {card.value}

@@ -32,9 +32,9 @@ export default async function ClientLayout({ children }: { children: React.React
               alt="BarberBook"
               width={32}
               height={32}
-              className="rounded-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md"
+              className="notranslate rounded-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md"
             />
-            <span className="font-bold text-xl tracking-tight text-gray-900 hidden sm:block transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
+            <span className="notranslate font-bold text-xl tracking-tight text-gray-900 hidden sm:block transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
           </Link>
           
           <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
@@ -50,9 +50,9 @@ export default async function ClientLayout({ children }: { children: React.React
               alt="BarberBook"
               width={28}
               height={28}
-              className="rounded-lg shrink-0 transition-transform duration-300 group-hover:scale-105"
+              className="notranslate rounded-lg shrink-0 transition-transform duration-300 group-hover:scale-105"
             />
-            <span className="text-base font-bold text-gray-900 tracking-tight transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
+            <span className="notranslate text-base font-bold text-gray-900 tracking-tight transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
           </Link>
           <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
         </div>

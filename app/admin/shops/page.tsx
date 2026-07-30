@@ -213,7 +213,7 @@ export default function ShopsPage() {
                           <Store size={18} />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">{shop.shopName}</p>
+                          <p className="notranslate text-sm font-semibold text-gray-900">{shop.shopName}</p>
                           <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                             <User size={11} />
                             <span>{shop.owner?.name || "Unknown"}</span>
@@ -286,7 +286,7 @@ export default function ShopsPage() {
               <tbody className="divide-y divide-gray-100">
                 {shops.map(shop => (
                   <tr key={shop.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{shop.shopName}</td>
+                    <td className="notranslate px-6 py-4 font-medium text-gray-900">{shop.shopName}</td>
                     <td className="px-6 py-4 text-gray-700">{shop.owner?.name || 'Unknown'}</td>
                     <td className="px-6 py-4">
                       <div className="text-gray-900 font-medium">{shop.phone || 'N/A'}</div>

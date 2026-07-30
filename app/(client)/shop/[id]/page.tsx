@@ -67,7 +67,7 @@ export default function ShopDetailsPage() {
             <img
               src={shop.logoUrl}
               alt={shop.shopName}
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
+              className="notranslate absolute inset-0 w-full h-full object-cover opacity-40"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -102,7 +102,7 @@ export default function ShopDetailsPage() {
 
         {/* Info */}
         <div className="px-4 sm:px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">{shop.shopName}</h1>
+          <h1 className="notranslate text-2xl font-bold text-gray-900">{shop.shopName}</h1>
           <div className="flex flex-wrap items-center gap-3 mt-1.5 text-sm text-gray-500">
             <span className="flex items-center gap-1">
               <MapPin size={14} className="text-gray-400" />
@@ -172,7 +172,7 @@ export default function ShopDetailsPage() {
                   <img
                     src={img}
                     alt={`${shop.shopName} ${idx + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className="notranslate w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               ))}

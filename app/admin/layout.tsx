@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Store, Users, Calendar, LogOut, Bell, Menu, X, User, Shield } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { signOut as firebaseSignOut } from "firebase/auth";
+import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
 import { useState, useEffect, useRef } from "react";
 import { TopNavigation } from "@/components/TopNavigation";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import Image from "next/image";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,8 +16,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationList, setNotificationList] = useState<{ message: string; time: string }[]>([]);
+  const notifRef = useRef<HTMLDivElement>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Listen for recent bookings for admin notifications
+  useEffect(() => {
+    const q = query(
+      collection(db, "bookings"),
+      orderBy("createdAt", "desc"),
+      limit(10)
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const items = snap.docs.map((d) => d.data());
+        const notifs = items.map((b: any) => ({
+          message: `New booking${b.status ? ` (${b.status})` : ""} at ${b.slotStartTime || "-"}`,
+          time: b.slotDate || "-",
+        }));
+        setNotificationList(notifs);
+      },
+      (err) => {
+        console.warn("Failed to load admin notifications:", err.message);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   const handleSignOut = async () => {
     await firebaseSignOut(auth);
@@ -23,9 +52,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/signin");
   };
 
-  // Close profile menu on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setShowProfileMenu(false);
       }
@@ -58,10 +90,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
             <h1 className="text-[17px] font-semibold text-gray-900">{currentPageName}</h1>
           </div>
-          <div className="flex items-center gap-1">
-            <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors">
-              <Bell size={20} className="animate-icon-hover" />
-            </button>
+          <div className="flex items-center gap-0.5">
+            <LanguageSwitcher />
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+              >
+                <Bell size={20} className="animate-icon-hover" />
+                {notificationList.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
+              </button>
+              {showNotifications && (
+                <div className="absolute right-0 top-11 w-[300px] bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
+                    <div className="flex items-center gap-2">
+                      {notificationList.length > 0 && (
+                        <button
+                          onClick={() => setNotificationList([])}
+                          className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                      <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto">
+                    {notificationList.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <Bell size={28} className="mx-auto text-gray-200 mb-2" />
+                        <p className="text-sm text-gray-500">No notifications yet.</p>
+                      </div>
+                    ) : (
+                      notificationList.map((n, i) => (
+                        <div key={i} className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                          <p className="text-sm text-gray-800 font-medium">{n.message}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{n.time}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -117,7 +193,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     alt="BarberBook"
                     width={36}
                     height={36}
-                    className="rounded-lg shrink-0"
+                    className="notranslate rounded-lg shrink-0"
                   />
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">Admin Portal</p>
@@ -208,7 +284,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             alt="BarberBook"
             width={28}
             height={28}
-            className="rounded-lg shrink-0"
+            className="notranslate rounded-lg shrink-0"
           />
           <span className="font-bold text-lg tracking-tight">Admin</span>
         </div>

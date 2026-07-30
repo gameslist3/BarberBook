@@ -62,6 +62,8 @@ export default function SignUpPage() {
           setError("This email is already registered. Please sign in instead.");
       } else if (err.code === 'auth/weak-password') {
           setError("Password should be at least 6 characters.");
+      } else if (err.code === 'auth/unauthorized-continue-uri' || (err.message && err.message.includes('auth/unauthorized-continue-uri'))) {
+          setError("Domain configuration error. Please contact the administrator.");
       } else {
           setError(err.message || "Failed to create account.");
       }
@@ -80,11 +82,11 @@ export default function SignUpPage() {
               alt="BarberBook"
               width={56}
               height={56}
-              className="rounded-xl"
+              className="notranslate rounded-xl"
             />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">Create an account</h2>
-          <p className="mt-2 text-sm text-gray-600">Join BarberBook today</p>
+          <p className="mt-2 text-sm text-gray-600">Join <span className="notranslate">BarberBook</span> today</p>
         </div>
 
         {error && (

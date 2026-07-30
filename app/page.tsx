@@ -3,6 +3,7 @@ import Image from "next/image";
 import { User, Map, LogIn, ChevronRight } from "lucide-react";
 import { getServerUser } from "@/lib/get-server-user";
 import { redirect } from "next/navigation";
+import { TaglineText } from "@/components/TaglineText";
 
 export default async function WelcomePage() {
   const user = await getServerUser();
@@ -88,23 +89,18 @@ export default async function WelcomePage() {
                   width={88}
                   height={88}
                   priority
-                  className="relative z-10 rounded-2xl shadow-lg brightness-0 invert"
+                  className="notranslate relative z-10 rounded-2xl shadow-lg brightness-0 invert"
                 />
               </div>
 
               <h1
-                className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight"
+                className="notranslate text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight"
                 style={{ animation: 'fadeInUp 0.6s ease-out 0.15s both' }}
               >
                 BarberBook
               </h1>
 
-              <p
-                className="text-violet-100/90 text-sm md:text-base max-w-xs leading-relaxed"
-                style={{ animation: 'fadeInUp 0.6s ease-out 0.3s both' }}
-              >
-                The premium platform to find and book the best local barber shops instantly.
-              </p>
+              <TaglineText />
             </div>
 
 

@@ -3,22 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Map, User, Store } from "lucide-react";
+import { useLanguage } from "./LanguageContext";
 
 export function BottomNavigation({ userRole }: { userRole?: string }) {
   const pathname = usePathname();
+  const { translate } = useLanguage();
 
   // Hide bottom nav on booking and shop detail pages
   if (pathname.startsWith("/book/") || pathname.startsWith("/shop/")) return null;
 
   const mainItems = [
-    { name: "Explore", href: "/explore", icon: Map },
-    { name: "Profile", href: "/profile", icon: User },
+    { name: translate("explore"), href: "/explore", icon: Map },
+    { name: translate("profile"), href: "/profile", icon: User },
   ];
 
   if (userRole === "SHOP_OWNER") {
-    mainItems.push({ name: "Shop", href: "/shop/dashboard", icon: Store });
+    mainItems.push({ name: translate("shop"), href: "/shop/dashboard", icon: Store });
   } else if (userRole === "ADMIN" || userRole === "APP_OWNER") {
-    mainItems.push({ name: "Admin", href: "/admin/dashboard", icon: Store });
+    mainItems.push({ name: translate("admin"), href: "/admin/dashboard", icon: Store });
   }
 
   return (

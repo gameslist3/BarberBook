@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   },
 };
 
+import { LanguageProvider } from "@/components/LanguageContext";
+import { GoogleTranslateInit } from "@/components/GoogleTranslateInit";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,10 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <SplashScreen>
-          {children}
-        </SplashScreen>
+      <body className={inter.className} suppressHydrationWarning>
+        <GoogleTranslateInit />
+        <LanguageProvider>
+          <SplashScreen>
+            {children}
+          </SplashScreen>
+        </LanguageProvider>
       </body>
     </html>
   );

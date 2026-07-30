@@ -5,8 +5,10 @@ import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide
 import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { getKolkataDateString, getScheduleInfo } from "@/lib/timeUtils";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function ShopDashboard() {
+  const { translate } = useLanguage();
   const [todaysBookings, setTodaysBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -75,10 +77,10 @@ export default function ShopDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-violet-600" />
-            <h2 className="text-[17px] font-bold text-gray-900">Today's Schedule</h2>
+            <h2 className="text-[17px] font-bold text-gray-900">{translate("todaysSchedule")}</h2>
           </div>
           <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-3 py-1.5 rounded-full">
-            {todaysBookings.length} Upcoming
+            {todaysBookings.length} {translate("upcoming")}
           </span>
         </div>
 
@@ -170,14 +172,14 @@ export default function ShopDashboard() {
                         ) : (
                           <Check size={18} />
                         )}
-                        {processingId === booking.id ? "Completing..." : "Complete Appointment"}
+                        {processingId === booking.id ? translate("completing") : translate("completeAppointment")}
                       </button>
                     ) : (
                       <div className="flex gap-2.5">
                         <button
                           onClick={() => handleComplete(booking.id)}
-                          disabled={processingId === booking.id}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 active:bg-violet-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                          disabled={true}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-sm font-semibold cursor-not-allowed transition-all shadow-none"
                         >
                           <Check size={16} />
                           Complete
