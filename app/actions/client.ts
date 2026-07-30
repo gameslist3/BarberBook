@@ -2,6 +2,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { getServerUser } from "@/lib/get-server-user";
+import { getKolkataDateString } from "@/lib/timeUtils";
 
 export async function getAllActiveShops() {
   try {
@@ -74,7 +75,7 @@ export async function checkUserActiveBooking(): Promise<{ hasActive: boolean; bo
   if (!user) return { hasActive: false };
 
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getKolkataDateString();
     const bookingsSnapshot = await adminDb.collection("bookings")
       .where("userId", "==", user.id)
       .where("slotDate", ">=", today)
@@ -153,7 +154,7 @@ export async function createBooking(data: { shopId: string, serviceIds: string[]
   
   try {
     const bookingRef = adminDb.collection("bookings").doc();
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getKolkataDateString();
     const bookingData = {
         slotDate: todayStr,
         slotStartTime: data.time,
@@ -205,7 +206,7 @@ export async function getMyUpcomingBookings() {
     const user = await getServerUser();
     if (!user) return [];
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = getKolkataDateString();
     const bookingsSnapshot = await adminDb.collection("bookings")
       .where("userId", "==", user.id)
       .where("slotDate", ">=", today)
