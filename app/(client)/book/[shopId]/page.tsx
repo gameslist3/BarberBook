@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getShopDetails, createBooking, getAvailableSlots, checkUserActiveBooking } from "@/app/actions/client";
+import { getShopDetails, createBooking, getAvailableSlots, checkUserActiveBooking, checkCustomTimeAvailability } from "@/app/actions/client";
+import { getKolkataDateString } from "@/lib/timeUtils";
 import {
   Scissors,  Clock, Loader2, ChevronLeft, ChevronUp, ChevronDown, Phone,
   Search, X, Check, Map as MapIcon
@@ -83,7 +84,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           }`}
           style={{ transitionDelay: "700ms" }}
         >
-          {translate("backToExplore")}
+          {translate("goToSession")}
         </button>
       </div>
     </div>
@@ -174,7 +175,7 @@ export default function BookingPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set());
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(() => getKolkataDateString());
   const [selectedTime, setSelectedTime] = useState("");
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
@@ -186,6 +187,9 @@ export default function BookingPage() {
   const [customHour, setCustomHour] = useState(9);
   const [customMinute, setCustomMinute] = useState(0);
   const [customAmPm, setCustomAmPm] = useState<'AM' | 'PM'>('AM');
+  const [customStatus, setCustomStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle');
+  const [customNextAvailable, setCustomNextAvailable] = useState<string | null>(null);
+  const [customUnavailableReason, setCustomUnavailableReason] = useState<string | null>(null);
 
   // ── Drag-to-scroll & tap-to-edit ────────────────────────
   const dragState = useRef<{ type: 'hour' | 'minute'; startY: number; accumulated: number; lastTime: number; speed: number } | null>(null);
@@ -429,6 +433,13 @@ export default function BookingPage() {
     return customMins >= shopHours.openMinutes && customMins <= latestStart;
   }, [customHour, customMinute, customAmPm, shopHours, totalDuration]);
 
+  // ── Fetch the earliest available time (computed live, no fixed slots) ──
+  const fetchNextSlot = useCallback(async () => {
+    const slots = await getAvailableSlots(shopId, selectedDate, totalDuration);
+    setAvailableSlots(slots);
+    return slots;
+  }, [shopId, selectedDate, totalDuration]);
+
   useEffect(() => {
     if (selectedServiceIds.size === 0) {
       setAvailableSlots([]);
@@ -438,15 +449,80 @@ export default function BookingPage() {
     setIsLoadingSlots(true);
     setSelectedTime("");
     (async () => {
-      const slots = await getAvailableSlots(shopId, selectedDate, totalDuration);
-      setAvailableSlots(slots);
+      const slots = await fetchNextSlot();
       setIsLoadingSlots(false);
       const pending = loadPendingBooking(shopId);
       if (pending?.time && slots.includes(pending.time)) {
         setSelectedTime(pending.time);
       }
     })();
-  }, [selectedServiceIds, selectedDate, shopId, totalDuration]);
+  }, [selectedServiceIds, selectedDate, shopId, totalDuration, fetchNextSlot]);
+
+  // ── Keep "Next Schedule" dynamic: refresh every 30s while the Next
+  //    Schedule tab is open, so the time follows the real clock and any
+  //    booking made meanwhile (no page refresh needed) ────────────────
+  useEffect(() => {
+    if (!showTimePicker || timeMode !== "available" || selectedServiceIds.size === 0) return;
+    fetchNextSlot();
+    const interval = setInterval(() => {
+      // Keep the date fresh too, so the schedule stays live across midnight.
+      // If the day changed, the effect re-runs and fetches with the new date;
+      // otherwise just refresh the next-slot time.
+      const date = getKolkataDateString();
+      if (date !== selectedDate) setSelectedDate(date);
+      else fetchNextSlot();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [showTimePicker, timeMode, selectedServiceIds, selectedDate, shopId, totalDuration, fetchNextSlot]);
+
+  // ── Keep "Custom Time" live too: validate the picked time against the
+  //    real schedule (past / outside hours / already booked), refresh every
+  //    30s while the tab is open, and offer the next free slot as a quick
+  //    fix. If the picker re-opens with a new date the check re-runs. ─────
+  const customCheckSeq = useRef(0);
+  const checkCustomTime = useCallback(async (silent = false) => {
+    if (selectedServiceIds.size === 0 || !isCustomTimeValid) {
+      customCheckSeq.current += 1; // invalidate any in-flight check
+      setCustomStatus('idle');
+      setCustomNextAvailable(null);
+      setCustomUnavailableReason(null);
+      return;
+    }
+    const seq = ++customCheckSeq.current;
+    // Silent background refreshes keep the last known status visible so the
+    // banner doesn't flicker to "Checking..." every 30s for no reason.
+    if (!silent) setCustomStatus('checking');
+    const res = await checkCustomTimeAvailability(
+      shopId,
+      selectedDate,
+      formatCustomTime(customHour, customMinute, customAmPm),
+      totalDuration
+    );
+    // Ignore stale responses — a newer check (time change, date rollover) won.
+    if (seq !== customCheckSeq.current) return;
+    setCustomStatus(res.available ? 'available' : 'unavailable');
+    setCustomNextAvailable(res.nextAvailable);
+    setCustomUnavailableReason(res.reason);
+  }, [shopId, selectedDate, customHour, customMinute, customAmPm, totalDuration, isCustomTimeValid, selectedServiceIds]);
+
+  useEffect(() => {
+    if (!showTimePicker || timeMode !== "custom" || selectedServiceIds.size === 0) return;
+    // Debounce the live check so rapid stepper drags don't fire a server
+    // call per step — only the settled time value gets validated.
+    const debounce = setTimeout(() => checkCustomTime(), 300);
+    const interval = setInterval(() => {
+      // Keep the date fresh too, so the check stays live across midnight.
+      // Background refreshes are silent — no "Checking..." flicker.
+      const date = getKolkataDateString();
+      if (date !== selectedDate) setSelectedDate(date);
+      else checkCustomTime(true);
+    }, 30000);
+    return () => {
+      clearTimeout(debounce);
+      clearInterval(interval);
+      customCheckSeq.current += 1; // invalidate any in-flight check on close/change
+    };
+  }, [showTimePicker, timeMode, selectedServiceIds, selectedDate, checkCustomTime]);
 
   const toggleService = (id: string) => {
     setSelectedServiceIds((prev) => {
@@ -498,6 +574,15 @@ export default function BookingPage() {
       });
     }
   }, [selectedServiceIds, selectedTime, shopId]);
+
+  // After a successful booking, move the user into the locked session screen.
+  useEffect(() => {
+    if (!showSuccess) return;
+    const t = setTimeout(() => {
+      router.push("/session");
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [showSuccess, router]);
 
   if (isLoadingShop) {
     return (
@@ -677,7 +762,7 @@ export default function BookingPage() {
             >
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("time")}</p>
               <p className={`text-sm font-bold flex items-center justify-center gap-1 ${selectedTime ? "text-violet-700" : "text-gray-400"}`}>
-                {isLoadingSlots ? translate("loading") : selectedTime ? selectedTime : selectedServiceIds.size === 0 ? translate("select") : translate("choose")}
+                {isLoadingSlots ? translate("loading") : selectedTime ? selectedTime : selectedServiceIds.size === 0 ? translate("select") : availableSlots.length > 0 ? availableSlots[0] : translate("choose")}
                 <Clock size={13} />
               </p>
             </button>
@@ -972,24 +1057,66 @@ export default function BookingPage() {
                     </div>
                   )}
 
+                  {/* Live availability status */}
+                  {isCustomTimeValid && customStatus !== 'idle' && (
+                    customStatus === 'checking' ? (
+                      <div className="text-xs text-gray-500 bg-gray-50 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>{translate("checkingAvailability")}</span>
+                      </div>
+                    ) : customStatus === 'available' ? (
+                      <div className="text-xs text-emerald-700 bg-emerald-50 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-center gap-2">
+                        <Check size={14} />
+                        <span>{translate("timeAvailable")}</span>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-600 bg-red-50 rounded-xl px-4 py-2.5 mb-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <X size={14} />
+                          <span>{customUnavailableReason === 'past' ? translate("timePassed") : translate("timeAlreadyBooked")}</span>
+                        </div>
+                        {customNextAvailable && (
+                          <button
+                            onClick={() => {
+                              const m = customNextAvailable.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                              if (m) {
+                                setCustomHour(parseInt(m[1], 10));
+                                setCustomMinute(parseInt(m[2], 10));
+                                setCustomAmPm(m[3].toUpperCase() as 'AM' | 'PM');
+                              }
+                            }}
+                            className="mt-2 w-full inline-flex items-center justify-center gap-1.5 font-semibold text-violet-700 hover:text-violet-800 active:text-violet-900 transition-colors"
+                          >
+                            <ChevronUp size={13} />
+                            {translate("useNextAvailable")} — {customNextAvailable}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  )}
+
                   {/* Select Button */}
                   <button
                     onClick={() => {
-                      if (!isCustomTimeValid) return;
+                      if (!isCustomTimeValid || customStatus !== 'available') return;
                       const time = formatCustomTime(customHour, customMinute, customAmPm);
                       setSelectedTime(time);
                       setShowTimePicker(false);
                     }}
-                    disabled={!isCustomTimeValid}
+                    disabled={!isCustomTimeValid || customStatus !== 'available'}
                     className={`w-full max-w-[240px] h-12 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
-                      isCustomTimeValid
+                      isCustomTimeValid && customStatus === 'available'
                         ? 'bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-violet-200'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    <Check size={16} />
-                    {isCustomTimeValid ? (
-                      <>{translate("select")} {formatCustomTime(customHour, customMinute, customAmPm)}</>
+                    {isCustomTimeValid && customStatus === 'available' ? (
+                      <>
+                        <Check size={16} />
+                        {translate("select")} {formatCustomTime(customHour, customMinute, customAmPm)}
+                      </>
+                    ) : isCustomTimeValid && customStatus !== 'unavailable' ? (
+                      <><Loader2 size={16} className="animate-spin" /> {translate("checkingAvailability")}</>
                     ) : (
                       <>{translate("unavailable")}</>
                     )}
@@ -1008,8 +1135,8 @@ export default function BookingPage() {
           time={selectedTime}
           onDone={() => {
             setShowSuccess(false);
-            // Full page navigation to ensure explore page fetches fresh booking data
-            window.location.href = "/explore";
+            // Move straight into the locked session screen
+            router.push("/session");
           }}
         />
       )}

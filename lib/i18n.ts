@@ -307,6 +307,83 @@ export const translations: Translations = {
     bn: '{open} থেকে {close} এর মধ্যে একটি সময় নির্বাচন করুন',
     hi: 'कृपया {open} और {close} के बीच एक समय चुनें',
   },
+  // Custom time live availability
+  timeAvailable: {
+    en: 'This time is available',
+    bn: 'এই সময়টি উপলব্ধ',
+    hi: 'यह समय उपलब्ध है',
+  },
+  timeAlreadyBooked: {
+    en: 'This time is already booked',
+    bn: 'এই সময়টি ইতিমধ্যে বুক করা',
+    hi: 'यह समय पहले से बुक है',
+  },
+  timePassed: {
+    en: 'This time has already passed',
+    bn: 'এই সময়টি ইতিমধ্যে পেরিয়ে গেছে',
+    hi: 'यह समय पहले ही बीत चुका है',
+  },
+  useNextAvailable: {
+    en: 'Use next available',
+    bn: 'পরবর্তী উপলব্ধ সময় ব্যবহার করুন',
+    hi: 'अगला उपलब्ध समय चुनें',
+  },
+  goToSession: {
+    en: 'Go to My Session',
+    bn: 'আমার সেশনে যান',
+    hi: 'मेरे सत्र पर जाएं',
+  },
+  // Locked session screen
+  sessionInProgress: {
+    en: 'Session in progress',
+    bn: 'সেশন চলছে',
+    hi: 'सत्र जारी है',
+  },
+  sessionEndsIn: {
+    en: 'Session ends in',
+    bn: 'সেশন শেষ হতে',
+    hi: 'सत्र समाप्त होने में',
+  },
+  totalDuration: {
+    en: 'Total duration',
+    bn: 'মোট সময়',
+    hi: 'कुल अवधि',
+  },
+  bookedServices: {
+    en: 'Booked services',
+    bn: 'বুক করা পরিষেবা',
+    hi: 'बुक की गई सेवाएं',
+  },
+  lockedNote: {
+    en: "You're locked in until your session ends",
+    bn: 'আপনার সেশন শেষ না হওয়া পর্যন্ত আপনি লকড',
+    hi: 'आपका सत्र समाप्त होने तक आप लॉक हैं',
+  },
+  sessionComplete: {
+    en: 'Session complete!',
+    bn: 'সেশন সম্পন্ন!',
+    hi: 'सत्र पूर्ण!',
+  },
+  sessionCompleteMsg: {
+    en: 'Thanks for visiting. Enjoy your new look!',
+    bn: 'ভিজিটের জন্য ধন্যবাদ। আপনার নতুন লুক উপভোগ করুন!',
+    hi: 'आने के लिए धन्यवाद। अपने नए लुक का आनंद लें!',
+  },
+  bookingCancelled: {
+    en: 'Booking cancelled',
+    bn: 'বুকিং বাতিল হয়েছে',
+    hi: 'बुकिंग रद्द',
+  },
+  bookingCancelledMsg: {
+    en: 'The shop cancelled this appointment. You can browse again.',
+    bn: 'দোকানটি এই অ্যাপয়েন্টমেন্ট বাতিল করেছে। আপনি আবার ব্রাউজ করতে পারেন।',
+    hi: 'दुकान ने यह अपॉइंटमेंट रद्द कर दिया। आप फिर से ब्राउज़ कर सकते हैं।',
+  },
+  continueExploring: {
+    en: 'Continue Exploring',
+    bn: 'অন্বেষণ চালিয়ে যান',
+    hi: 'खोज जारी रखें',
+  },
 };
 
 // Returns the translation for the given key and language.

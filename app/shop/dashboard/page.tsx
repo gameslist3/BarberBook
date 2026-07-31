@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide-react";
 import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { getKolkataDateString, getScheduleInfo, getOvertimeInfo, formatOvertime } from "@/lib/timeUtils";
 import { useLanguage } from "@/components/LanguageContext";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
 
 export default function ShopDashboard() {
   const { translate } = useLanguage();
@@ -14,6 +17,8 @@ export default function ShopDashboard() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
   const [, setTick] = useState(0);
+  const [todayStr, setTodayStr] = useState(() => getKolkataDateString());
+  const [rawBookings, setRawBookings] = useState<any[] | null>(null);
 
   // Refresh countdown and overtime timer every second
   useEffect(() => {
@@ -21,28 +26,78 @@ export default function ShopDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Keep today's date fresh so the list rolls over at midnight without a refresh
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const allBookings = await getShopBookings();
-        const todayStr = getKolkataDateString();
-        const filtered = allBookings.filter(
-          (b: any) =>
-            b.slotDate === todayStr &&
-            (b.status === "confirmed" || b.status === "pending") &&
-            b.slotStartTime // Make sure slotStartTime exists to prevent render crash
-        );
-        setTodaysBookings(filtered);
-      } catch (error) {
-        console.error("Failed to fetch today's bookings:", error);
-        setTodaysBookings([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+    const interval = setInterval(() => setTodayStr(getKolkataDateString()), 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  // Fetch the enriched booking list (user + service details) from the server action
+  const fetchBookings = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsLoading(true);
+    try {
+      const allBookings = await getShopBookings();
+      setRawBookings(allBookings);
+    } catch (error) {
+      console.error("Failed to fetch today's bookings:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Filter raw bookings down to today's confirmed/pending appointments
+  useEffect(() => {
+    if (!rawBookings) return;
+    const filtered = rawBookings.filter(
+      (b: any) =>
+        b.slotDate === todayStr &&
+        (b.status === "confirmed" || b.status === "pending") &&
+        b.slotStartTime // Make sure slotStartTime exists to prevent render crash
+    );
+    setTodaysBookings(filtered);
+  }, [rawBookings, todayStr]);
+
+  // Resolve the shop and keep the schedule realtime via a Firestore listener.
+  // The first snapshot performs the initial (loading) fetch; every later
+  // snapshot — e.g. a client booking a slot — refetches in the background so
+  // the new card appears instantly without refreshing the page.
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      let cancelled = false;
+      let unsubBookings: (() => void) | null = null;
+
+      (async () => {
+        try {
+          const shopQ = query(collection(db, "shops"), where("ownerId", "==", user.uid));
+          const shopSnap = await getDocs(shopQ);
+          if (shopSnap.empty) {
+            setIsLoading(false);
+            return;
+          }
+          const shopId = shopSnap.docs[0].id;
+
+          let isFirst = true;
+          const bookingsQ = query(collection(db, "bookings"), where("shopId", "==", shopId));
+          if (cancelled) return;
+          unsubBookings = onSnapshot(bookingsQ, () => {
+            fetchBookings(isFirst);
+            isFirst = false;
+          });
+        } catch (error) {
+          console.error("Failed to resolve shop:", error);
+          setIsLoading(false);
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+        unsubBookings?.();
+      };
+    });
+
+    return () => unsubAuth();
+  }, [fetchBookings]);
 
   const handleComplete = async (id: string) => {
     setProcessingId(id);

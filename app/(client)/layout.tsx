@@ -5,6 +5,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { getServerUser } from "@/lib/get-server-user";
 import { adminDb } from "@/lib/firebase-admin";
 import { ClientNotificationProvider } from "@/components/ClientNotificationProvider";
+import { SessionGuard } from "@/components/SessionGuard";
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const user = await getServerUser();
@@ -22,6 +23,7 @@ export default async function ClientLayout({ children }: { children: React.React
   return (
     <div className="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden w-full relative">
       <ClientNotificationProvider />
+      <SessionGuard />
       
       {/* Desktop Header */}
       <header className="bg-white border-b border-gray-200 shrink-0 z-50 relative hidden md:block animate-fadeIn">

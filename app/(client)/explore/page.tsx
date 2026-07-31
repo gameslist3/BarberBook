@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getAllActiveShops, getAvailableSlots } from "@/app/actions/client";
+import { getKolkataDateString } from "@/lib/timeUtils";
 import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell, ArrowLeft } from "lucide-react";
 import { SkeletonExploreList } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
@@ -118,8 +119,7 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
 
   useEffect(() => {
     const fetchSlots = async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const available = await getAvailableSlots(shop.id, today, 30);
+      const available = await getAvailableSlots(shop.id, getKolkataDateString(), 30);
       setSlots(available.slice(0, 5));
       setIsLoading(false);
     };
