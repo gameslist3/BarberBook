@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Scissors, CalendarCheck, Settings } from "lucide-react";
+import { LayoutDashboard, Scissors, CalendarCheck, Settings, History } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 
 interface ShopBottomNavProps {
@@ -17,6 +17,7 @@ export function ShopBottomNav({ newBookingCount = 0 }: ShopBottomNavProps) {
     { name: translate("dashboard"), href: "/shop/dashboard", icon: LayoutDashboard },
     { name: translate("services"), href: "/shop/services", icon: Scissors },
     { name: translate("bookings"), href: "/shop/bookings", icon: CalendarCheck, badge: newBookingCount },
+    { name: translate("history"), href: "/shop/history", icon: History },
     { name: translate("settings"), href: "/shop/settings", icon: Settings },
   ];
 

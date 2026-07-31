@@ -264,6 +264,11 @@ export const translations: Translations = {
     bn: 'আমার পরিষেবা',
     hi: 'मेरी सेवाएं',
   },
+  history: {
+    en: 'History',
+    bn: 'ইতিহাস',
+    hi: 'इतिहास',
+  },
   // Time picker modes
   nextSchedule: {
     en: 'Next Schedule',

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Store, Users, Calendar, LogOut, Bell, Menu, X, User, Shield } from "lucide-react";
+import { LayoutDashboard, Store, Users, Calendar, History, LogOut, Bell, Menu, X, User, Shield } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signOut as firebaseSignOut } from "firebase/auth";
 import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
@@ -71,6 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Shop Accounts", href: "/admin/shops", icon: Store },
     { name: "All Users", href: "/admin/users", icon: Users },
     { name: "All Bookings", href: "/admin/bookings", icon: Calendar },
+    { name: "History", href: "/admin/history", icon: History },
   ];
 
   const currentPageName = navItems.find(i => i.href === pathname)?.name || "Admin Portal";

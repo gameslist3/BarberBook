@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, X, User, Store } from "lucide-react";
+import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, X, User, Store, History } from "lucide-react";
 import { TopNavigation } from "@/components/TopNavigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
@@ -144,6 +144,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     { name: "Dashboard", href: "/shop/dashboard", icon: LayoutDashboard },
     { name: "My Services", href: "/shop/services", icon: Scissors },
     { name: "Bookings", href: "/shop/bookings", icon: CalendarCheck },
+    { name: "History", href: "/shop/history", icon: History },
     { name: "Settings", href: "/shop/settings", icon: Settings },
   ];
 
@@ -298,7 +299,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             height={32}
             className="notranslate rounded-lg shrink-0"
           />
-          <span className="hidden lg:block ml-3 font-bold text-lg tracking-tight">Barber Portal</span>
+          <span className="hidden lg:block ml-3 font-bold text-lg tracking-tight">BarberBook</span>
         </div>
         <nav className="flex-1 py-6 px-2 lg:px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
@@ -335,7 +336,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <main className="hidden md:flex flex-1 overflow-y-auto bg-gray-50 flex-col relative">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
           <h1 className="text-xl font-semibold text-gray-800">
-            {navItems.find((i) => i.href === pathname)?.name || "Barber Portal"}
+            {navItems.find((i) => i.href === pathname)?.name || "BarberBook"}
           </h1>
           <TopNavigation serverRole="SHOP_OWNER" />
         </header>
