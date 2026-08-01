@@ -18,7 +18,7 @@ export interface HistoryBooking {
   shopId: string;
   shopName: string;
   userId: string;
-  user: { name: string; email: string; phone: string };
+  user: { name: string; email: string; phone: string; photoUrl: string };
   services: HistoryService[];
   totalPrice: number;
   totalDuration: number;
@@ -84,9 +84,16 @@ export async function getBookingHistory(params: {
       snapshot = await adminDb.collection("bookings").get();
     }
 
+    // History only ever shows finished schedules — Completed or Cancelled.
+    // Upcoming/confirmed bookings belong on the Bookings screen, never here.
     const filteredDocs = snapshot.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((b: any) => b.slotDate >= params.startDate && b.slotDate <= params.endDate);
+      .filter(
+        (b: any) =>
+          b.slotDate >= params.startDate &&
+          b.slotDate <= params.endDate &&
+          (b.status === "completed" || b.status === "cancelled")
+      );
 
     // Batch-load referenced users + services + shops (no N+1)
     const userIds = [...new Set(filteredDocs.map((b) => b.userId).filter(Boolean))] as string[];
@@ -138,6 +145,7 @@ export async function getBookingHistory(params: {
           name: userData.name || "Unknown",
           email: userData.email || "",
           phone: userData.phone || "",
+          photoUrl: userData.photoUrl || "",
         },
         services,
         totalPrice: services.reduce((sum: number, s) => sum + s.price, 0),

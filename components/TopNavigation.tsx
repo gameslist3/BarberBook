@@ -1,63 +1,70 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Bell, Settings, X, User, Trash2, Store, CreditCard, Shield, LogOut, ArrowLeftRight } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Bell, Settings, User, Trash2, Store, CreditCard, Shield, LogOut } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signOut as firebaseSignOut, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useBookingNotifications, type NotifItem } from "./useBookingNotifications";
+import { NotificationsPanel } from "./NotificationsPanel";
 
 interface TopNavigationProps {
   serverRole?: string;
-  hasMultipleRoles?: boolean;
 }
 
-export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationProps) {
+export function TopNavigation({ serverRole }: TopNavigationProps) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { translate } = useLanguage();
 
+  // Live notifications — only new booking events (confirmed / cancelled),
+  // newest first, dismissed notifications stay dismissed after "Clear all".
+  // Memoized so the snapshot listener doesn't re-subscribe on every render.
+  const bookingsQuery = useMemo(
+    () =>
+      user
+        ? query(collection(db, "bookings"), where("userId", "==", user.uid))
+        : null,
+    [user]
+  );
+  const { notifications, clearAll } = useBookingNotifications(
+    bookingsQuery,
+    (b: any, changeType, docId) => {
+      if (b.status === "cancelled") {
+        return {
+          id: `${docId}:cancelled`,
+          title: translate("bookingCancelled") || "Booking Cancelled",
+          message: `Your booking on ${b.slotDate} at ${b.slotStartTime} was cancelled.`,
+          time: `${b.slotDate || ""} • ${b.slotStartTime || ""}`,
+          type: "danger",
+        } as NotifItem;
+      }
+      if (changeType === "added" && b.status === "confirmed") {
+        return {
+          id: `${docId}:confirmed`,
+          title: translate("bookingConfirmed") || "Booking Confirmed",
+          message: `You have an appointment on ${b.slotDate} at ${b.slotStartTime}.`,
+          time: `${b.slotDate || ""} • ${b.slotStartTime || ""}`,
+          type: "success",
+        } as NotifItem;
+      }
+      return null;
+    },
+    `bb_client_notifs_${user?.uid || "anon"}`
+  );
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    
-    // Listen to user's bookings to generate notifications
-    const q = query(collection(db, "bookings"), where("userId", "==", user.uid));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const bks = snap.docs.map(d => d.data());
-      const notifs: any[] = [];
-      
-      bks.forEach((b: any) => {
-        if (b.status === "cancelled") {
-          notifs.push({
-            title: translate("bookingCancelled") || "Booking Cancelled",
-            message: `Your booking on ${b.slotDate} at ${b.slotStartTime} was cancelled.`,
-          });
-        } else if (b.status === "confirmed") {
-          notifs.push({
-            title: translate("bookingConfirmed") || "Booking Confirmed",
-            message: `You have an appointment on ${b.slotDate} at ${b.slotStartTime}.`,
-          });
-        }
-      });
-      // Reverse to show newest first conceptually
-      setNotifications(notifs.reverse().slice(0, 10));
-    });
-    
-    return () => unsubscribe();
-  }, [user, translate]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -105,11 +112,9 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
   // Build settings menu items based on role
   const settingsItems: { label: string; icon: any; onClick?: () => void; href?: string; danger?: boolean; divider?: boolean }[] = [];
 
+  // Everyone can edit their personal profile. Shop owners get both their own
+  // "Profile Info" entry (client area) and "Shop Info" (shop area).
   settingsItems.push({ label: "Profile Info", icon: User, href: "/profile" });
-
-  if (hasMultipleRoles) {
-    settingsItems.push({ label: "Switch Profile", icon: ArrowLeftRight, href: "/select-profile" });
-  }
 
   if (serverRole === "SHOP_OWNER") {
     settingsItems.push({ label: "Shop Info", icon: Store, href: "/shop/settings" });
@@ -118,6 +123,7 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
   if (serverRole === "ADMIN" || serverRole === "APP_OWNER") {
     settingsItems.push({ label: "Admin Panel", icon: Shield, href: "/admin/dashboard" });
   }
+
 
   // Just a divider before destructive actions
   settingsItems.push({ label: "", icon: CreditCard, divider: true, href: "" });
@@ -150,39 +156,13 @@ export function TopNavigation({ serverRole, hasMultipleRoles }: TopNavigationPro
         </button>
 
         {showNotifications && (
-          <div className="absolute right-0 top-12 w-[300px] sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999] overflow-hidden" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
-              <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
-              <div className="flex items-center gap-2">
-                {notifications.length > 0 && (
-                  <button
-                    onClick={() => setNotifications([])}
-                    className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-                <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600">
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-            <div className="max-h-80 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="p-8 text-center">
-                  <Bell size={28} className="mx-auto text-gray-200 mb-2" />
-                  <p className="text-sm text-gray-500">No notifications yet.</p>
-                  <p className="text-xs text-gray-400 mt-1">We'll let you know when something happens.</p>
-                </div>
-              ) : (
-                notifications.map((n: any, i: number) => (
-                  <div key={i} className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer">
-                    <p className="text-sm text-gray-800 font-medium">{n.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
-                  </div>
-                ))
-              )}
-            </div>
+          <div className="absolute right-0 top-12">
+            <NotificationsPanel
+              notifications={notifications}
+              onClearAll={clearAll}
+              onClose={() => setShowNotifications(false)}
+              accent="violet"
+            />
           </div>
         )}
       </div>

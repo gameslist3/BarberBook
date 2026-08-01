@@ -61,7 +61,7 @@ export function formatDisplayDate(iso: string): string {
 
 export function statusLabel(status: string): string {
   const map: Record<string, string> = {
-    confirmed: "Confirmed",
+    confirmed: "Booked",
     pending: "Pending",
     completed: "Completed",
     cancelled: "Cancelled",

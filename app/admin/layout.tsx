@@ -5,10 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Store, Users, Calendar, History, LogOut, Bell, Menu, X, User, Shield } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { signOut as firebaseSignOut } from "firebase/auth";
-import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
-import { useState, useEffect, useRef } from "react";
+import { collection, query, orderBy, limit } from "firebase/firestore";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { TopNavigation } from "@/components/TopNavigation";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useBookingNotifications, type NotifItem } from "@/components/useBookingNotifications";
+import { NotificationsPanel } from "@/components/NotificationsPanel";
 import Image from "next/image";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -17,34 +19,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationList, setNotificationList] = useState<{ message: string; time: string }[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Listen for recent bookings for admin notifications
-  useEffect(() => {
-    const q = query(
-      collection(db, "bookings"),
-      orderBy("createdAt", "desc"),
-      limit(10)
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        const items = snap.docs.map((d) => d.data());
-        const notifs = items.map((b: any) => ({
+  // Listen for recent bookings for admin notifications (newest first, and
+  // dismissed notifications stay dismissed after "Clear all").
+  const bookingsQuery = useMemo(
+    () => query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10)),
+    []
+  );
+  const { notifications: notificationList, clearAll: clearNotifications } = useBookingNotifications(
+    bookingsQuery,
+    (b: any, changeType, docId) => {
+      if (changeType === "added") {
+        return {
+          id: `${docId}:${b.status || "new"}`,
+          title: "New Booking",
           message: `New booking${b.status ? ` (${b.status})` : ""} at ${b.slotStartTime || "-"}`,
           time: b.slotDate || "-",
-        }));
-        setNotificationList(notifs);
-      },
-      (err) => {
-        console.warn("Failed to load admin notifications:", err.message);
+          type: "booking",
+        } as NotifItem;
       }
-    );
-    return () => unsubscribe();
-  }, []);
+      return null;
+    },
+    "bb_admin_notifs"
+  );
 
   const handleSignOut = async () => {
     await firebaseSignOut(auth);
@@ -104,38 +104,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 )}
               </button>
               {showNotifications && (
-                <div className="absolute right-0 top-11 w-[300px] bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
-                    <div className="flex items-center gap-2">
-                      {notificationList.length > 0 && (
-                        <button
-                          onClick={() => setNotificationList([])}
-                          className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
-                        >
-                          Clear all
-                        </button>
-                      )}
-                      <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600">
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    {notificationList.length === 0 ? (
-                      <div className="p-8 text-center">
-                        <Bell size={28} className="mx-auto text-gray-200 mb-2" />
-                        <p className="text-sm text-gray-500">No notifications yet.</p>
-                      </div>
-                    ) : (
-                      notificationList.map((n, i) => (
-                        <div key={i} className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                          <p className="text-sm text-gray-800 font-medium">{n.message}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{n.time}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                <div className="absolute right-0 top-11">
+                  <NotificationsPanel
+                    notifications={notificationList}
+                    onClearAll={clearNotifications}
+                    onClose={() => setShowNotifications(false)}
+                    accent="indigo"
+                  />
                 </div>
               )}
             </div>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Clock, Users, X, Loader2, User, Shield, Power, PowerOff, Trash2 } from "lucide-react";
+import { Mail, Clock, Users, X, Loader2, Shield, Power, PowerOff, Trash2 } from "lucide-react";
 import { toggleUserStatus, deleteUserAccount } from "@/app/actions/admin";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "./UserAvatar";
 
 const roleConfig: Record<string, { label: string; color: string; bg: string }> = {
   ADMIN: { label: "Admin", color: "text-purple-700", bg: "bg-purple-50" },
@@ -94,9 +95,11 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                   {/* User Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0 text-sm">
-                        {u.name?.charAt(0)?.toUpperCase() || "U"}
-                      </div>
+                      <UserAvatar
+                        user={u}
+                        className="w-10 h-10 rounded-full"
+                        fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-sm"
+                      />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{u.name || "Unknown"}</p>
                         <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
@@ -148,9 +151,11 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                     <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0">
-                            {u.name?.charAt(0) || 'U'}
-                          </div>
+                          <UserAvatar
+                            user={u}
+                            className="w-10 h-10 rounded-full"
+                            fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-sm"
+                          />
                           <div>
                             <div className="font-semibold text-gray-900">{u.name}</div>
                             <div className="text-sm text-gray-500 flex items-center gap-1">
@@ -196,9 +201,11 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
             <div className="p-5 space-y-5">
               {/* User Info */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0 text-lg">
-                  {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+                <UserAvatar
+                  user={selectedUser}
+                  className="w-12 h-12 rounded-full"
+                  fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-lg"
+                />
                 <div>
                   <p className="font-semibold text-gray-900 text-base">{selectedUser.name}</p>
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>

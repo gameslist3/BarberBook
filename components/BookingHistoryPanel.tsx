@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { getBookingHistory, deleteAnyBooking } from "@/app/actions/history";
 import { getShops } from "@/app/actions/shop";
+import { UserAvatar } from "./UserAvatar";
 import { getKolkataDateString } from "@/lib/timeUtils";
 import {
   buildExportRows,
@@ -512,10 +513,21 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                         </td>
                       )}
                       <td className="px-4 py-3">
-                        <p className="text-sm font-semibold text-gray-900">{b.user?.name || "Unknown"}</p>
-                        <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                          {isAdmin ? b.user?.email || b.user?.phone || "" : b.user?.phone || ""}
-                        </p>
+                        <div className="flex items-center gap-2.5">
+                          <UserAvatar
+                            user={b.user}
+                            className="w-8 h-8 rounded-full"
+                            fallbackClassName="bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs"
+                          />
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{b.user?.name || "Unknown"}</p>
+                            {isAdmin && (
+                              <p className="text-xs text-gray-400 truncate max-w-[160px]">
+                                {b.user?.email || b.user?.phone || ""}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm text-gray-700 max-w-[240px] truncate">
@@ -566,16 +578,18 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                   {/* Header: avatar + name | status */}
                   <div className="flex items-start justify-between mb-2.5">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm`}
-                      >
-                        {(b.user?.name || "U").charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar
+                        user={b.user}
+                        className="w-8 h-8 rounded-lg shadow-sm"
+                        fallbackClassName="bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs"
+                      />
                       <div className="min-w-0">
                         <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">{b.user?.name || "Unknown Client"}</p>
-                        <p className="text-[11px] text-gray-400 truncate">
-                          {isAdmin ? b.user?.email || b.user?.phone || "" : b.user?.phone || ""}
-                        </p>
+                        {isAdmin && (
+                          <p className="text-[11px] text-gray-400 truncate">
+                            {b.user?.email || b.user?.phone || ""}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">

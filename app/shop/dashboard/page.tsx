@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer, Phone } from "lucide-react";
 import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { getKolkataDateString, getScheduleInfo, getOvertimeInfo, formatOvertime } from "@/lib/timeUtils";
 import { useLanguage } from "@/components/LanguageContext";
+import { UserAvatar } from "@/components/UserAvatar";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
@@ -16,9 +17,10 @@ export default function ShopDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   const [todayStr, setTodayStr] = useState(() => getKolkataDateString());
   const [rawBookings, setRawBookings] = useState<any[] | null>(null);
+  const autoCompletedRef = useRef<Set<string>>(new Set());
 
   // Refresh countdown and overtime timer every second
   useEffect(() => {
@@ -31,6 +33,39 @@ export default function ShopDashboard() {
     const interval = setInterval(() => setTodayStr(getKolkataDateString()), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-complete any booking whose overtime exceeded 15 minutes.
+  // The 1-second tick keeps this check live without extra refetches; each id
+  // is only completed once thanks to autoCompletedRef.
+  useEffect(() => {
+    todaysBookings.forEach((booking: any) => {
+      if (autoCompletedRef.current.has(booking.id)) return;
+      const servicesList =
+        booking.services && booking.services.length > 0
+          ? booking.services
+          : [booking.service];
+      const totalDuration = servicesList.reduce(
+        (acc: number, s: any) => acc + (parseInt(s?.duration, 10) || 30),
+        0
+      ) || 30;
+      const { isOvertime, overtimeSeconds } = getOvertimeInfo(
+        booking.slotDate,
+        booking.slotStartTime,
+        totalDuration
+      );
+      if (isOvertime && overtimeSeconds > 15 * 60) {
+        autoCompletedRef.current.add(booking.id);
+        updateBookingStatus(booking.id, "completed").then((result) => {
+          if (result.success) {
+            setTodaysBookings((prev) => prev.filter((b) => b.id !== booking.id));
+          } else {
+            autoCompletedRef.current.delete(booking.id);
+          }
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todaysBookings, tick]);
 
   // Fetch the enriched booking list (user + service details) from the server action
   const fetchBookings = useCallback(async (showLoading = true) => {
@@ -195,19 +230,36 @@ export default function ShopDashboard() {
                   }`}
                 >
                   <div className="p-4 space-y-3">
-                    {/* ═══ ROW 1: User Name + Avatar | Scheduled Time ═══ */}
+                    {/* ═══ ROW 1: User Name + Avatar | Call icon + Scheduled Time ═══ */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-sm shrink-0 ring-2 ring-white shadow-sm">
-                          {(booking.user?.name || "U").charAt(0).toUpperCase()}
-                        </div>
-                        <p className="text-[15px] font-bold text-gray-900">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <UserAvatar
+                          user={booking.user}
+                          className="w-10 h-10 rounded-full ring-2 ring-white shadow-sm"
+                          fallbackClassName="bg-violet-100 text-violet-700 font-bold text-sm"
+                        />
+                        <p className="text-[15px] font-bold text-gray-900 truncate">
                           {booking.user?.name || "Unknown Client"}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-xl">
-                        <Clock size={14} />
-                        {booking.slotStartTime}
+                      <div className="flex items-center gap-2">
+                        {/* Call icon — dashboard only lists active (booked)
+                            schedules, so this is naturally hidden once the
+                            service is completed/cancelled. */}
+                        {booking.user?.phone && (
+                          <a
+                            href={`tel:${booking.user.phone}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 hover:text-emerald-700 active:scale-90 transition-all flex items-center justify-center shrink-0"
+                            title={`Call ${booking.user.name || "client"} at ${booking.user.phone}`}
+                          >
+                            <Phone size={15} />
+                          </a>
+                        )}
+                        <div className="flex items-center gap-1.5 text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1.5 rounded-xl">
+                          <Clock size={14} />
+                          {booking.slotStartTime}
+                        </div>
                       </div>
                     </div>
 

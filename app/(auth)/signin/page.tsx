@@ -36,15 +36,12 @@ export default function SignInPage() {
       
       // Fetch role to determine redirect
       const userDoc = await getDoc(doc(db, "users", uid));
-      if (userDoc.exists()) {
-          const role = userDoc.data().role;
-          if (role === "ADMIN") {
-              router.push("/admin/dashboard");
-          } else if (role === "SHOP_OWNER") {
-              router.push("/select-profile");
-          } else {
-              router.push("/explore");
-          }
+      const role = userDoc.exists() ? userDoc.data().role : "CLIENT";
+
+      if (role === "ADMIN") {
+          router.push("/admin/dashboard");
+      } else if (role === "SHOP_OWNER") {
+          router.push("/select-profile");
       } else {
           router.push("/explore");
       }

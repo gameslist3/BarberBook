@@ -25,7 +25,9 @@ export async function createShop(formData: any) {
     const userRef = adminDb.collection("users").doc(userId);
     batch.set(userRef, {
         name: owner,
-        email: email,
+        // Store lowercase so multi-role detection (query by canonical auth
+        // email) finds every profile linked to the same email.
+        email: (email || "").trim().toLowerCase(),
         role: "SHOP_OWNER",
         createdAt: new Date(),
     });

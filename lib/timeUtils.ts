@@ -41,7 +41,7 @@ export function getKolkataDateString() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
-function parseTimeToMinutes(timeStr: string): { hours: number; minutes: number } | null {
+export function parseTimeToMinutes(timeStr: string): { hours: number; minutes: number } | null {
   const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
   if (!match) return null;
 
@@ -53,6 +53,13 @@ function parseTimeToMinutes(timeStr: string): { hours: number; minutes: number }
   if (ampm === "AM" && hours === 12) hours = 0;
 
   return { hours, minutes };
+}
+
+/** Numeric minutes-of-day for a "h:mm AM/PM" style time — for reliable sorting. */
+export function timeToMinutes(timeStr?: string | null): number {
+  if (!timeStr) return 0;
+  const parsed = parseTimeToMinutes(timeStr);
+  return parsed ? parsed.hours * 60 + parsed.minutes : 0;
 }
 
 export function getOvertimeInfo(

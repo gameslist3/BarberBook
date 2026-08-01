@@ -4,8 +4,9 @@ import { useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, CheckCircle2, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { normalizePhone } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +16,7 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,8 +24,16 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
+
+    // Optional phone must be a valid 10-digit Indian mobile number.
+    const normalizedPhone = phone.trim() ? (normalizePhone(phone) ?? "") : "";
+    if (phone.trim() && !normalizedPhone) {
+      setError("Enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -36,7 +46,10 @@ export default function SignUpPage() {
       // Save user to Firestore
       await setDoc(doc(db, "users", user.uid), {
         name,
-        email,
+        // Store lowercase so multi-role detection (query by canonical auth
+        // email) finds every profile linked to the same email.
+        email: email.trim().toLowerCase(),
+        phone: normalizedPhone,
         role: "CLIENT", // Default role
         createdAt: serverTimestamp(),
       });
@@ -133,6 +146,25 @@ export default function SignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="phone">Phone Number <span className="text-gray-400 font-normal">(optional)</span></label>
+              <div className="relative mt-1">
+                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  className="flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  placeholder="+91 98765 43210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-gray-400">Shops can call you about your appointment.</p>
             </div>
 
             <div>

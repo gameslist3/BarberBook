@@ -2,25 +2,30 @@
 
 import { useState } from "react";
 import { Calendar, Clock, Store, User, ChevronDown, Filter, MapPin } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   all: { label: "All", color: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" },
-  confirmed: { label: "Confirmed", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
+  booked: { label: "Booked", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
   completed: { label: "Completed", color: "text-green-700", bg: "bg-green-50", dot: "bg-green-500" },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", dot: "bg-red-500" },
   pending: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", dot: "bg-amber-500" },
 };
 
+const getFilterKey = (status: string) => (status === "confirmed" ? "booked" : status);
+
 export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-  const filteredBookings = bookings.filter(
-    (b) => (statusFilter === "all" ? true : b.status === statusFilter)
-  );
+  const filteredBookings = bookings.filter((b) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "booked") return b.status === "confirmed" || b.status === "pending";
+    return b.status === statusFilter;
+  });
 
   const getStatusBadge = (status: string) => {
-    const config = statusConfig[status] || statusConfig.all;
+    const config = statusConfig[getFilterKey(status)] || statusConfig.all;
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.color}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
@@ -39,19 +44,22 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
 
         {/* Filter Pills - Desktop */}
         <div className="hidden md:flex items-center gap-2">
-          {Object.keys(statusConfig).map((key) => (
-            <button
-              key={key}
-              onClick={() => setStatusFilter(key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                statusFilter === key
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              {statusConfig[key].label}
-            </button>
-          ))}
+          {Object.entries(statusConfig).map(([key, config]) => {
+            const filterKey = getFilterKey(key);
+            return (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(filterKey)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  statusFilter === filterKey
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {config.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Filter Dropdown - Mobile */}
@@ -66,21 +74,24 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
           </button>
           {showFilterDropdown && (
             <div className="absolute right-0 top-10 w-40 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden animate-fadeIn">
-              {Object.entries(statusConfig).map(([key, config]) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setStatusFilter(key);
-                    setShowFilterDropdown(false);
-                  }}
-                  className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                    statusFilter === key ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${config.dot}`} />
-                  {config.label}
-                </button>
-              ))}
+              {Object.entries(statusConfig).map(([key, config]) => {
+                const filterKey = getFilterKey(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setStatusFilter(filterKey);
+                      setShowFilterDropdown(false);
+                    }}
+                    className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                      statusFilter === filterKey ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${config.dot}`} />
+                    {config.label}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -107,9 +118,11 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                   {/* Header Row */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold text-sm shrink-0">
-                        {(b.user?.name || "U").charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar
+                        user={b.user}
+                        className="w-9 h-9 rounded-full"
+                        fallbackClassName="bg-indigo-50 text-indigo-600 font-semibold text-sm"
+                      />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{b.user?.name || "Unknown Client"}</p>
                         <p className="text-xs text-gray-500">{b.user?.email || ""}</p>
@@ -172,11 +185,18 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-900 flex items-center gap-1">
-                            <User size={14} className="text-blue-600" /> {b.user?.name || 'Unknown Client'}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {b.user?.email}
+                        <div className="flex items-center gap-2.5">
+                          <UserAvatar
+                            user={b.user}
+                            className="w-9 h-9 rounded-full"
+                            fallbackClassName="bg-indigo-50 text-indigo-600 font-semibold text-sm"
+                          />
+                          <div>
+                            <div className="font-semibold text-gray-900">{b.user?.name || 'Unknown Client'}</div>
+                            <div className="text-sm text-gray-500">
+                              {b.user?.email}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">{getStatusBadge(b.status)}</td>

@@ -8,6 +8,7 @@ import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { Scissors, Clock, Lock, Check, X, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function parseTimeToMinutes(timeStr: string): number {
@@ -124,7 +125,10 @@ export default function SessionPage() {
     return () => clearInterval(id);
   }, [session, ended, unlock]);
 
-  // If the shop cancels the booking mid-session, unlock right away
+  // If the shop cancels OR completes the booking mid-session, unlock right away.
+  // "completed" fires when the shop owner taps Complete — the "Session in
+  // progress" screen ends immediately with the same completion animation as
+  // the countdown naturally finishing.
   useEffect(() => {
     if (!session) return;
     const unsubAuth = onAuthStateChanged(auth, (user) => {
@@ -135,6 +139,10 @@ export default function SessionPage() {
           const data = snap.data();
           if (data && data.status === "cancelled") {
             setCancelled(true);
+            setEnded(true);
+          } else if (data && data.status === "completed") {
+            unlock(); // remove the beforeunload trap immediately, no race
+            setCancelled(false);
             setEnded(true);
           }
         },
@@ -209,36 +217,51 @@ export default function SessionPage() {
   }
 
   // ── Session complete / cancelled → unlock ──────────────────
-  if (ended) {
-    return (
-      <div className="min-h-dvh bg-gradient-to-br from-violet-800 via-violet-900 to-purple-950 flex items-center justify-center px-6">
-        <div className="bg-white rounded-3xl p-8 mx-4 max-w-sm w-full text-center animate-popIn">
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 ${cancelled ? "bg-red-100" : "bg-green-100"}`}>
-            {cancelled ? (
-              <X size={34} className="text-red-500" />
-            ) : (
-              <Check size={34} className="text-green-600" strokeWidth={3} />
-            )}
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {cancelled ? translate("bookingCancelled") : translate("sessionComplete")}
-          </h2>
-          <p className="text-sm text-gray-500 mb-8">
-            {cancelled ? translate("bookingCancelledMsg") : translate("sessionCompleteMsg")}
-          </p>
-          <button
-            onClick={() => router.push("/explore")}
-            className="w-full h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 transition-all"
-          >
-            {translate("continueExploring")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // AnimatePresence cross-fades the live "Session in progress" screen out and
+  // pops the completion card in — used both for the natural countdown end and
+  // when the shop owner taps Complete.
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-violet-800 via-violet-900 to-purple-950 text-white flex flex-col items-center px-5 py-8 overflow-y-auto">
+    <AnimatePresence mode="wait">
+      {ended ? (
+        <motion.div
+          key="ended"
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="min-h-dvh bg-gradient-to-br from-violet-800 via-violet-900 to-purple-950 flex items-center justify-center px-6"
+        >
+          <div className="bg-white rounded-3xl p-8 mx-4 max-w-sm w-full text-center animate-popIn">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 ${cancelled ? "bg-red-100" : "bg-green-100"}`}>
+              {cancelled ? (
+                <X size={34} className="text-red-500" />
+              ) : (
+                <Check size={34} className="text-green-600" strokeWidth={3} />
+              )}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {cancelled ? translate("bookingCancelled") : translate("sessionComplete")}
+            </h2>
+            <p className="text-sm text-gray-500 mb-8">
+              {cancelled ? translate("bookingCancelledMsg") : translate("sessionCompleteMsg")}
+            </p>
+            <button
+              onClick={() => router.push("/explore")}
+              className="w-full h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 transition-all"
+            >
+              {translate("continueExploring")}
+            </button>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="live"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="min-h-dvh bg-gradient-to-br from-violet-800 via-violet-900 to-purple-950 text-white flex flex-col items-center px-5 py-8 overflow-y-auto"
+        >
       {/* ── LIVE badge + shop ──────────────────────────────── */}
       <div className="w-full max-w-sm flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -334,6 +357,8 @@ export default function SessionPage() {
         <Lock size={13} className="shrink-0" />
         {translate("lockedNote")}
       </p>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

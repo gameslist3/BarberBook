@@ -3,23 +3,14 @@ import Image from "next/image";
 import { TopNavigation } from "@/components/TopNavigation";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { getServerUser } from "@/lib/get-server-user";
-import { adminDb } from "@/lib/firebase-admin";
 import { ClientNotificationProvider } from "@/components/ClientNotificationProvider";
 import { SessionGuard } from "@/components/SessionGuard";
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const user = await getServerUser();
 
-  // Check if user has multiple roles (both CLIENT and SHOP_OWNER accounts)
-  let hasMultipleRoles = false;
-  if (user) {
-    try {
-      const usersSnapshot = await adminDb.collection("users").where("email", "==", user.email).get();
-      const roles = usersSnapshot.docs.map(d => d.data().role);
-      hasMultipleRoles = new Set(roles).size > 1;
-    } catch (_) {}
-  }
-
+  // Shop owners may also use the client area (explore, profile, booking) —
+  // the select-profile screen offers both entry points.
   return (
     <div className="bg-gray-50 h-[100dvh] flex flex-col overflow-hidden w-full relative">
       <ClientNotificationProvider />
@@ -39,7 +30,7 @@ export default async function ClientLayout({ children }: { children: React.React
             <span className="notranslate font-bold text-xl tracking-tight text-gray-900 hidden sm:block transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
           </Link>
           
-          <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
+          <TopNavigation serverRole={user?.role} />
         </div>
       </header>
       
@@ -56,7 +47,7 @@ export default async function ClientLayout({ children }: { children: React.React
             />
             <span className="notranslate text-base font-bold text-gray-900 tracking-tight transition-colors duration-300 group-hover:text-violet-600">BarberBook</span>
           </Link>
-          <TopNavigation serverRole={user?.role} hasMultipleRoles={hasMultipleRoles} />
+          <TopNavigation serverRole={user?.role} />
         </div>
       </header>
       

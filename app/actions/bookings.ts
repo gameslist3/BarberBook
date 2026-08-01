@@ -3,6 +3,10 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { getServerUser } from "@/lib/get-server-user";
 import { revalidatePath } from "next/cache";
+import { getOvertimeInfo } from "@/lib/timeUtils";
+
+/** Maximum overtime before a booking auto-completes (15 minutes). */
+const MAX_OVERTIME_SECONDS = 15 * 60;
 
 async function getShopForCurrentUser() {
   const user = await getServerUser();
@@ -60,6 +64,39 @@ export async function getShopBookings() {
         };
     }));
     
+    // ── Auto-complete bookings whose overtime exceeded 15 minutes ──────────
+    // The client cards show "Over Time" while the service runs; if the shop
+    // owner never taps Complete, the booking would stay open forever. Enforce
+    // a hard ceiling here: any confirmed/pending booking that ended more than
+    // 15 minutes ago is automatically marked completed.
+    const autoCompletedIds = new Set<string>();
+    for (const b of bookings) {
+      if (b.status !== "confirmed" && b.status !== "pending") continue;
+      const totalDuration = (b.services || []).reduce(
+        (acc: number, s: any) => acc + (parseInt(s.duration, 10) || 30),
+        0
+      ) || 30;
+      const { isOvertime, overtimeSeconds } = getOvertimeInfo(
+        b.slotDate,
+        b.slotStartTime,
+        totalDuration
+      );
+      if (isOvertime && overtimeSeconds > MAX_OVERTIME_SECONDS) {
+        autoCompletedIds.add(b.id);
+      }
+    }
+    if (autoCompletedIds.size > 0) {
+      await Promise.all(
+        [...autoCompletedIds].map((id) =>
+          adminDb.collection("bookings").doc(id).update({
+            status: "completed",
+            updatedAt: new Date(),
+            autoCompleted: true,
+          })
+        )
+      );
+    }
+
     // Sort in memory by slotDate then slotStartTime
     bookings.sort((a: any, b: any) => {
         if (a.slotDate === b.slotDate) {
@@ -68,7 +105,9 @@ export async function getShopBookings() {
         return a.slotDate.localeCompare(b.slotDate);
     });
     
-    return bookings;
+    return bookings.map((b: any) =>
+      autoCompletedIds.has(b.id) ? { ...b, status: "completed" } : b
+    );
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return [];

@@ -2,34 +2,27 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, X, User, Store, History } from "lucide-react";
+import { LayoutDashboard, Scissors, CalendarCheck, Settings, LogOut, Bell, User, Store, History } from "lucide-react";
 import { TopNavigation } from "@/components/TopNavigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { useState, useEffect, useRef } from "react";
+import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { ShopStatCards } from "@/components/ShopStatCards";
 import { ShopBottomNav } from "@/components/ShopBottomNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useBookingNotifications, type NotifItem } from "@/components/useBookingNotifications";
+import { NotificationsPanel } from "@/components/NotificationsPanel";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Reset new booking badge when visiting Bookings page
-  useEffect(() => {
-    if (pathname === "/shop/bookings") {
-      setNewBookingCount(0);
-    }
-  }, [pathname]);
-
   const [toasts, setToasts] = useState<{ id: string; message: string; type: "info" | "warning" | "success" }[]>([]);
   const [shopData, setShopData] = useState<any>(null);
   const [shopId, setShopId] = useState<string>("");
-  const [newBookingCount, setNewBookingCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationList, setNotificationList] = useState<{ message: string; time: string }[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -43,9 +36,61 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
     }, 5000);
   };
 
+  // Live new-booking notifications (newest first, dismissable via "Clear all").
+  // We build the query once the shop is resolved, then let the shared hook
+  // manage the list + seen-keys so cleared notifications never reappear.
+  // Memoized so the snapshot listener doesn't re-subscribe on every render.
+  const bookingsQuery = useMemo(
+    () => (shopId ? query(collection(db, "bookings"), where("shopId", "==", shopId)) : null),
+    [shopId]
+  );
+  const { notifications: notificationList, clearAll: clearNotifications } = useBookingNotifications(
+    bookingsQuery,
+    (b: any, changeType, docId) => {
+      if (changeType === "added" && (b.status === "confirmed" || b.status === "pending")) {
+        return {
+          id: `${docId}:new`,
+          title: "New Booking",
+          message: `New booking at ${b.slotStartTime}${b.status === "pending" ? " (pending)" : ""}`,
+          time: b.slotDate || "Today",
+          type: "booking",
+          meta: { slotStartTime: b.slotStartTime },
+        } as NotifItem;
+      }
+      return null;
+    },
+    `bb_shop_notifs_${shopId || "none"}`,
+    (n) => {
+      addToast(`New Booking Received for ${n.meta?.slotStartTime || "now"}!`, "success");
+    }
+  );
+  const newBookingCount = notificationList.length;
+
+  // Reset new booking badge when visiting Bookings page
+  useEffect(() => {
+    if (pathname === "/shop/bookings") {
+      clearNotifications();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Strict role separation: only shop owners may use /shop/* screens.
+        // A regular client who somehow lands here is sent back to explore.
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (!userDoc.exists() || userDoc.data()?.role !== "SHOP_OWNER") {
+            router.replace("/explore");
+            return;
+          }
+        } catch {
+          // If the role can't be read, don't let them into the shop area.
+          router.replace("/explore");
+          return;
+        }
+
         setUserEmail(user.email || "");
         const shopQ = query(collection(db, "shops"), where("ownerId", "==", user.uid));
         const unsubscribeShop = onSnapshot(shopQ, (snap) => {
@@ -53,49 +98,15 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
             const shop = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
             setShopData(shop);
             setShopId(shop.id);
-
-            // Monitor bookings for new booking badge and notifications
-            if (shop.isActive !== false) {
-              const bookingsQ = query(collection(db, "bookings"), where("shopId", "==", shop.id));
-              let isInitialRender = true;
-
-              const unsubscribeBookings = onSnapshot(bookingsQ, (snapshot) => {
-                if (isInitialRender) {
-                  isInitialRender = false;
-                  return;
-                }
-                snapshot.docChanges().forEach((change) => {
-                  if (change.type === "added") {
-                    const b = change.doc.data();
-                    // Only count confirmed/pending as new
-                    if (b.status === "confirmed" || b.status === "pending") {
-                      setNewBookingCount((prev) => prev + 1);
-                      setNotificationList((prev) => [
-                        {
-                          message: `New booking${b.status === "confirmed" ? " (confirmed)" : ""} at ${b.slotStartTime}`,
-                          time: b.slotDate || "Today",
-                        },
-                        ...prev,
-                      ].slice(0, 20));
-                      if (b.status === "confirmed") {
-                        addToast(`New Booking Received for ${b.slotStartTime}!`, "success");
-                      }
-                    }
-                  }
-                });
-              });
-              (window as any)._unsubscribeBookings = unsubscribeBookings;
-            }
           }
         });
         return () => {
           unsubscribeShop();
-          if ((window as any)._unsubscribeBookings) (window as any)._unsubscribeBookings();
         };
       }
     });
     return () => unsubscribeAuth();
-  }, []);
+  }, [router]);
 
   // Lunch time monitor
   useEffect(() => {
@@ -201,38 +212,16 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 )}
               </button>
               {showNotifications && (
-                <div className="absolute right-0 top-11 w-[300px] bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <h3 className="font-bold text-gray-900 text-sm">Bookings</h3>
-                    <div className="flex items-center gap-2">
-                      {notificationList.length > 0 && (
-                        <button
-                          onClick={() => setNotificationList([])}
-                          className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
-                        >
-                          Clear all
-                        </button>
-                      )}
-                      <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600">
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    {notificationList.length === 0 ? (
-                      <div className="p-8 text-center">
-                        <Bell size={28} className="mx-auto text-gray-200 mb-2" />
-                        <p className="text-sm text-gray-500">No new bookings yet.</p>
-                      </div>
-                    ) : (
-                      notificationList.map((n, i) => (
-                        <div key={i} className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                          <p className="text-sm text-gray-800 font-medium">{n.message}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{n.time}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                <div className="absolute right-0 top-11">
+                  <NotificationsPanel
+                    notifications={notificationList}
+                    onClearAll={clearNotifications}
+                    onClose={() => setShowNotifications(false)}
+                    title="New Bookings"
+                    emptyTitle="No new bookings yet."
+                    emptyMessage=""
+                    accent="violet"
+                  />
                 </div>
               )}
             </div>

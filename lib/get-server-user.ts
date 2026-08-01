@@ -10,16 +10,20 @@ export async function getServerUser() {
 
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
     
-    // Fetch role from Firestore
+    // Fetch role + editable profile fields from Firestore (the user doc is the
+    // source of truth for name/phone/photo so edits reflect everywhere).
     const userDoc = await adminDb.collection('users').doc(decodedClaims.uid).get();
-    const role = userDoc.exists ? userDoc.data()?.role : 'CLIENT';
+    const data = userDoc.exists ? userDoc.data() : {};
+    const role = userDoc.exists ? data?.role : 'CLIENT';
 
     return {
       id: decodedClaims.uid,
       email: decodedClaims.email,
-      name: decodedClaims.name,
+      name: data?.name || decodedClaims.name || "",
       role: role,
-      emailVerified: decodedClaims.email_verified
+      emailVerified: decodedClaims.email_verified,
+      phone: data?.phone || null,
+      photoUrl: data?.photoUrl || null,
     };
   } catch (error) {
     return null;
