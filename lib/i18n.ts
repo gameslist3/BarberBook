@@ -90,6 +90,26 @@ export const translations: Translations = {
     bn: 'শেষ হচ্ছে...',
     hi: 'पूरा हो रहा है...',
   },
+  markNotArrive: {
+    en: 'Not Arrive',
+    bn: 'উপস্থিত হননি',
+    hi: 'नहीं आया',
+  },
+  markingNotArrive: {
+    en: 'Marking Not Arrive...',
+    bn: 'চিহ্নিত হচ্ছে...',
+    hi: 'चिह्नित किया जा रहा है...',
+  },
+  notArriveConfirmTitle: {
+    en: 'Mark as Not Arrive?',
+    bn: 'উপস্থিত হননি হিসেবে চিহ্নিত করবেন?',
+    hi: 'नहीं आया के रूप में चिह्नित करें?',
+  },
+  notArriveConfirmMsg: {
+    en: 'The client did not arrive within the scheduled time. This will close their session and show the appointment as cancelled on their end.',
+    bn: 'নির্ধারিত সময়ে ক্লায়েন্ট আসেননি। এটি তাদের সেশন বন্ধ করবে এবং তাদের কাছে অ্যাপয়েন্টমেন্টটি বাতিল দেখাবে।',
+    hi: 'निर्धारित समय में ग्राहक नहीं आया। यह उनका सत्र बंद कर देगा और उनकी ओर से अपॉइंटमेंट रद्द दिखाएगा।',
+  },
   // Booking page specific
   bookAppointment: {
     en: 'Book Appointment',
@@ -388,6 +408,37 @@ export const translations: Translations = {
     en: 'Continue Exploring',
     bn: 'অন্বেষণ চালিয়ে যান',
     hi: 'खोज जारी रखें',
+  },
+  // Waiting state before the booked session starts
+  waitingForTurn: {
+    en: 'Your turn is coming',
+    bn: 'আপনার পালা আসছে',
+    hi: 'आपकी बारी आ रही है',
+  },
+  appointmentStartsAt: {
+    en: 'Your appointment starts at',
+    bn: 'আপনার অ্যাপয়েন্টমেন্ট শুরু হবে',
+    hi: 'आपका अपॉइंटमेंट शुरू होगा',
+  },
+  startsIn: {
+    en: 'Starts in',
+    bn: 'শুরু হবে',
+    hi: 'शुरू होने में',
+  },
+  appointmentUpcoming: {
+    en: 'Upcoming',
+    bn: 'আসন্ন',
+    hi: 'आगामी',
+  },
+  openInMaps: {
+    en: 'Open in Google Maps',
+    bn: 'গুগল ম্যাপে খুলুন',
+    hi: 'Google Maps में खोलें',
+  },
+  callShop: {
+    en: 'Call the shop',
+    bn: 'দোকানে কল করুন',
+    hi: 'दुकान को कॉल करें',
   },
 };
 

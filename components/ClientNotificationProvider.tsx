@@ -31,7 +31,7 @@ export function ClientNotificationProvider() {
                     snapshot.docChanges().forEach((change) => {
                         if (change.type === "modified") {
                             const b = change.doc.data();
-                            if (b.status === "cancelled") {
+                            if (b.status === "cancelled" || b.status === "no_show") {
                                 addToast(`Your booking on ${b.slotDate} at ${b.slotStartTime} has been cancelled by the shop.`);
                             }
                         }

@@ -7,6 +7,8 @@ import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
 import { TimeSelectDropdown } from "@/components/TimeSelectDropdown";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
+import { uploadImage } from "@/lib/uploadImage";
+import { SafeImage } from "@/components/SafeImage";
 
 export default function ShopSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -68,33 +70,21 @@ export default function ShopSettingsPage() {
     fetchProfile();
   }, []);
 
-  const uploadToCloudinary = async (file: Blob | File) => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      throw new Error("Cloudinary environment variables are missing.");
-    }
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", uploadPreset);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: "POST",
-      body: data,
-    });
-    if (!res.ok) throw new Error("Failed to upload image");
-    const json = await res.json();
-    return json.secure_url;
-  };
-
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Image must be less than 10MB.");
+        e.target.value = "";
+        return;
+      }
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         setImageSrc(reader.result?.toString() || null);
         setIsCropping(true);
       });
       reader.readAsDataURL(file);
+      e.target.value = "";
     }
   };
 
@@ -108,7 +98,7 @@ export default function ShopSettingsPage() {
       setIsUploadingLogo(true);
       const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
       if (croppedImageBlob) {
-        const url = await uploadToCloudinary(croppedImageBlob);
+        const url = await uploadImage(croppedImageBlob);
         setFormData((prev) => ({ ...prev, logoUrl: url }));
       }
     } catch (e: any) {
@@ -123,9 +113,15 @@ export default function ShopSettingsPage() {
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     try {
-      setIsUploadingGallery(true);
       const file = e.target.files[0];
-      const url = await uploadToCloudinary(file);
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Image must be less than 10MB.");
+        e.target.value = "";
+        return;
+      }
+      setIsUploadingGallery(true);
+      setError("");
+      const url = await uploadImage(file);
       setFormData((prev) => ({ ...prev, images: [...prev.images, url] }));
     } catch (e: any) {
       setError(e.message || "Failed to upload gallery image.");
@@ -350,7 +346,12 @@ export default function ShopSettingsPage() {
             {/* Logo Preview */}
             {formData.logoUrl ? (
               <div className="relative w-20 h-20 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-sm">
-                <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                <SafeImage
+                  src={formData.logoUrl}
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                  fallback={<ImageIcon className="text-gray-300 w-7 h-7" />}
+                />
               </div>
             ) : (
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
@@ -383,7 +384,12 @@ export default function ShopSettingsPage() {
                 key={idx}
                 className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 shadow-sm group"
               >
-                <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                <SafeImage
+                  src={img}
+                  alt={`Gallery ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  fallback={<ImageIcon className="text-gray-300 w-6 h-6" />}
+                />
                 <button
                   type="button"
                   onClick={() => removeGalleryImage(idx)}

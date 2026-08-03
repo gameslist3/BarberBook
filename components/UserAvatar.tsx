@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 
 interface UserAvatarProps {
   user?: { name?: string; photoUrl?: string; photoURL?: string } | null;
@@ -22,16 +23,18 @@ export function UserAvatar({
 }: UserAvatarProps) {
   const photoUrl = user?.photoUrl || user?.photoURL || "";
   const name = user?.name || "U";
+  const [failed, setFailed] = useState(false);
 
   return (
     <div className={`relative overflow-hidden shrink-0 ${className}`}>
-      {photoUrl ? (
+      {photoUrl && !failed ? (
         <Image
           src={photoUrl}
           alt={name}
           fill
           sizes="96px"
           className="object-cover"
+          onError={() => setFailed(true)}
         />
       ) : (
         <div className={`flex h-full w-full items-center justify-center ${fallbackClassName}`}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Camera, Loader2, Trash2, X } from "lucide-react";
 import { db, auth } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
+import { uploadImage } from "@/lib/uploadImage";
 
 export function ProfilePhotoManager({ user }: { user: any }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -26,26 +27,15 @@ export function ProfilePhotoManager({ user }: { user: any }) {
   // The user.photoUrl is fetched from the server (and live-updates via the
   // parent's onSnapshot, so the new photo shows right after saving).
   const photoUrl = user.photoUrl || user.photoURL || null;
+  const [photoFailed, setPhotoFailed] = useState(false);
 
-  // Upload an image to Cloudinary (same approach as the shop logo/gallery).
-  // Returns the secure URL to store on the user doc.
-  const uploadToCloudinary = async (file: Blob | File) => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloudName || !uploadPreset) {
-      throw new Error("Cloudinary environment variables are missing.");
-    }
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", uploadPreset);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: "POST",
-      body: data,
-    });
-    if (!res.ok) throw new Error("Failed to upload image");
-    const json = await res.json();
-    return json.secure_url as string;
-  };
+  // Reset the fallback state whenever the URL changes (new upload / removal).
+  const displayUrl = photoUrl || null;
+  const showImage = displayUrl && !photoFailed;
+
+  useEffect(() => {
+    setPhotoFailed(false);
+  }, [photoUrl]);
 
   const handleRemovePhoto = async () => {
     if (!photoUrl || isUploading || isRemoving) return;
@@ -109,7 +99,8 @@ export function ProfilePhotoManager({ user }: { user: any }) {
       if (!croppedImageBlob) throw new Error("Failed to crop image");
 
       // Upload the cropped image to Cloudinary
-      const downloadURL = await uploadToCloudinary(croppedImageBlob);
+      const downloadURL = await uploadImage(croppedImageBlob);
+      setPhotoFailed(false);
 
       // Update Firestore
       await updateDoc(doc(db, "users", user.id), {
@@ -139,8 +130,14 @@ export function ProfilePhotoManager({ user }: { user: any }) {
   return (
     <div className="relative group shrink-0">
       <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-3xl overflow-hidden border-4 border-white shadow-sm ring-1 ring-gray-100 relative">
-        {photoUrl ? (
-          <Image src={photoUrl} alt="Profile" fill className="object-cover" />
+        {showImage ? (
+          <Image
+            src={displayUrl as string}
+            alt="Profile"
+            fill
+            className="object-cover"
+            onError={() => setPhotoFailed(true)}
+          />
         ) : (
           user.name?.charAt(0) || "U"
         )}

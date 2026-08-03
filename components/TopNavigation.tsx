@@ -38,7 +38,7 @@ export function TopNavigation({ serverRole }: TopNavigationProps) {
   const { notifications, clearAll } = useBookingNotifications(
     bookingsQuery,
     (b: any, changeType, docId) => {
-      if (b.status === "cancelled") {
+      if (b.status === "cancelled" || b.status === "no_show") {
         return {
           id: `${docId}:cancelled`,
           title: translate("bookingCancelled") || "Booking Cancelled",

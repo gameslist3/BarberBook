@@ -209,6 +209,8 @@ export async function getActiveSession() {
               id: data.shopId,
               shopName: shop.shopName || "",
               logoUrl: shop.logoUrl || null,
+              phone: shop.phone || "",
+              googleMapLink: shop.googleMapLink || "",
             },
             services,
             totalDuration: duration,

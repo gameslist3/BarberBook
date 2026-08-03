@@ -65,6 +65,7 @@ export function statusLabel(status: string): string {
     pending: "Pending",
     completed: "Completed",
     cancelled: "Cancelled",
+    no_show: "Not Arrive",
   };
   return map[status] || status || "Unknown";
 }

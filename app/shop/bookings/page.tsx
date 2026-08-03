@@ -12,6 +12,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
   booked: { label: "Booked", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
   completed: { label: "Completed", color: "text-violet-700", bg: "bg-violet-50", dot: "bg-violet-500" },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", dot: "bg-red-500" },
+  no_show: { label: "Not Arrive", color: "text-orange-700", bg: "bg-orange-50", dot: "bg-orange-500" },
   pending: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", dot: "bg-amber-500" },
 };
 
@@ -56,7 +57,7 @@ export default function ShopBookingsPage() {
       };
       if (sortBy === "newest") return cmp(b, a);
       if (sortBy === "oldest") return cmp(a, b);
-      const priority: any = { confirmed: 1, pending: 2, completed: 3, cancelled: 4 };
+      const priority: any = { confirmed: 1, pending: 2, completed: 3, cancelled: 4, no_show: 5 };
       return (priority[a.status] || 99) - (priority[b.status] || 99);
     });
 

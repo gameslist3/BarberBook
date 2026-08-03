@@ -6,6 +6,7 @@ import { getShopDetails } from "@/app/actions/client";
 import { Scissors, MapPin, Clock, ChevronLeft, Phone, Calendar, Star, Map as MapIcon } from "lucide-react";
 import { SkeletonShopDetail } from "@/components/Skeleton";
 import Link from "next/link";
+import { SafeImage } from "@/components/SafeImage";
 
 function formatDuration(mins: number) {
   const h = Math.floor(mins / 60);
@@ -64,10 +65,11 @@ export default function ShopDetailsPage() {
         {/* Cover */}
         <div className="relative h-36 sm:h-48 w-full overflow-hidden bg-gradient-to-br from-violet-900 to-indigo-800">
           {shop.logoUrl && (
-            <img
+            <SafeImage
               src={shop.logoUrl}
               alt={shop.shopName}
               className="notranslate absolute inset-0 w-full h-full object-cover opacity-40"
+              fallback={null}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -75,7 +77,7 @@ export default function ShopDetailsPage() {
           {/* Logo floating */}
           {shop.logoUrl && (
             <div className="absolute bottom-3 left-4 w-14 h-14 rounded-2xl border-2 border-white/60 overflow-hidden shadow-lg bg-white">
-              <img src={shop.logoUrl} alt="" className="w-full h-full object-cover" />
+              <SafeImage src={shop.logoUrl} alt="" className="w-full h-full object-cover" fallback={null} />
             </div>
           )}
           <div className="absolute bottom-3 right-4 flex gap-2">
@@ -169,10 +171,15 @@ export default function ShopDetailsPage() {
                   key={idx}
                   className="snap-start shrink-0 w-48 h-32 rounded-xl overflow-hidden border border-gray-100 bg-gray-50"
                 >
-                  <img
+                  <SafeImage
                     src={img}
                     alt={`${shop.shopName} ${idx + 1}`}
                     className="notranslate w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    fallback={
+                      <div className="flex items-center justify-center w-full h-full">
+                        <Scissors size={20} className="text-gray-300" />
+                      </div>
+                    }
                   />
                 </div>
               ))}

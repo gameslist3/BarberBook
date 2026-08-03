@@ -12,6 +12,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useLanguage } from "@/components/LanguageContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { SafeImage } from "@/components/SafeImage";
 
 // ─── Helper: check if booking time hasn't passed yet ────────────
 function isBookingStillActive(slotDate: string, slotStartTime: string): boolean {
@@ -136,11 +137,12 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
-              {shop.logoUrl ? (
-                <img src={shop.logoUrl} alt={shop.shopName} className="notranslate w-full h-full object-cover" />
-              ) : (
-                <Scissors className="h-6 w-6 text-violet-500" />
-              )}
+              <SafeImage
+                src={shop.logoUrl}
+                alt={shop.shopName}
+                className="notranslate w-full h-full object-cover"
+                fallback={<Scissors className="h-6 w-6 text-violet-500" />}
+              />
             </div>
             <div className="min-w-0">
               <h3 className="notranslate text-[17px] font-bold text-gray-900 truncate">{shop.shopName}</h3>
@@ -446,11 +448,12 @@ export default function ExplorePage() {
                   </button>
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
-                      {expandedShop.logoUrl ? (
-                        <img src={expandedShop.logoUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <Scissors size={16} className="text-violet-500" />
-                      )}
+                      <SafeImage
+                        src={expandedShop.logoUrl}
+                        alt={expandedShop.shopName}
+                        className="w-full h-full object-cover"
+                        fallback={<Scissors size={16} className="text-violet-500" />}
+                      />
                     </div>
                     <h3 className="text-[17px] font-bold text-gray-900 truncate notranslate">{expandedShop.shopName}</h3>
                   </div>

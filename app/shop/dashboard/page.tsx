@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer, Phone } from "lucide-react";
+import { Clock, Check, X, Loader2, CalendarCheck, Scissors, Timer, Phone, UserX } from "lucide-react";
 import { SkeletonBookingCard } from "@/components/Skeleton";
 import { getShopBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { getKolkataDateString, getScheduleInfo, getOvertimeInfo, formatOvertime } from "@/lib/timeUtils";
@@ -17,6 +17,7 @@ export default function ShopDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
+  const [noShowModalId, setNoShowModalId] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const [todayStr, setTodayStr] = useState(() => getKolkataDateString());
   const [rawBookings, setRawBookings] = useState<any[] | null>(null);
@@ -158,6 +159,21 @@ export default function ShopDashboard() {
     setCancelModalId(null);
   };
 
+  // Mark a started appointment as a no-show: the client never arrived, so the
+  // booking ends and shows up as cancelled on the client's locked session screen.
+  const handleConfirmNoShow = async () => {
+    if (!noShowModalId) return;
+    setProcessingId(noShowModalId);
+    const result = await updateBookingStatus(noShowModalId, "no_show");
+    if (result.success) {
+      setTodaysBookings((prev) => prev.filter((b) => b.id !== noShowModalId));
+    } else {
+      alert("Failed to mark as not arrive: " + result.error);
+    }
+    setProcessingId(null);
+    setNoShowModalId(null);
+  };
+
   const formatDuration = (mins: number) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
@@ -288,20 +304,35 @@ export default function ShopDashboard() {
                       )}
                     </div>
 
-                    {/* ═══ ROW 3: Complete / Cancel Buttons ═══ */}
+                    {/* ═══ ROW 3: Complete / Not Arrive / Cancel Buttons ═══ */}
                     {hasStarted ? (
-                      <button
-                        onClick={() => handleComplete(booking.id)}
-                        disabled={processingId === booking.id}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-violet-200"
-                      >
-                        {processingId === booking.id ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <Check size={18} />
-                        )}
-                        {processingId === booking.id ? translate("completing") : translate("completeAppointment")}
-                      </button>
+                      <div className="flex gap-2.5">
+                        <button
+                          onClick={() => handleComplete(booking.id)}
+                          disabled={processingId === booking.id}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-violet-200"
+                        >
+                          {processingId === booking.id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <Check size={16} />
+                          )}
+                          {processingId === booking.id ? translate("completing") : translate("completeAppointment")}
+                        </button>
+                        <button
+                          onClick={() => setNoShowModalId(booking.id)}
+                          disabled={processingId === booking.id}
+                          title="Client did not arrive"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-semibold hover:bg-amber-100 active:bg-amber-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {processingId === booking.id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <UserX size={16} />
+                          )}
+                          {processingId === booking.id ? translate("markingNotArrive") : translate("markNotArrive")}
+                        </button>
+                      </div>
                     ) : (
                       <div className="flex gap-2.5">
                         <button
@@ -329,6 +360,40 @@ export default function ShopDashboard() {
           </div>
         )}
       </div>
+
+      {/* Not Arrive Confirmation Modal */}
+      {noShowModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4">
+              <UserX size={22} />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{translate("notArriveConfirmTitle")}</h3>
+            <p className="text-sm text-gray-600 text-center mb-6">{translate("notArriveConfirmMsg")}</p>
+            <div className="flex items-center gap-3 w-full">
+              <button
+                onClick={() => setNoShowModalId(null)}
+                disabled={processingId === noShowModalId}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+              >
+                Keep it
+              </button>
+              <button
+                onClick={handleConfirmNoShow}
+                disabled={processingId === noShowModalId}
+                className="flex-1 px-4 py-2.5 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 text-sm"
+              >
+                {processingId === noShowModalId ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <UserX size={16} />
+                )}
+                {processingId === noShowModalId ? translate("markingNotArrive") : translate("markNotArrive")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Confirmation Modal */}
       {cancelModalId && (

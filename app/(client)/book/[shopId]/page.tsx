@@ -13,6 +13,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
+import { SafeImage } from "@/components/SafeImage";
 
 // ─── Success overlay ─────────────────────────────────────────────
 function BookingSuccess({ shopName, time, onDone }: {
@@ -629,11 +630,12 @@ export default function BookingPage() {
           <div className="bg-white px-4 sm:px-6 py-3.5 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
-                {shop.logoUrl ? (
-                  <img src={shop.logoUrl} alt={shop.shopName} className="notranslate w-full h-full object-cover" />
-                ) : (
-                  <Scissors size={22} className="text-violet-500" />
-                )}
+                <SafeImage
+                  src={shop.logoUrl}
+                  alt={shop.shopName}
+                  className="notranslate w-full h-full object-cover"
+                  fallback={<Scissors size={22} className="text-violet-500" />}
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="notranslate text-base font-bold text-gray-900 truncate">{shop.shopName}</h2>

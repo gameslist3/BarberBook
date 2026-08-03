@@ -9,6 +9,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; d
   booked: { label: "Booked", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
   completed: { label: "Completed", color: "text-green-700", bg: "bg-green-50", dot: "bg-green-500" },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", dot: "bg-red-500" },
+  no_show: { label: "Not Arrive", color: "text-orange-700", bg: "bg-orange-50", dot: "bg-orange-500" },
   pending: { label: "Pending", color: "text-amber-700", bg: "bg-amber-50", dot: "bg-amber-500" },
 };
 

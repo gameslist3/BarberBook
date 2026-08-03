@@ -84,15 +84,16 @@ export async function getBookingHistory(params: {
       snapshot = await adminDb.collection("bookings").get();
     }
 
-    // History only ever shows finished schedules — Completed or Cancelled.
-    // Upcoming/confirmed bookings belong on the Bookings screen, never here.
+    // History only ever shows finished schedules — Completed, Cancelled or
+    // Not Arrive. Upcoming/confirmed bookings belong on the Bookings screen,
+    // never here.
     const filteredDocs = snapshot.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }))
       .filter(
         (b: any) =>
           b.slotDate >= params.startDate &&
           b.slotDate <= params.endDate &&
-          (b.status === "completed" || b.status === "cancelled")
+          (b.status === "completed" || b.status === "cancelled" || b.status === "no_show")
       );
 
     // Batch-load referenced users + services + shops (no N+1)
