@@ -20,10 +20,7 @@ export default function ForgotPasswordPage() {
     setError("");
 
     try {
-      await sendPasswordResetEmail(auth, email, {
-        url: window.location.origin + '/signin', // redirect back to signin after reset
-        handleCodeInApp: false // Firebase's widget handles the reset
-      });
+      await sendPasswordResetEmail(auth, email);
       setSuccess(true);
     } catch (err: any) {
       console.error(err);
@@ -56,7 +53,7 @@ export default function ForgotPasswordPage() {
         {success ? (
             <div className="text-center">
                 <div className="rounded-md bg-green-50 p-4 border border-green-200 mb-6">
-                    <p className="text-sm text-green-800">A password reset link has been sent to your email.</p>
+                    <p className="text-sm text-green-800">A password reset link has been sent to your email. Check your inbox (and spam folder).</p>
                 </div>
                 <button
                     onClick={() => router.push("/signin")}
