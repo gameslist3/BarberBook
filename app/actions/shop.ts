@@ -198,6 +198,7 @@ export async function getShopProfile() {
       lunchTime: shopData.lunchTime || shopData.lunchStartTime || "13:00",
       openTime: shopData.openTime || "9:00 AM",
       closeTime: shopData.closeTime || "6:00 PM",
+      holidays: shopData.holidays || {},
     };
   } catch (error) {
     console.error("Error fetching shop profile:", error);
@@ -205,7 +206,7 @@ export async function getShopProfile() {
   }
 }
 
-export async function updateShopProfile(data: { shopName: string; address: string; phone: string; description: string; googleMapLink: string; lunchTime?: string; lunchStartTime?: string; lunchEndTime?: string; openTime?: string; closeTime?: string; logoUrl?: string; images?: string[] }) {
+export async function updateShopProfile(data: { shopName: string; address: string; phone: string; description: string; googleMapLink: string; lunchTime?: string; lunchStartTime?: string; lunchEndTime?: string; openTime?: string; closeTime?: string; logoUrl?: string; images?: string[]; holidays?: Record<string, string> }) {
   try {
     const user = await getServerUser();
     if (!user || user.role !== "SHOP_OWNER") throw new Error("Unauthorized");
@@ -228,6 +229,7 @@ export async function updateShopProfile(data: { shopName: string; address: strin
       ...(data.lunchTime !== undefined && { lunchTime: data.lunchTime }),
       ...(data.openTime !== undefined && { openTime: data.openTime }),
       ...(data.closeTime !== undefined && { closeTime: data.closeTime }),
+      ...(data.holidays !== undefined && { holidays: data.holidays }),
       updatedAt: new Date()
     });
     

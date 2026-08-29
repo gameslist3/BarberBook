@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info } from "lucide-react";
+import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info, CalendarX, Plus, Trash2 } from "lucide-react";
 import { SkeletonForm } from "@/components/Skeleton";
 import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
 import { TimeSelectDropdown } from "@/components/TimeSelectDropdown";
@@ -28,6 +28,7 @@ export default function ShopSettingsPage() {
     openTime: "9:00 AM",
     closeTime: "6:00 PM",
     images: [] as string[],
+    holidays: {} as Record<string, string>,
   });
 
   const initialRef = useRef<typeof formData | null>(null);
@@ -61,6 +62,7 @@ export default function ShopSettingsPage() {
           openTime: data.openTime || "9:00 AM",
           closeTime: data.closeTime || "6:00 PM",
           images: data.images || [],
+          holidays: data.holidays || {},
         };
         setFormData(initial);
         initialRef.current = initial;
@@ -135,6 +137,30 @@ export default function ShopSettingsPage() {
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+  };
+
+  // Holidays state
+  const [showAddHoliday, setShowAddHoliday] = useState(false);
+  const [holidayDate, setHolidayDate] = useState("");
+  const [holidayReason, setHolidayReason] = useState("");
+
+  const addHoliday = () => {
+    if (!holidayDate) return;
+    setFormData((prev) => ({
+      ...prev,
+      holidays: { ...prev.holidays, [holidayDate]: holidayReason },
+    }));
+    setHolidayDate("");
+    setHolidayReason("");
+    setShowAddHoliday(false);
+  };
+
+  const removeHoliday = (date: string) => {
+    setFormData((prev) => {
+      const updated = { ...prev.holidays };
+      delete updated[date];
+      return { ...prev, holidays: updated };
+    });
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -418,6 +444,121 @@ export default function ShopSettingsPage() {
               />
             </label>
           </div>
+        </div>
+      </div>
+
+      {/* Section: Holidays / Off-Days */}
+      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <CalendarX size={18} className="text-red-500" />
+              <h2 className="text-[15px] font-bold text-gray-900">Holidays / Off-Days</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAddHoliday(!showAddHoliday)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 rounded-xl text-xs font-semibold transition-all"
+            >
+              <Plus size={14} />
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-1.5">
+            Your shop will show as closed on these days. No bookings can be made.
+          </p>
+        </div>
+        <div className="p-4">
+          {/* Add Holiday Form */}
+          {showAddHoliday && (
+            <div className="mb-4 p-3.5 bg-red-50 rounded-2xl border border-red-100 space-y-3">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={holidayDate}
+                    onChange={(e) => setHolidayDate(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-red-200 focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none text-gray-900 bg-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Reason (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Republic Day"
+                    value={holidayReason}
+                    onChange={(e) => setHolidayReason(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-red-200 focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none text-gray-900 bg-white text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={addHoliday}
+                  disabled={!holidayDate}
+                  className="flex-1 h-9 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700 active:bg-red-800 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Plus size={14} />
+                  Add Holiday
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowAddHoliday(false); setHolidayDate(""); setHolidayReason(""); }}
+                  className="h-9 px-4 rounded-xl border border-gray-200 text-gray-600 text-xs font-medium hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Holiday List */}
+          {Object.keys(formData.holidays).length === 0 ? (
+            <div className="py-8 text-center">
+              <CalendarX className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-400 font-medium">No holidays set</p>
+              <p className="text-xs text-gray-300 mt-0.5">Your shop is open every day</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(formData.holidays)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([date, reason]) => {
+                  const d = new Date(date + "T00:00:00");
+                  const display = d.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  });
+                  return (
+                    <div
+                      key={date}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center">
+                          <CalendarX size={16} className="text-red-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{display}</p>
+                          {reason && <p className="text-xs text-gray-500 mt-0.5">{reason}</p>}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeHoliday(date)}
+                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
       </div>
 

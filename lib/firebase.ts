@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyDeMwHa58A-3RcBtbEXN7zOG2WRTKfE-S8",
@@ -19,4 +20,17 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-export { app, auth, db, storage };
+// Firebase Cloud Messaging (browser-only)
+let messaging: ReturnType<typeof getMessaging> | null = null;
+
+async function getMessagingInstance() {
+  if (typeof window === "undefined") return null;
+  if (messaging) return messaging;
+  const supported = await isSupported();
+  if (supported) {
+    messaging = getMessaging(app);
+  }
+  return messaging;
+}
+
+export { app, auth, db, storage, getMessagingInstance };
