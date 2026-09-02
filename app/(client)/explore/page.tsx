@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getAllActiveShops, getAvailableSlots } from "@/app/actions/client";
 import { getKolkataDateString } from "@/lib/timeUtils";
-import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell, ArrowLeft } from "lucide-react";
+import { MapPin, Search, X, Loader2, Map, Phone, Scissors, Clock, ChevronRight, Bell, ArrowLeft, CalendarX } from "lucide-react";
 import { SkeletonExploreList } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -89,10 +89,10 @@ function UpcomingBookingAlert({ booking }: { booking: any }) {
   return (
     <Link
       href={`/shop/${booking.shop?.id || ""}`}
-      className="block bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-4 text-white mb-3 shadow-lg shadow-violet-200/50 active:scale-[0.99] transition-transform"
+      className="block bg-gradient-to-r from-violet-600 to-indigo-600 rounded-[24px] p-4 text-white mb-3 shadow-lg shadow-violet-200/50 active:scale-[0.99] transition-transform"
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur">
+        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900/20 flex items-center justify-center shrink-0 backdrop-blur">
           <Bell size={20} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
@@ -130,22 +130,41 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
   return (
     <div
       onClick={() => { router.push(`/shop/${shop.id}`); }}
-      className={`bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden active:scale-[0.99] transition-transform cursor-pointer ${selectedShopId === shop.id ? 'border-violet-400 shadow-md ring-1 ring-violet-100' : ''}`}
+      className={`relative bg-gray-100 dark:bg-gray-800/70 rounded-[24px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-200/60 dark:border-gray-700/40 active:scale-[0.99] transition-transform cursor-pointer ${selectedShopId === shop.id ? 'border-violet-400 shadow-md ring-1 ring-violet-100' : ''}`}
     >
+      {shop.holidays && shop.holidays[getKolkataDateString()] !== undefined && (
+        <div 
+          className="absolute top-0 right-6 z-10 px-3 py-1.5 bg-red-600 text-white text-[11px] font-black uppercase tracking-wider rounded-b-lg shadow-sm border-x border-b border-red-700"
+          style={{ 
+            transformOrigin: 'top center',
+            animation: 'swing 3s ease-in-out infinite'
+          }}
+        >
+          Closed
+          <div className="absolute top-0 left-1.5 w-1.5 h-1.5 bg-gray-900/30 rounded-full shadow-inner"></div>
+          <div className="absolute top-0 right-1.5 w-1.5 h-1.5 bg-gray-900/30 rounded-full shadow-inner"></div>
+        </div>
+      )}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes swing {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
+      `}} />
       <div className="p-4">
         {/* ═══ ROW 1: Logo + Name (left) | Map + Phone (right) ═══ */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
-              <SafeImage
-                src={shop.logoUrl}
-                alt={shop.shopName}
-                className="notranslate w-full h-full object-cover"
-                fallback={<Scissors className="h-6 w-6 text-violet-500" />}
-              />
-            </div>
+              <div className="w-12 h-12 rounded-[24px] bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100 dark:border-gray-800">
+                <SafeImage
+                  src={shop.logoUrl}
+                  alt={shop.shopName}
+                  className="notranslate w-full h-full object-contain"
+                  fallback={<Scissors className="h-6 w-6 text-violet-500" />}
+                />
+              </div>
             <div className="min-w-0">
-              <h3 className="notranslate text-[17px] font-bold text-gray-900 truncate">{shop.shopName}</h3>
+              <h3 className="notranslate text-[19px] font-bold text-gray-900 dark:text-white truncate">{shop.shopName}</h3>
             </div>
           </div>
 
@@ -158,14 +177,14 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
                   onMapClick?.(shop.id);
                 }
               }}
-              className={`p-2 rounded-xl transition-colors flex items-center justify-center ${shop.googleMapLink ? (selectedShopId === shop.id ? 'bg-violet-600 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100') : 'bg-gray-50 text-gray-400 cursor-not-allowed'}`}
+              className={`p-2 rounded-xl transition-colors flex items-center justify-center ${shop.googleMapLink ? (selectedShopId === shop.id ? 'bg-violet-600 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100') : 'bg-gray-50 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}
               disabled={!shop.googleMapLink}
               title={shop.googleMapLink ? "View on map" : "Location not set"}
             >
               <Map size={18} />
             </button>
             {shop.phone && (
-              <a onClick={(e) => e.stopPropagation()} href={`tel:${shop.phone}`} className="p-2 rounded-xl bg-gray-50 text-gray-500 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+              <a onClick={(e) => e.stopPropagation()} href={`tel:${shop.phone}`} className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:bg-violet-50 hover:text-violet-600 transition-colors">
                 <Phone size={18} />
               </a>
             )}
@@ -173,8 +192,8 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
         </div>
 
         {/* ═══ ROW 2: Address + Timing ═══ */}
-        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5 mb-3">
-          <div className="flex items-center gap-1.5 text-xs text-gray-600 min-w-0 flex-1">
+        <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2.5 mb-3">
+          <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 min-w-0 flex-1">
             <MapPin size={15} className="text-gray-400 shrink-0" />
             <span className="line-clamp-2">{shop.address || "Local Shop"}</span>
           </div>
@@ -186,8 +205,18 @@ function ShopCard({ shop, router, selectedShopId, setSelectedShopId, onMapClick 
         </div>
 
         {/* ═══ ROW 3: Status / Action ═══ */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-2.5 text-xs text-gray-500 bg-gray-50 rounded-xl">
+        {shop.holidays && shop.holidays[getKolkataDateString()] !== undefined ? (
+          <div className="flex items-center justify-center gap-2 py-3 text-[12px] font-bold text-red-600 bg-red-50 rounded-xl border border-red-100">
+            <div className="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center">
+              <CalendarX size={13} className="text-red-500" />
+            </div>
+            Shop Closed Today
+            {shop.holidays[getKolkataDateString()] && (
+              <span className="text-[10px] font-medium text-red-400">· {shop.holidays[getKolkataDateString()]}</span>
+            )}
+          </div>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center py-2.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-xl">
             <Loader2 className="w-4 h-4 animate-spin mr-2" /> {tr("checkingAvailability")}
           </div>
         ) : slots.length > 0 ? (
@@ -294,14 +323,15 @@ export default function ExplorePage() {
     return () => unsubAuth();
   }, []);
 
-  // Fetch shops
+  // Fetch shops real-time
   useEffect(() => {
-    const load = async () => {
-      const shops = await getAllActiveShops();
+    const q = query(collection(db, "shops"), where("isActive", "==", true));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const shops = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAllShops(shops);
       setIsLoading(false);
-    };
-    load();
+    });
+    return () => unsub();
   }, []);
 
   const filteredShops = allShops.filter(s => {
@@ -313,7 +343,7 @@ export default function ExplorePage() {
   const panelContent = (
     <>
       {/* Search bar */}
-      <div className="px-4 pb-2 lg:px-5 shrink-0 bg-white">
+      <div className="px-4 pb-2 lg:px-5 shrink-0 bg-white dark:bg-gray-900">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
@@ -322,16 +352,16 @@ export default function ExplorePage() {
             translate="no"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="notranslate w-full h-10 pl-9 pr-9 rounded-2xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+            className="notranslate w-full h-10 pl-9 pr-9 rounded-[24px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-300">
               <X size={14} />
             </button>
           )}
         </div>
         <div className="flex items-center justify-between mt-2 pb-1">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600 dark:text-gray-400">
             {filteredShops.length} {translate("shopsAvailable")}
           </p>
         </div>
@@ -342,10 +372,10 @@ export default function ExplorePage() {
         {isLoading ? (
           <SkeletonExploreList />
         ) : filteredShops.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100 mt-2">
+          <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-[24px] shadow-sm border border-gray-100 dark:border-gray-800 mt-2">
             <Scissors className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-            <h3 className="text-sm font-medium text-gray-900">{translate("noShopsFound")}</h3>
-            <p className="text-xs text-gray-600 mt-1">{translate("tryDifferentSearch")}</p>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{translate("noShopsFound")}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{translate("tryDifferentSearch")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2 mt-2">
@@ -369,7 +399,7 @@ export default function ExplorePage() {
   );
 
   return (
-    <div className="relative flex-1 w-full h-full flex flex-col lg:flex-row overflow-hidden">
+    <div className="relative flex-1 w-full h-full flex flex-col lg:flex-row overflow-hidden overflow-x-hidden">
       
       {/* ── Upcoming booking alert — fixed at top below navbar ── */}
       {upcomingBooking && (
@@ -419,7 +449,7 @@ export default function ExplorePage() {
       {/* Mobile: panel with animated list → detail transition */}
       {isMobile && (
         <div
-          className="flex flex-col overflow-hidden bg-white"
+          className="flex flex-col overflow-hidden bg-white dark:bg-gray-900"
           style={{
             flex: 1,
             borderTopLeftRadius: '20px',
@@ -439,23 +469,23 @@ export default function ExplorePage() {
                 className="flex flex-col h-full"
               >
                 {/* ── Header: Back + Shop Name ── */}
-                <div className="px-4 py-3 flex items-center gap-3 bg-white shrink-0 border-b border-gray-100">
+                <div className="px-4 py-3 flex items-center gap-3 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800">
                   <button
                     onClick={() => setExpandedShop(null)}
                     className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors -ml-1"
                   >
-                    <ArrowLeft size={20} className="text-gray-700" />
+                    <ArrowLeft size={20} className="text-gray-700 dark:text-gray-300" />
                   </button>
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
-                      <SafeImage
-                        src={expandedShop.logoUrl}
-                        alt={expandedShop.shopName}
-                        className="w-full h-full object-cover"
-                        fallback={<Scissors size={16} className="text-violet-500" />}
-                      />
-                    </div>
-                    <h3 className="text-[17px] font-bold text-gray-900 truncate notranslate">{expandedShop.shopName}</h3>
+                      <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100 dark:border-gray-800">
+                        <SafeImage
+                          src={expandedShop.logoUrl}
+                          alt={expandedShop.shopName}
+                          className="w-full h-full object-contain"
+                          fallback={<Scissors size={16} className="text-violet-500" />}
+                        />
+                      </div>
+                    <h3 className="text-[19px] font-bold text-gray-900 dark:text-white truncate notranslate">{expandedShop.shopName}</h3>
                   </div>
                 </div>
 
@@ -496,7 +526,7 @@ export default function ExplorePage() {
                       <MapPin size={18} className="text-gray-400 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{translate("address")}</p>
-                        <p className="text-sm text-gray-900 mt-0.5">{expandedShop.address}</p>
+                        <p className="text-sm text-gray-900 dark:text-white mt-0.5">{expandedShop.address}</p>
                       </div>
                     </div>
                   )}
@@ -506,7 +536,7 @@ export default function ExplorePage() {
                     <Clock size={18} className="text-gray-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{translate("hours")}</p>
-                      <p className="text-sm text-gray-900 mt-0.5 font-medium">
+                      <p className="text-sm text-gray-900 dark:text-white mt-0.5 font-medium">
                         {expandedShop.openTime || "9:00 AM"} — {expandedShop.closeTime || "6:00 PM"}
                       </p>
                     </div>
@@ -526,30 +556,40 @@ export default function ExplorePage() {
                   )}
 
                   {/* Directions & Book Buttons */}
-                  <div className="flex gap-3 pt-2">
-                    {(() => {
-                      const cm = expandedShop.googleMapLink?.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-                      const dest = cm ? `${cm[1]},${cm[2]}` : encodeURIComponent(`${expandedShop.shopName} ${expandedShop.address || ''}`);
-                      return (
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${dest}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 h-11 rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-all"
-                        >
-                          <Map size={16} />
-                          {translate("directions")}
-                        </a>
-                      );
-                    })()}
-                    <button
-                      onClick={() => router.push(`/book/${expandedShop.id}`)}
-                      className="flex-1 h-11 rounded-2xl bg-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200"
-                    >
-                      <Scissors size={16} />
-                      {translate("bookNow")}
-                    </button>
-                  </div>
+                  {expandedShop.holidays && expandedShop.holidays[getKolkataDateString()] !== undefined ? (
+                    <div className="flex items-center justify-center gap-2 py-3 text-sm font-bold text-red-600 bg-red-50 rounded-[24px] border border-red-100 mt-2">
+                      <CalendarX size={18} className="text-red-500" />
+                      Shop Closed Today
+                      {expandedShop.holidays[getKolkataDateString()] && (
+                        <span className="text-xs font-medium text-red-400">· {expandedShop.holidays[getKolkataDateString()]}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex gap-3 pt-2">
+                      {(() => {
+                        const cm = expandedShop.googleMapLink?.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                        const dest = cm ? `${cm[1]},${cm[2]}` : encodeURIComponent(`${expandedShop.shopName} ${expandedShop.address || ''}`);
+                        return (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${dest}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 h-11 rounded-[24px] border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 dark:bg-gray-800 active:bg-gray-100 transition-all"
+                          >
+                            <Map size={16} />
+                            {translate("directions")}
+                          </a>
+                        );
+                      })()}
+                      <button
+                        onClick={() => router.push(`/book/${expandedShop.id}`)}
+                        className="flex-1 h-11 rounded-[24px] bg-violet-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200"
+                      >
+                        <Scissors size={16} />
+                        {translate("bookNow")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ) : (
@@ -570,7 +610,7 @@ export default function ExplorePage() {
 
       {/* Desktop: Side panel */}
       {!isMobile && (
-        <div className="flex flex-col overflow-hidden lg:max-w-[420px] lg:border-l lg:border-gray-200 flex-1">
+        <div className="flex flex-col overflow-hidden lg:max-w-[420px] lg:border-l lg:border-gray-200 dark:border-gray-700 flex-1">
           {panelContent}
         </div>
       )}
