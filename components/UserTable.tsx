@@ -47,7 +47,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
   };
 
   const getRoleBadge = (role: string) => {
-    const config = roleConfig[role] || { label: role, color: "text-gray-700", bg: "bg-gray-100" };
+    const config = roleConfig[role] || { label: role, color: "text-gray-700 dark:text-gray-300", bg: "bg-gray-100" };
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.bg} ${config.color}`}>
         {config.label}
@@ -75,11 +75,11 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
   return (
     <>
       {users.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-12 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
             <Users size={28} className="text-gray-300" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No users found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">No users found</h3>
           <p className="text-sm text-gray-500">Users will appear here once they sign up.</p>
         </div>
       ) : (
@@ -89,7 +89,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
             {users.map((u: any) => (
               <div
                 key={u.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden active:scale-[0.99] transition-transform"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden active:scale-[0.99] transition-transform"
               >
                 <div className="p-4">
                   {/* User Header */}
@@ -101,7 +101,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                         fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-sm"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{u.name || "Unknown"}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{u.name || "Unknown"}</p>
                         <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                           <Mail size={11} />
                           <span>{u.email}</span>
@@ -112,7 +112,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                   </div>
 
                   {/* Details */}
-                  <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-3">
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 mb-3">
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Clock size={12} />
                       <span>Joined {formatDate(u.createdAt)}</span>
@@ -134,10 +134,10 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   <tr>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
@@ -148,7 +148,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {users.map((u: any) => (
-                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={u.id} className="hover:bg-gray-50 dark:bg-gray-800 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <UserAvatar
@@ -157,7 +157,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                             fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-sm"
                           />
                           <div>
-                            <div className="font-semibold text-gray-900">{u.name}</div>
+                            <div className="font-semibold text-gray-900 dark:text-white">{u.name}</div>
                             <div className="text-sm text-gray-500 flex items-center gap-1">
                               <Mail size={12} /> {u.email}
                             </div>
@@ -187,9 +187,9 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
       {/* Manage User Modal / Bottom Sheet */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-md md:mx-4 overflow-hidden animate-slideUp md:animate-fadeIn">
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Manage User</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-md md:mx-4 overflow-hidden animate-slideUp md:animate-fadeIn">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Manage User</h2>
               <button
                 onClick={() => setSelectedUser(null)}
                 className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
@@ -207,7 +207,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                   fallbackClassName="bg-indigo-100 text-indigo-600 font-bold text-lg"
                 />
                 <div>
-                  <p className="font-semibold text-gray-900 text-base">{selectedUser.name}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-base">{selectedUser.name}</p>
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>
                   <div className="mt-1">{getRoleBadge(selectedUser.role)}</div>
                 </div>
@@ -215,7 +215,7 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                {selectedUser.isActive !== false ? (
+                {selectedUser.role !== "APP_OWNER" && (
                   <button
                     disabled={isProcessing}
                     onClick={() => handleToggleStatus(selectedUser, false)}
@@ -224,27 +224,32 @@ export default function UserTable({ users: initialUsers }: { users: any[] }) {
                     {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <PowerOff size={16} />}
                     Deactivate Account
                   </button>
-                ) : (
-                  <button
-                    disabled={isProcessing}
-                    onClick={() => handleToggleStatus(selectedUser, true)}
-                    className="w-full flex items-center justify-center gap-2 h-12 bg-green-50 text-green-700 hover:bg-green-100 active:bg-green-200 font-medium rounded-xl disabled:opacity-50 transition-colors text-sm"
-                  >
-                    {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Power size={16} />}
-                    Activate Account
-                  </button>
+                )}
+                {selectedUser.role === "APP_OWNER" && (
+                  <div className="w-full flex items-center justify-center gap-2 h-12 bg-gray-100 text-gray-400 font-medium rounded-xl text-sm cursor-not-allowed">
+                    Cannot deactivate
+                  </div>
                 )}
 
-                <div className="border-t border-gray-100"></div>
+                <div className="border-t border-gray-100 dark:border-gray-800"></div>
 
-                <button
-                  disabled={isProcessing}
-                  onClick={() => handleDelete(selectedUser)}
-                  className="w-full flex items-center justify-center gap-2 h-12 bg-red-600 text-white hover:bg-red-700 active:bg-red-800 font-medium rounded-xl disabled:opacity-50 transition-colors shadow-sm text-sm"
-                >
-                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 size={16} />}
-                  Permanently Remove Account
-                </button>
+                {selectedUser.role !== "APP_OWNER" ? (
+                  <button
+                    disabled={isProcessing}
+                    onClick={() => handleDelete(selectedUser)}
+                    className="w-full flex items-center justify-center gap-2 h-12 bg-red-600 text-white hover:bg-red-700 active:bg-red-800 font-medium rounded-xl disabled:opacity-50 transition-colors shadow-sm text-sm"
+                  >
+                    {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 size={16} />}
+                    Permanently Remove Account
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="w-full flex items-center justify-center gap-2 h-12 bg-gray-200 text-gray-400 font-medium rounded-xl cursor-not-allowed text-sm"
+                  >
+                    Cannot delete
+                  </button>
+                )}
               </div>
             </div>
           </div>

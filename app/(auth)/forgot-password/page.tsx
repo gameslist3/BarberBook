@@ -6,6 +6,7 @@ import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -35,11 +36,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-800 px-4 relative">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle variant="icon" />
+      </div>
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 dark:border-gray-900">
         <div className="text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Reset your password</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Reset your password</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Enter your email to receive a password reset link.
           </p>
         </div>
@@ -65,14 +69,14 @@ export default function ForgotPasswordPage() {
         ) : (
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div>
-                <label className="block text-sm font-medium text-gray-700" htmlFor="email">Email address</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">Email address</label>
                 <input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

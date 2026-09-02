@@ -37,8 +37,17 @@ export function getScheduleInfo(slotDate: string, slotStartTime?: string | null)
 }
 
 export function getKolkataDateString() {
-    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    });
+    const parts = formatter.formatToParts(new Date());
+    const year = parts.find(p => p.type === 'year')?.value;
+    const month = parts.find(p => p.type === 'month')?.value?.padStart(2, '0');
+    const day = parts.find(p => p.type === 'day')?.value?.padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 export function parseTimeToMinutes(timeStr: string): { hours: number; minutes: number } | null {

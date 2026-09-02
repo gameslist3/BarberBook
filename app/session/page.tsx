@@ -85,7 +85,7 @@ function SessionHeader({ session, live }: { session: any; live: boolean }) {
   return (
     <div className="w-full max-w-sm flex items-center justify-between mb-6">
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900/10 border border-white/15 flex items-center justify-center shrink-0 overflow-hidden">
           <SafeImage
             src={session.shop?.logoUrl}
             alt={session.shop?.shopName || ""}
@@ -119,7 +119,7 @@ function SessionHeader({ session, live }: { session: any; live: boolean }) {
 function ServicesCard({ session }: { session: any }) {
   const { translate } = useLanguage();
   return (
-    <div className="w-full max-w-sm bg-white/[0.08] backdrop-blur-xl border border-white/10 rounded-3xl p-5 mb-8">
+    <div className="w-full max-w-sm bg-white dark:bg-gray-900/[0.08] backdrop-blur-xl border border-white/10 rounded-3xl p-5 mb-8">
       <div className="flex items-center gap-2 mb-4">
         <Scissors size={14} className="text-violet-300" />
         <h3 className="text-[11px] uppercase tracking-widest text-violet-200 font-semibold">{translate("bookedServices")}</h3>
@@ -127,7 +127,7 @@ function ServicesCard({ session }: { session: any }) {
       <div className="space-y-3">
         {session.services.map((s: any) => (
           <div key={s.id} className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-white dark:bg-gray-900/10 flex items-center justify-center shrink-0">
               <Clock size={14} className="text-violet-300" />
             </div>
             <div className="flex-1 min-w-0">
@@ -159,7 +159,7 @@ function ShopContactBar({ shop }: { shop: any }) {
         <a
           href={`tel:${shop.phone}`}
           title={translate("callShop")}
-          className="w-12 h-12 rounded-2xl bg-white/[0.08] border border-white/10 backdrop-blur-xl flex items-center justify-center text-white hover:bg-white/[0.14] hover:scale-105 active:scale-95 transition-all shrink-0"
+          className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-900/[0.08] border border-white/10 backdrop-blur-xl flex items-center justify-center text-white hover:bg-white dark:bg-gray-900/[0.14] hover:scale-105 active:scale-95 transition-all shrink-0"
         >
           <Phone size={19} className="text-violet-300" />
         </a>
@@ -170,7 +170,7 @@ function ShopContactBar({ shop }: { shop: any }) {
           target="_blank"
           rel="noopener noreferrer"
           title={translate("openInMaps")}
-          className="w-12 h-12 rounded-2xl bg-white/[0.08] border border-white/10 backdrop-blur-xl flex items-center justify-center text-white hover:bg-white/[0.14] hover:scale-105 active:scale-95 transition-all shrink-0"
+          className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-900/[0.08] border border-white/10 backdrop-blur-xl flex items-center justify-center text-white hover:bg-white dark:bg-gray-900/[0.14] hover:scale-105 active:scale-95 transition-all shrink-0"
         >
           <MapPin size={19} className="text-violet-300" />
         </a>
@@ -355,7 +355,7 @@ export default function SessionPage() {
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="min-h-dvh bg-gradient-to-br from-violet-800 via-violet-900 to-purple-950 flex items-center justify-center px-6"
         >
-          <div className="bg-white rounded-3xl p-8 mx-4 max-w-sm w-full text-center animate-popIn">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 mx-4 max-w-sm w-full text-center animate-popIn">
             <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 ${cancelled ? "bg-red-100" : "bg-green-100"}`}>
               {cancelled ? (
                 <X size={34} className="text-red-500" />
@@ -363,7 +363,7 @@ export default function SessionPage() {
                 <Check size={34} className="text-green-600" strokeWidth={3} />
               )}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {cancelled ? translate("bookingCancelled") : translate("sessionComplete")}
             </h2>
             <p className="text-sm text-gray-500 mb-8">
@@ -465,7 +465,7 @@ export default function SessionPage() {
               animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0.1, 0.6] }}
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
             />
-            <div className="w-32 h-32 rounded-[2rem] bg-white/[0.08] border border-white/15 backdrop-blur-xl flex flex-col items-center justify-center gap-2 shadow-2xl">
+            <div className="w-32 h-32 rounded-[2rem] bg-white dark:bg-gray-900/[0.08] border border-white/15 backdrop-blur-xl flex flex-col items-center justify-center gap-2 shadow-2xl">
               <motion.div
                 animate={{ rotate: [0, -6, 6, 0] }}
                 transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}

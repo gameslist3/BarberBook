@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, X, Loader2, Scissors, Clock, IndianRupee } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Scissors, Clock, IndianRupee, Edit2 } from "lucide-react";
 import { SkeletonServiceCard } from "@/components/Skeleton";
-import { getServices, addService, deleteService, toggleServiceStatus } from "@/app/actions/services";
+import { getServices, addService, deleteService, toggleServiceStatus, editService } from "@/app/actions/services";
 
 export default function ShopServicesPage() {
   const [services, setServices] = useState<any[]>([]);
@@ -11,6 +11,7 @@ export default function ShopServicesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [newService, setNewService] = useState({ name: "", price: "", hr: "0", min: "30" });
 
@@ -25,7 +26,7 @@ export default function ShopServicesPage() {
     fetchServices();
   }, []);
 
-  const handleAddService = async (e: React.FormEvent) => {
+  const handleSaveService = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreating(true);
     setError("");
@@ -40,19 +41,35 @@ export default function ShopServicesPage() {
       return;
     }
 
-    const result = await addService({
-      name: newService.name,
-      price: parseFloat(newService.price),
-      duration: totalMinutes,
-      isActive: true,
-    });
-
-    if (result.success) {
-      setShowAddModal(false);
-      setNewService({ name: "", price: "", hr: "0", min: "30" });
-      fetchServices();
+    if (editingId) {
+      const result = await editService(editingId, {
+        name: newService.name,
+        price: parseFloat(newService.price),
+        duration: totalMinutes
+      });
+      if (result.success) {
+        setShowAddModal(false);
+        setEditingId(null);
+        setNewService({ name: "", price: "", hr: "0", min: "30" });
+        fetchServices();
+      } else {
+        setError(result.error || "Failed to update service.");
+      }
     } else {
-      setError(result.error || "Failed to save service.");
+      const result = await addService({
+        name: newService.name,
+        price: parseFloat(newService.price),
+        duration: totalMinutes,
+        isActive: true,
+      });
+
+      if (result.success) {
+        setShowAddModal(false);
+        setNewService({ name: "", price: "", hr: "0", min: "30" });
+        fetchServices();
+      } else {
+        setError(result.error || "Failed to save service.");
+      }
     }
 
     setIsCreating(false);
@@ -100,12 +117,13 @@ export default function ShopServicesPage() {
     <div className="space-y-5">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-[17px] font-bold text-gray-900">My Services</h2>
+        <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">My Services</h2>
         <button
-          onClick={() => setShowAddModal(true)}
-          className="w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 active:bg-violet-800 transition-all shadow-sm shadow-violet-200 active:scale-95"
+          onClick={() => { setEditingId(null); setNewService({ name: "", price: "", hr: "0", min: "30" }); setShowAddModal(true); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 text-violet-600 hover:bg-violet-100 active:bg-violet-200 rounded-xl text-xs font-semibold transition-all"
         >
-          <Plus size={20} />
+          <Plus size={14} />
+          Add
         </button>
       </div>
 
@@ -113,21 +131,21 @@ export default function ShopServicesPage() {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center">
           <div
-            className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-md md:mx-4 overflow-hidden flex flex-col max-h-[90vh] animate-slideUp md:animate-fadeIn"
+            className="bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-md md:mx-4 overflow-hidden flex flex-col max-h-[90vh] animate-slideUp md:animate-fadeIn"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Add New Service</h2>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">{editingId ? 'Edit Service' : 'Add New Service'}</h2>
               <button
-                onClick={() => setShowAddModal(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
+                onClick={() => { setShowAddModal(false); setEditingId(null); setNewService({ name: "", price: "", hr: "0", min: "30" }); }}
+                className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-all"
               >
                 <X size={18} />
               </button>
             </div>
 
             <form
-              onSubmit={handleAddService}
+              onSubmit={handleSaveService}
               className="p-5 space-y-4 overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
@@ -139,14 +157,14 @@ export default function ShopServicesPage() {
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Service Name</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Service Name</label>
                 <div className="relative">
                   <Scissors size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     required
                     type="text"
                     placeholder="e.g. Men's Fade"
-                    className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                     value={newService.name}
                     onChange={(e) => setNewService({ ...newService, name: e.target.value })}
                   />
@@ -154,7 +172,7 @@ export default function ShopServicesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Price</label>
                 <div className="relative">
                   <IndianRupee size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
@@ -163,7 +181,7 @@ export default function ShopServicesPage() {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                     value={newService.price}
                     onChange={(e) => setNewService({ ...newService, price: e.target.value })}
                   />
@@ -171,7 +189,7 @@ export default function ShopServicesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Duration</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Duration</label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <input
@@ -180,7 +198,7 @@ export default function ShopServicesPage() {
                       min="0"
                       max="12"
                       placeholder="Hours"
-                      className="w-full h-12 px-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                      className="w-full h-12 px-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                       value={newService.hr}
                       onChange={(e) => setNewService({ ...newService, hr: e.target.value })}
                     />
@@ -193,7 +211,7 @@ export default function ShopServicesPage() {
                       min="0"
                       max="59"
                       placeholder="Minutes"
-                      className="w-full h-12 px-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                      className="w-full h-12 px-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                       value={newService.min}
                       onChange={(e) => setNewService({ ...newService, min: e.target.value })}
                     />
@@ -211,7 +229,7 @@ export default function ShopServicesPage() {
                   {isCreating ? (
                     <Loader2 className="animate-spin w-5 h-5" />
                   ) : (
-                    "Save Service"
+                    editingId ? "Update Service" : "Save Service"
                   )}
                 </button>
               </div>
@@ -227,11 +245,11 @@ export default function ShopServicesPage() {
         </div>
       ) : services.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-10 text-center">
           <div className="w-16 h-16 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-4">
             <Scissors size={28} className="text-violet-400" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">No services yet</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No services yet</h3>
           <p className="text-sm text-gray-500">Tap the + button to add your first service.</p>
         </div>
       ) : (
@@ -242,8 +260,8 @@ export default function ShopServicesPage() {
             return (
               <div
                 key={service.id}
-                className={`bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border transition-all ${
-                  isActive ? "border-gray-50" : "border-gray-50 opacity-60"
+                className={`bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border transition-all ${
+                  isActive ? "border-gray-50 dark:border-gray-900" : "border-gray-50 dark:border-gray-900 opacity-60"
                 }`}
               >
                 <div className="p-4 space-y-3">
@@ -252,17 +270,17 @@ export default function ShopServicesPage() {
                     <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
                       <Scissors size={15} />
                     </div>
-                    <p className="text-[15px] font-bold text-gray-900">{service.name}</p>
+                    <p className="text-[15px] font-bold text-gray-900 dark:text-white">{service.name}</p>
                   </div>
 
                   {/* ═══ ROW 2: Price | Duration | Toggle | Delete ═══ */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-gray-900">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
                         ₹{Number(service.price).toFixed(2)}
                       </span>
                       <span className="text-xs text-gray-400">|</span>
-                      <span className="text-xs font-medium text-gray-600">
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                         {formatDuration(service.duration)}
                       </span>
                     </div>
@@ -276,12 +294,27 @@ export default function ShopServicesPage() {
                         }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-all ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white dark:bg-gray-900 shadow-sm transition-all ${
                             isActive ? "translate-x-5" : "translate-x-0.5"
                           }`}
                         />
                       </button>
                       {/* Delete Button */}
+                      <button
+                        onClick={() => {
+                          setEditingId(service.id);
+                          setNewService({
+                            name: service.name,
+                            price: service.price.toString(),
+                            hr: Math.floor(service.duration / 60).toString(),
+                            min: (service.duration % 60).toString()
+                          });
+                          setShowAddModal(true);
+                        }}
+                        className="p-1.5 rounded-lg text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-all mr-1"
+                      >
+                        <Edit2 size={15} />
+                      </button>
                       <button
                         onClick={() => handleDelete(service.id, service.name)}
                         className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all"

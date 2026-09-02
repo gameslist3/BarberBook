@@ -1,13 +1,43 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FEF7FF;
+  --foreground: #1D1B20;
   --accent: #7C3AED;
   --accent-light: #F5F3FF;
   --accent-dark: #6D28D9;
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Material Design 3 (M3) Light Scheme */
+  --md-sys-color-primary: #6D28D9;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-surface-dim: #DED8E1;
+  --md-sys-color-surface-bright: #FEF7FF;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low: #F7F2FA;
+  --md-sys-color-surface-container: #F3EDF7;
+  --md-sys-color-surface-container-high: #ECE6F0;
+  --md-sys-color-surface-container-highest: #E6E0E9;
+  --md-sys-color-on-surface: #1D1B20;
+  --md-sys-color-on-surface-variant: #49454F;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0.0, 0, 1.0);
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1.0);
 }
 
 @theme inline {
@@ -17,10 +47,45 @@
   --font-mono: var(--font-geist-mono);
 }
 
+.dark {
+  --background: #141218;
+  --foreground: #E6E0E9;
+  --accent: #A78BFA;
+  --accent-light: #2E1065;
+  --accent-dark: #C4B5FD;
+
+  /* Material Design 3 (M3) Dark Scheme */
+  --md-sys-color-primary: #D0BCFF;
+  --md-sys-color-on-primary: #381E72;
+  --md-sys-color-primary-container: #4F378B;
+  --md-sys-color-on-primary-container: #EADDFF;
+  --md-sys-color-secondary: #CCC2DC;
+  --md-sys-color-on-secondary: #332D41;
+  --md-sys-color-secondary-container: #4A4458;
+  --md-sys-color-on-secondary-container: #E8DEF8;
+  --md-sys-color-tertiary: #EFB8C8;
+  --md-sys-color-on-tertiary: #492532;
+  --md-sys-color-surface: #141218;
+  --md-sys-color-surface-dim: #141218;
+  --md-sys-color-surface-bright: #3B383E;
+  --md-sys-color-surface-container-lowest: #0F0D13;
+  --md-sys-color-surface-container-low: #1D1B20;
+  --md-sys-color-surface-container: #211F26;
+  --md-sys-color-surface-container-high: #2B2930;
+  --md-sys-color-surface-container-highest: #36343B;
+  --md-sys-color-on-surface: #E6E0E9;
+  --md-sys-color-on-surface-variant: #CAC4D0;
+  --md-sys-color-outline: #938F99;
+  --md-sys-color-outline-variant: #49454F;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    --background: #141218;
+    --foreground: #E6E0E9;
+    --accent: #A78BFA;
+    --accent-light: #2E1065;
+    --accent-dark: #C4B5FD;
   }
 }
 
@@ -30,6 +95,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Custom map marker styles */
@@ -332,11 +399,11 @@ body {
 }
 
 /* ========================================== */
-/* Mobile Text Size - 25% Bigger Everywhere    */
+/* Mobile Text Size - 12% Bigger Everywhere    */
 /* ========================================== */
 @media (max-width: 767px) {
   html {
-    font-size: 125%;
+    font-size: 112%;
   }
 }
 
@@ -393,3 +460,114 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
+
+/* ========================================== */
+/* Gradient Background Animation               */
+/* ========================================== */
+@keyframes gradientShift {
+  0% { transform: translate(0%, 0%) rotate(0deg); }
+  25% { transform: translate(5%, -5%) rotate(1deg); }
+  50% { transform: translate(-3%, 3%) rotate(-1deg); }
+  75% { transform: translate(4%, -2%) rotate(0.5deg); }
+  100% { transform: translate(0%, 0%) rotate(0deg); }
+}
+
+@keyframes gradientShiftReverse {
+  0% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+  33% { transform: translate(-4%, 4%) rotate(-1deg) scale(1.02); }
+  66% { transform: translate(3%, -3%) rotate(1deg) scale(0.98); }
+  100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+}
+
+@keyframes gradientShiftSlow {
+  0% { transform: translate(0%, 0%); }
+  50% { transform: translate(-5%, 5%); }
+  100% { transform: translate(0%, 0%); }
+}
+
+.animate-gradient-bg {
+  animation: gradientShift 8s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradientShift 12s ease-in-out infinite;
+}
+
+.animate-gradient-shift-reverse {
+  animation: gradientShiftReverse 15s ease-in-out infinite;
+}
+
+.animate-gradient-shift-slow {
+  animation: gradientShiftSlow 20s ease-in-out infinite;
+}
+
+/* ========================================== */
+/* Material Design 3 Elevation & Surface Tokens */
+/* ========================================== */
+.m3-surface {
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-surface-container-lowest {
+  background-color: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-surface-container-low {
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-surface-container {
+  background-color: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-surface-container-high {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-surface-container-highest {
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-elevation-1 {
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.m3-elevation-2 {
+  box-shadow: 0 2px 6px 2px rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.m3-elevation-3 {
+  box-shadow: 0 4px 8px 3px rgba(0, 0, 0, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Purposeful M3 Ambient Motion for Hero Gradients */
+@keyframes m3MeshFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.m3-animated-gradient {
+  background: linear-gradient(-45deg, #4C1D95, #6D28D9, #7C3AED, #8B5CF6, #3B0764);
+  background-size: 300% 300%;
+  animation: m3MeshFlow 14s ease-in-out infinite;
+}
+
+.dark .m3-animated-gradient {
+  background: linear-gradient(-45deg, #18082e, #2e1065, #4c1d95, #3b0764, #120520);
+  background-size: 300% 300%;
+  animation: m3MeshFlow 16s ease-in-out infinite;
+}
+

@@ -160,23 +160,23 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   ];
 
   return (
-    <div className="flex h-[100dvh] bg-gray-50 overflow-hidden w-full relative">
+    <div className="flex h-[100dvh] bg-gray-50 dark:bg-gray-800 dark:bg-gray-950 overflow-hidden w-full relative">
       {/* Deactivated Overlay */}
       {shopData?.isActive === false && (
-        <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+        <div className="absolute inset-0 z-[100] bg-white dark:bg-gray-900/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
           <div className="bg-red-50 text-red-600 w-20 h-20 rounded-full flex items-center justify-center mb-6">
             <Settings size={40} />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Access Has Been Paused</h2>
-          <p className="text-gray-600 text-lg mb-8 max-w-md">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Access Has Been Paused</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md">
             Your shop account is currently deactivated. You cannot access your dashboard, manage services, or receive new bookings at this time.
           </p>
-          <div className="bg-gray-100 p-6 rounded-xl border border-gray-200">
-            <p className="text-gray-900 font-medium mb-2">To activate your account, please contact the App Owner:</p>
+          <div className="bg-gray-100 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <p className="text-gray-900 dark:text-white font-medium mb-2">To activate your account, please contact the App Owner:</p>
             <p className="text-lg font-bold text-violet-600 mb-1">📞 +1 (555) 123-4567</p>
             <p className="text-lg font-bold text-green-600">💬 WhatsApp: +1 (555) 123-4567</p>
           </div>
-          <button onClick={handleSignOut} className="mt-12 text-gray-600 hover:text-gray-900 underline underline-offset-4">
+          <button onClick={handleSignOut} className="mt-12 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white underline underline-offset-4">
             Sign out of this account
           </button>
         </div>
@@ -185,17 +185,17 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       {/* ========== MOBILE LAYOUT ========== */}
       <div className="flex flex-col h-full w-full md:hidden">
         {/* Premium Compact Header */}
-        <header className="shrink-0 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between z-30">
+        <header className="shrink-0 bg-white dark:bg-gray-900/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center justify-between z-30">
           {/* Brand Logo */}
           <div className="flex items-center gap-2.5">
             <Image
-              src="/logo.png"
+              src="/logo2.svg"
               alt="BarberBook"
               width={28}
               height={28}
               className="notranslate rounded-lg shrink-0"
             />
-            <span className="notranslate text-base font-bold text-gray-900 tracking-tight">BarberBook</span>
+            <span className="notranslate text-base font-bold text-gray-900 dark:text-white dark:text-gray-100 tracking-tight">BarberBook</span>
           </div>
 
           {/* Right side: Language + Notification + Profile */}
@@ -233,21 +233,21 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
                 <User size={16} />
               </button>
               {showProfileMenu && (
-                <div className="absolute right-0 top-11 w-52 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <p className="text-sm font-bold text-gray-900 truncate">Shop Owner</p>
-                    <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                <div className="absolute right-0 top-11 w-52 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[100] overflow-hidden animate-fadeIn">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white dark:text-gray-100 truncate">Shop Owner</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userEmail}</p>
                   </div>
                   <div className="py-1">
                     <Link
                       href="/shop/settings"
                       onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-800 transition-colors"
                     >
                       <Store size={16} className="text-gray-500" />
                       <span className="font-medium">Shop Info</span>
                     </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
+                    <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
                     <button
                       onClick={() => {
                         setShowProfileMenu(false);
@@ -266,7 +266,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* Mobile Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 pb-24">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800 pb-24">
           <div className="px-4 pt-4 pb-4">
             {/* Stat Cards - shown on every page */}
             {shopId && <ShopStatCards shopId={shopId} />}
@@ -282,11 +282,11 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       <aside className="hidden md:flex w-16 lg:w-64 bg-slate-900 text-white flex-col shrink-0">
         <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800">
           <Image
-            src="/logo.png"
+            src="/logo2.svg"
             alt="BarberBook"
             width={32}
             height={32}
-            className="notranslate rounded-lg shrink-0"
+            className="notranslate shrink-0 brightness-0 invert"
           />
           <span className="hidden lg:block ml-3 font-bold text-lg tracking-tight">BarberBook</span>
         </div>
@@ -322,9 +322,9 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* Desktop Main Content */}
-      <main className="hidden md:flex flex-1 overflow-y-auto bg-gray-50 flex-col relative">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
-          <h1 className="text-xl font-semibold text-gray-800">
+      <main className="hidden md:flex flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800 dark:bg-gray-950 flex-col relative">
+        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 dark:border-gray-800 flex items-center justify-between px-8 shrink-0">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
             {navItems.find((i) => i.href === pathname)?.name || "BarberBook"}
           </h1>
           <TopNavigation serverRole="SHOP_OWNER" />

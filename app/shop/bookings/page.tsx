@@ -8,7 +8,7 @@ import { timeToMinutes } from "@/lib/timeUtils";
 import { UserAvatar } from "@/components/UserAvatar";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  all: { label: "All Bookings", color: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" },
+  all: { label: "All Bookings", color: "text-gray-700 dark:text-gray-300", bg: "bg-gray-100", dot: "bg-gray-400" },
   booked: { label: "Booked", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
   completed: { label: "Completed", color: "text-violet-700", bg: "bg-violet-50", dot: "bg-violet-500" },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", dot: "bg-red-500" },
@@ -78,13 +78,13 @@ export default function ShopBookingsPage() {
     <div className="space-y-5">
       {/* Section Header with Filter + Sort */}
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[17px] font-bold text-gray-900">Bookings</h2>
+        <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">Bookings</h2>
         <div className="flex items-center gap-2">
           {/* Sort Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-violet-200 active:bg-gray-50 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-violet-200 active:bg-gray-50 dark:bg-gray-800 transition-all shadow-sm"
             >
               {(() => {
                 const Icon = SORT_OPTIONS.find((s) => s.key === sortBy)?.icon || ArrowDownUp;
@@ -97,7 +97,7 @@ export default function ShopBookingsPage() {
               />
             </button>
             {showSortDropdown && (
-              <div className="absolute right-0 top-12 w-44 bg-white rounded-2xl shadow-xl border border-gray-200 z-20 overflow-hidden animate-fadeIn">
+              <div className="absolute right-0 top-12 w-44 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 overflow-hidden animate-fadeIn">
                 {SORT_OPTIONS.map((opt) => (
                   <button
                     key={opt.key}
@@ -108,7 +108,7 @@ export default function ShopBookingsPage() {
                     className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors ${
                       sortBy === opt.key
                         ? "bg-violet-50 text-violet-700 font-semibold"
-                        : "text-gray-700 hover:bg-gray-50"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800"
                     }`}
                   >
                     <opt.icon size={14} className="text-gray-400 shrink-0" />
@@ -122,7 +122,7 @@ export default function ShopBookingsPage() {
           <div className="relative">
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-violet-200 active:bg-gray-50 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-violet-200 active:bg-gray-50 dark:bg-gray-800 transition-all shadow-sm"
           >
             <Filter size={14} className="text-gray-400" />
             <span>{statusConfig[statusFilter].label}</span>
@@ -132,7 +132,7 @@ export default function ShopBookingsPage() {
             />
           </button>
           {showFilterDropdown && (
-            <div className="absolute right-0 top-12 w-44 bg-white rounded-2xl shadow-xl border border-gray-200 z-20 overflow-hidden animate-fadeIn">
+            <div className="absolute right-0 top-12 w-44 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 overflow-hidden animate-fadeIn">
               {Object.entries(statusConfig)
                 .filter(([key]) => key !== "pending")
                 .map(([key, config]) => {
@@ -147,7 +147,7 @@ export default function ShopBookingsPage() {
                     className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors ${
                       statusFilter === filterKey
                         ? "bg-violet-50 text-violet-700 font-semibold"
-                        : "text-gray-700 hover:bg-gray-50"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800"
                     }`}
                   >
                     <span className={`w-2 h-2 rounded-full ${config.dot} shrink-0`} />
@@ -168,11 +168,11 @@ export default function ShopBookingsPage() {
         </div>
       ) : filteredBookings.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-10 text-center">
           <div className="w-16 h-16 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-4">
             <Calendar size={28} className="text-violet-400" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">No bookings found</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No bookings found</h3>
           <p className="text-sm text-gray-500">
             {statusFilter === "all"
               ? "When clients book your services, they'll appear here."
@@ -191,7 +191,7 @@ export default function ShopBookingsPage() {
             return (
               <div
                 key={booking.id}
-                className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden active:scale-[0.99] transition-transform"
+                className="bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 overflow-hidden active:scale-[0.99] transition-transform"
               >
                 <div className="p-4">
                   {/* Top: Avatar + Name + Status */}
@@ -203,12 +203,12 @@ export default function ShopBookingsPage() {
                         fallbackClassName="bg-violet-100 text-violet-700 font-bold text-sm"
                       />
                       <div>
-                        <p className="text-[15px] font-bold text-gray-900">
+                        <p className="text-[15px] font-bold text-gray-900 dark:text-white">
                           {booking.user?.name || "Unknown Client"}
                         </p>
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
                           <Scissors size={12} className="text-gray-400" />
-                          <span className="font-semibold text-gray-700">{servicesCount}</span>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">{servicesCount}</span>
                           <span>service{servicesCount !== 1 ? "s" : ""}</span>
                         </div>
                       </div>
@@ -217,12 +217,12 @@ export default function ShopBookingsPage() {
                   </div>
 
                   {/* Date & Time Row */}
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-xl px-3.5 py-2.5">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2.5">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                       <Calendar size={13} className="text-gray-400" />
                       <span className="font-medium">{booking.slotDate}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                       <Clock size={13} className="text-gray-400" />
                       <span className="font-medium">{booking.slotStartTime}</span>
                     </div>

@@ -28,7 +28,7 @@ export function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+        className="flex items-center gap-1.5 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 transition-colors"
         title="Change Language"
       >
         <Globe size={18} />
@@ -40,14 +40,14 @@ export function LanguageSwitcher() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden animate-fadeIn">
+          <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 z-50 overflow-hidden animate-fadeIn">
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleChangeLanguage(lang.code)}
                 className="w-full text-left px-4 py-2.5 text-sm hover:bg-violet-50 transition-colors flex items-center justify-between"
               >
-                <span className={language === lang.code ? "text-violet-600 font-bold" : "text-gray-700"}>
+                <span className={language === lang.code ? "text-violet-600 font-bold" : "text-gray-700 dark:text-gray-300"}>
                   {lang.label}
                 </span>
                 {language === lang.code && <Check size={14} className="text-violet-600" />}

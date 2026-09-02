@@ -55,7 +55,7 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
 
     if (bookings.length === 0) {
         return (
-            <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+            <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
                 No appointments scheduled for today.
             </div>
         );
@@ -79,12 +79,12 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                     <div key={booking.id} className={`p-4 rounded-xl border transition-colors ${
                       isOvertime 
                         ? "border-red-200 bg-red-50" 
-                        : "border-gray-100 bg-gray-50 hover:border-indigo-200"
+                        : "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 hover:border-indigo-200"
                     }`}>
                         <div className="flex items-start justify-between mb-3">
                             <div>
-                                <p className="font-bold text-gray-900">{booking.user?.name || "Unknown Client"}</p>
-                                <p className="text-sm text-gray-600 mt-0.5 truncate max-w-[200px] lg:max-w-[300px]">
+                                <p className="font-bold text-gray-900 dark:text-white">{booking.user?.name || "Unknown Client"}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate max-w-[200px] lg:max-w-[300px]">
                                     {servicesList} ({totalDuration} mins)
                                 </p>
                             </div>
@@ -100,7 +100,7 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
                             </div>
                         </div>
                         
-                        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                             {isOvertime ? (
                               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-100 px-2.5 py-1 rounded-md animate-pulse">
                                 <Timer size={14} className="text-red-500" />
@@ -139,15 +139,15 @@ export function TodaysSchedule({ initialBookings }: { initialBookings: any[] }) 
             
             {cancelModalId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel Booking?</h3>
-                        <p className="text-sm text-gray-600 mb-6">Are you sure you want to cancel this booking? The client will be notified immediately.</p>
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Cancel Booking?</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to cancel this booking? The client will be notified immediately.</p>
                         
                         <div className="flex items-center gap-3 w-full">
                             <button 
                                 onClick={() => setCancelModalId(null)}
                                 disabled={processingId === cancelModalId}
-                                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
                             >
                                 Keep it
                             </button>

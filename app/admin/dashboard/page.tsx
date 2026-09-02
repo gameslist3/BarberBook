@@ -59,14 +59,14 @@ export default async function AdminDashboard() {
           return (
             <div
               key={i}
-              className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3 active:scale-[0.98] transition-transform"
+              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-3 active:scale-[0.98] transition-transform"
             >
               <div className={`p-2.5 rounded-xl ${stat.lightColor} ${stat.textColor} shrink-0`}>
                 <Icon size={20} />
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">{stat.label}</p>
-                <h3 className="text-xl font-bold text-gray-900 mt-0.5">{stat.value}</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{stat.value}</h3>
               </div>
             </div>
           );
@@ -74,10 +74,10 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Recent Activity - Mobile responsive */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-3.5 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3.5 border-b border-gray-100 dark:border-gray-800">
           <Activity size={18} className="text-indigo-500" />
-          <h2 className="text-[15px] font-bold text-gray-900">Recent Activity</h2>
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Recent Activity</h2>
         </div>
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
           <Activity size={32} className="text-gray-200 mb-3" />

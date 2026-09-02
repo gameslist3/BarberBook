@@ -63,7 +63,7 @@ export default function LocationPickerMap({
         zoom={position ? 15 : 12} 
         scrollWheelZoom={true}
         style={{ touchAction: 'none' }}
-        className="h-full w-full rounded-xl z-0 relative shadow-sm border border-gray-200"
+        className="h-full w-full rounded-xl z-0 relative shadow-sm border border-gray-200 dark:border-gray-700"
     >
       <TileLayer
         attribution='&copy; OpenStreetMap contributors'

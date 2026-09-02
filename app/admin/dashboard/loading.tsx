@@ -7,7 +7,7 @@ export default function AdminDashboardLoading() {
       {/* Stats Grid Skeleton */}
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
+          <div key={i} className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-gray-100 shrink-0">
               <div className="w-5 h-5 bg-gray-200 rounded animate-shimmer" />
             </div>
@@ -20,8 +20,8 @@ export default function AdminDashboardLoading() {
       </div>
 
       {/* Recent Activity Skeleton */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-3.5 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3.5 border-b border-gray-100 dark:border-gray-800">
           <Activity size={18} className="text-gray-200" />
           <div className="h-4 w-28 bg-gray-100 rounded animate-shimmer" />
         </div>

@@ -77,19 +77,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentPageName = navItems.find(i => i.href === pathname)?.name || "Admin Portal";
 
   return (
-    <div className="flex h-[100dvh] bg-gray-50 overflow-hidden w-full relative">
+    <div className="flex h-[100dvh] bg-gray-50 dark:bg-gray-800 overflow-hidden w-full relative">
       {/* ========== MOBILE LAYOUT ========== */}
       <div className="flex flex-col h-full w-full md:hidden">
         {/* Mobile Top Header */}
-        <header className="shrink-0 bg-white border-b border-gray-200 px-4 h-14 flex items-center justify-between z-30">
+        <header className="shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 h-14 flex items-center justify-between z-30">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-1.5 -ml-1.5 rounded-lg text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+              className="p-1.5 -ml-1.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 active:bg-gray-200 transition-colors"
             >
               {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <h1 className="text-[17px] font-semibold text-gray-900">{currentPageName}</h1>
+            <h1 className="text-[17px] font-semibold text-gray-900 dark:text-white">{currentPageName}</h1>
           </div>
           <div className="flex items-center gap-0.5">
             <LanguageSwitcher />
@@ -122,21 +122,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <User size={16} />
               </button>
               {showProfileMenu && (
-                <div className="absolute right-0 top-11 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <p className="text-sm font-bold text-gray-900 truncate">Admin</p>
-                    <p className="text-xs text-gray-600 truncate">App Owner</p>
+                <div className="absolute right-0 top-11 w-52 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[100] overflow-hidden animate-fadeIn">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">Admin</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">App Owner</p>
                   </div>
                   <div className="py-1">
                     <Link
                       href="/admin/dashboard"
                       onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800 transition-colors"
                     >
                       <Shield size={16} className="text-gray-500" />
                       <span className="font-medium">Admin Dashboard</span>
                     </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
+                    <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
                     <button
                       onClick={() => {
                         setShowProfileMenu(false);
@@ -159,21 +159,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="fixed inset-0 z-20" onClick={() => setShowMobileMenu(false)}>
             <div className="absolute inset-0 bg-black/40" />
             <div
-              className="absolute left-0 top-14 bottom-0 w-64 bg-white shadow-2xl animate-slideInLeft"
+              className="absolute left-0 top-14 bottom-0 w-64 bg-white dark:bg-gray-900 shadow-2xl animate-slideInLeft"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b border-gray-100">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-3">
                   <Image
-                    src="/logo.png"
+                    src="/logo2.svg"
                     alt="BarberBook"
                     width={36}
                     height={36}
-                    className="notranslate rounded-lg shrink-0"
+                    className="notranslate shrink-0"
+                    style={{ objectFit: 'contain' }}
                   />
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">Admin Portal</p>
-                    <p className="text-xs text-gray-600">App Owner</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">Admin Portal</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">App Owner</p>
                   </div>
                 </div>
               </div>
@@ -189,7 +190,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
                         isActive
                           ? "bg-indigo-50 text-indigo-700 font-semibold"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800 hover:text-gray-900 dark:text-white"
                       }`}
                     >
                       <div
@@ -204,7 +205,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   );
                 })}
               </nav>
-              <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
+              <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => {
                     setShowMobileMenu(false);
@@ -221,12 +222,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
 
         {/* Mobile Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 pb-16">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800 pb-16">
           <div className="px-4 py-4">{children}</div>
         </main>
 
         {/* Mobile Bottom Tab Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-30 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
           <div className="flex items-center justify-around h-16">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -236,7 +237,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.name}
                   href={item.href}
                   className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 relative ${
-                    isActive ? "text-indigo-600" : "text-gray-500 hover:text-gray-700"
+                    isActive ? "text-indigo-600" : "text-gray-500 hover:text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {isActive && (
@@ -256,11 +257,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="hidden md:flex w-64 bg-slate-900 text-white flex-col shrink-0">
         <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
           <Image
-            src="/logo.png"
+            src="/logo2.svg"
             alt="BarberBook"
             width={28}
             height={28}
-            className="notranslate rounded-lg shrink-0"
+            className="notranslate shrink-0 brightness-0 invert"
           />
           <span className="font-bold text-lg tracking-tight">Admin</span>
         </div>
@@ -297,8 +298,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Desktop Main Content */}
       <main className="hidden md:flex flex-1 flex-col min-h-screen overflow-hidden">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
-          <h1 className="text-xl font-semibold text-gray-800">{currentPageName}</h1>
+        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-8 shrink-0">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{currentPageName}</h1>
           <TopNavigation serverRole="ADMIN" />
         </header>
         <div className="flex-1 overflow-auto p-8">

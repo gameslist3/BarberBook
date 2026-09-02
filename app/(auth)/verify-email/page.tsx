@@ -68,22 +68,22 @@ export default function VerifyEmailPage() {
 
   if (!email) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-800">
         <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-800 px-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 dark:border-gray-900 text-center">
         <div className="flex justify-center">
             <div className="bg-violet-50 p-4 rounded-full">
                 <Mail className="w-10 h-10 text-violet-600" />
             </div>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Verify your email</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Verify your email</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           We've sent a verification link to <span className="font-semibold">{email}</span>. Please click the link to verify your account.
         </p>
         

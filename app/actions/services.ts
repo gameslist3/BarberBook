@@ -77,3 +77,22 @@ export async function toggleServiceStatus(serviceId: string, isActive: boolean) 
     return { success: false, error: error.message };
   }
 }
+
+
+export async function editService(serviceId: string, data: { name: string; price: number; duration: number }) {
+  try {
+    const user = await getServerUser();
+    if (!user || user.role !== "SHOP_OWNER") throw new Error("Unauthorized");
+    
+    await adminDb.collection("services").doc(serviceId).update({
+        name: data.name,
+        price: data.price,
+        duration: data.duration
+    });
+    
+    revalidatePath("/shop/services");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

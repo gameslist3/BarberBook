@@ -127,12 +127,12 @@ export function TimeSelectDropdown({ value, onChange, placeholder = "Select time
           w-full h-11 px-3.5 rounded-xl border text-left text-sm flex items-center justify-between gap-2
           transition-all duration-150 outline-none cursor-pointer
           ${isOpen
-            ? "border-violet-300 ring-2 ring-violet-100 bg-white"
-            : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white"
+            ? "border-violet-300 ring-2 ring-violet-100 bg-white dark:bg-gray-900"
+            : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 hover:bg-white dark:bg-gray-900"
           }
         `}
       >
-        <span className={`truncate ${value ? "text-gray-900 font-medium" : "text-gray-400"}`}>
+        <span className={`truncate ${value ? "text-gray-900 dark:text-white font-medium" : "text-gray-400"}`}>
           {value || placeholder}
         </span>
         <ChevronDown
@@ -144,7 +144,7 @@ export function TimeSelectDropdown({ value, onChange, placeholder = "Select time
       {isOpen && position && mounted && createPortal(
         <div
           ref={panelRef}
-          className="fixed z-[99999] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+          className="fixed z-[99999] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
           style={{ top: position.top, left: position.left, width: position.width }}
         >
           <div ref={listRef} className="max-h-60 overflow-y-auto py-1 custom-scrollbar">
@@ -176,7 +176,7 @@ export function TimeSelectDropdown({ value, onChange, placeholder = "Select time
                       transition-colors relative cursor-pointer
                       ${isSelected
                         ? "text-violet-700 font-semibold bg-violet-50"
-                        : "text-gray-700 hover:bg-gray-50"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800"
                       }
                     `}
                   >

@@ -4,6 +4,7 @@ import { Shield } from "lucide-react";
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
 import { UserProfileEditor } from "@/components/UserProfileEditor";
+import { ProfileAppearanceCard } from "@/components/ProfileAppearanceCard";
 
 export default async function ProfilePage() {
   const user = await getServerUser();
@@ -13,23 +14,26 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 lg:py-12 pb-24 w-full">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Your Profile</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Profile</h1>
 
       {/* Shared editor: photo, name, locked email + phone — works for every role */}
       <UserProfileEditor />
 
+      {/* Theme / Appearance selection for clients */}
+      <ProfileAppearanceCard />
+
       {(user.role === 'ADMIN' || user.role === 'APP_OWNER') && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden mt-6">
           <div className="p-2">
-            <Link href="/admin/dashboard" className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+            <Link href="/admin/dashboard" className="flex items-center gap-3 p-4 hover:bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
               <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Shield size={18} /></div>
-              <div className="flex-1 font-medium text-gray-900 text-sm">Admin Panel</div>
+              <div className="flex-1 font-medium text-gray-900 dark:text-white text-sm">Admin Panel</div>
             </Link>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-red-100 overflow-hidden mt-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-red-100 overflow-hidden mt-6">
         <div className="p-2">
           <LogoutButton />
         </div>

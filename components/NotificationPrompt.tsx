@@ -73,7 +73,7 @@ export function NotificationPrompt() {
             setShow(true);
           }
         }}
-        className="fixed bottom-24 right-4 z-50 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-3 shadow-lg hover:bg-white/20 transition-all"
+        className="fixed bottom-24 right-4 z-50 bg-white dark:bg-gray-900/10 backdrop-blur-md border border-white/20 rounded-full p-3 shadow-lg hover:bg-white dark:bg-gray-900/20 transition-all"
         title={enabled ? "Disable notifications" : "Enable notifications"}
       >
         {enabled ? (
@@ -97,7 +97,7 @@ export function NotificationPrompt() {
         </button>
 
         {/* Icon */}
-        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-3">
+        <div className="w-12 h-12 bg-white dark:bg-gray-900/10 rounded-xl flex items-center justify-center mb-3">
           <Bell className="w-6 h-6 text-white" />
         </div>
 
@@ -114,7 +114,7 @@ export function NotificationPrompt() {
           <button
             onClick={handleEnable}
             disabled={loading}
-            className="flex-1 bg-white text-black font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="flex-1 bg-white dark:bg-gray-900 text-black font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             {loading ? "Setting up..." : "Enable Notifications"}
           </button>

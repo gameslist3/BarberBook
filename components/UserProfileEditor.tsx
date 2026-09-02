@@ -118,7 +118,7 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden animate-pulse">
         <div className="p-5 md:p-6 space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-gray-100" />
@@ -127,22 +127,22 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
               <div className="h-3 w-24 bg-gray-100 rounded" />
             </div>
           </div>
-          <div className="h-12 w-full bg-gray-100 rounded-xl" />
-          <div className="h-12 w-full bg-gray-100 rounded-xl" />
-          <div className="h-12 w-full bg-gray-100 rounded-xl" />
+          <div className="h-12 w-full bg-gray-100 rounded-[20px]" />
+          <div className="h-12 w-full bg-gray-100 rounded-[20px]" />
+          <div className="h-12 w-full bg-gray-100 rounded-[20px]" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
       <div className="p-5 md:p-6">
         {/* Header: photo + title + role badge */}
         <div className="flex items-center gap-4 mb-5">
           <ProfilePhotoManager user={{ id: userId, name, photoUrl }} />
           <div>
-            <h2 className="text-base font-bold text-gray-900">Personal Profile</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Personal Profile</h2>
             <p className="text-xs text-gray-500 mt-0.5">Update your details — email can't be changed.</p>
             {role && (
               <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-50 text-violet-700">
@@ -155,7 +155,7 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
         <div className="space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 text-gray-700 dark:text-gray-300 mb-1.5">Full Name</label>
             <input
               type="text"
               maxLength={60}
@@ -167,29 +167,29 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
                 if (errorField) setErrorField(null);
                 if (saved) setSaved(false);
               }}
-              className={`w-full h-12 px-4 rounded-xl border text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+              className={`w-full h-12 px-4 rounded-[20px] border text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white dark:bg-gray-900 transition-all ${
                 errorField === "name"
                   ? "border-red-300 bg-red-50 focus:ring-red-200 focus:border-red-400"
-                  : "border-gray-200 bg-gray-50 focus:ring-violet-300 focus:border-violet-400"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-violet-300 focus:border-violet-400"
               }`}
             />
           </div>
 
           {/* Email — read-only */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 text-gray-700 dark:text-gray-300 mb-1.5">
               <span className="inline-flex items-center gap-1.5">
                 <Lock size={13} className="text-gray-400" />
                 Email (can't be changed)
               </span>
             </label>
             <div className="relative">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Mail size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="email"
                 readOnly
                 value={email}
-                className="w-full h-12 pl-11 pr-4 rounded-xl border border-gray-100 bg-gray-50/60 text-sm text-gray-500 cursor-not-allowed"
+                className="w-full h-12 pl-11 pr-4 rounded-[20px] border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60 text-sm text-gray-500 cursor-not-allowed"
               />
             </div>
           </div>
@@ -198,9 +198,9 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
               the Shop Information section) */}
           {showPhone && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number</label>
+              <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 text-gray-700 dark:text-gray-300 mb-1.5">Phone Number</label>
               <div className="relative">
-                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Phone size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="tel"
                   inputMode="tel"
@@ -214,10 +214,10 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
                     if (errorField) setErrorField(null);
                     if (saved) setSaved(false);
                   }}
-                  className={`w-full h-12 pl-11 pr-4 rounded-xl border text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                  className={`w-full h-12 pl-11 pr-4 rounded-[20px] border text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:bg-white dark:bg-gray-900 transition-all ${
                     errorField === "phone"
                       ? "border-red-300 bg-red-50 focus:ring-red-200 focus:border-red-400"
-                      : "border-gray-200 bg-gray-50 focus:ring-violet-300 focus:border-violet-400"
+                      : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:ring-violet-300 focus:border-violet-400"
                   }`}
                 />
               </div>
@@ -236,9 +236,9 @@ export function UserProfileEditor({ showPhone = true }: { showPhone?: boolean })
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center justify-center gap-2 px-5 h-12 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-violet-200 w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 px-5 h-12 rounded-[20px] bg-violet-600 text-white text-sm font-bold uppercase tracking-wider text-gray-500 hover:bg-violet-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-violet-200 w-full sm:w-auto"
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : saved ? <CheckCircle2 size={16} /> : <Save size={16} />}
+              {saving ? <Loader2 size={20} className="animate-spin" /> : saved ? <CheckCircle2 size={20} /> : <Save size={20} />}
               {saving ? "Saving..." : saved ? "Saved" : "Save Changes"}
             </button>
           )}

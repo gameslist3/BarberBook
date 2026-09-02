@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info, CalendarX, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, MapPin, Upload, X, Image as ImageIcon, Store, Phone, Clock, Info, CalendarX, Plus, Trash2, Sun, Moon, Monitor } from "lucide-react";
 import { SkeletonForm } from "@/components/Skeleton";
 import { getShopProfile, updateShopProfile } from "@/app/actions/shop";
 import { TimeSelectDropdown } from "@/components/TimeSelectDropdown";
@@ -9,8 +9,30 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 import { uploadImage } from "@/lib/uploadImage";
 import { SafeImage } from "@/components/SafeImage";
+import { getKolkataDateString } from "@/lib/timeUtils";
+import { useTheme } from "@/components/ThemeProvider";
+
+// Convert a local date string (YYYY-MM-DD from date picker) to Kolkata date string
+// Date picker returns midnight in user's local timezone; we need the Kolkata date at that moment
+function localDateToKolkataDate(localDateStr: string): string {
+  // Parse as local midnight
+  const localDate = new Date(localDateStr + "T00:00:00");
+  // Format as Kolkata date manually
+  const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+  });
+  const parts = formatter.formatToParts(localDate);
+  const year = parts.find(p => p.type === 'year')?.value;
+  const month = parts.find(p => p.type === 'month')?.value?.padStart(2, '0');
+  const day = parts.find(p => p.type === 'day')?.value?.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export default function ShopSettingsPage() {
+  const { theme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -142,25 +164,80 @@ export default function ShopSettingsPage() {
   // Holidays state
   const [showAddHoliday, setShowAddHoliday] = useState(false);
   const [holidayDate, setHolidayDate] = useState("");
+  const [holidayEndDate, setHolidayEndDate] = useState("");
   const [holidayReason, setHolidayReason] = useState("");
 
-  const addHoliday = () => {
-    if (!holidayDate) return;
-    setFormData((prev) => ({
-      ...prev,
-      holidays: { ...prev.holidays, [holidayDate]: holidayReason },
-    }));
-    setHolidayDate("");
-    setHolidayReason("");
-    setShowAddHoliday(false);
+  // Helper to increment a YYYY-MM-DD date string by one day (pure string math, no timezone)
+  const incrementDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    // Days in each month (non-leap year)
+    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    // Check leap year for February
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const dim = month === 2 && isLeap ? 29 : daysInMonth[month - 1];
+    
+    let newDay = day + 1;
+    let newMonth = month;
+    let newYear = year;
+    
+    if (newDay > dim) {
+      newDay = 1;
+      newMonth++;
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      }
+    }
+    
+    return [
+      newYear,
+      String(newMonth).padStart(2, '0'),
+      String(newDay).padStart(2, '0')
+    ].join('-');
   };
 
-  const removeHoliday = (date: string) => {
-    setFormData((prev) => {
-      const updated = { ...prev.holidays };
-      delete updated[date];
-      return { ...prev, holidays: updated };
-    });
+  const addHoliday = async () => {
+    if (!holidayDate) return;
+
+    const startDate = holidayDate;
+    const endDate = holidayEndDate && holidayEndDate > holidayDate ? holidayEndDate : holidayDate;
+
+    const newHolidays = { ...formData.holidays };
+
+    if (endDate > startDate) {
+      let current = startDate;
+      while (current <= endDate) {
+        newHolidays[current] = holidayReason;
+        current = incrementDate(current);
+      }
+    } else {
+      newHolidays[startDate] = holidayReason;
+    }
+
+    const updatedForm = { ...formData, holidays: newHolidays };
+
+    // Update local state
+    setFormData(updatedForm);
+    setHolidayDate("");
+    setHolidayEndDate("");
+    setHolidayReason("");
+    setShowAddHoliday(false);
+
+    // Save to Firestore
+    setIsSaving(true);
+    await updateShopProfile(updatedForm);
+    setIsSaving(false);
+  };
+
+  const removeHoliday = async (date: string) => {
+    const updatedHolidays = { ...formData.holidays };
+    delete updatedHolidays[date];
+    const updatedForm = { ...formData, holidays: updatedHolidays };
+
+    setFormData(updatedForm);
+    setIsSaving(true);
+    await updateShopProfile(updatedForm);
+    setIsSaving(false);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -190,45 +267,45 @@ export default function ShopSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-8">
         <SkeletonForm />
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Alerts */}
       {error && (
-        <div className="bg-red-50 text-red-700 p-3.5 rounded-2xl text-sm border border-red-100 flex items-start gap-2.5">
+        <div className="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 p-3.5 rounded-[20px] text-sm border border-red-100 dark:border-red-900 flex items-start gap-2.5">
           <X size={16} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {success && (
-        <div className="bg-green-50 text-green-700 p-3.5 rounded-2xl text-sm border border-green-100 flex items-center gap-2.5">
+        <div className="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-3.5 rounded-[20px] text-sm border border-green-100 dark:border-green-900 flex items-center gap-2.5">
           <Save size={16} className="shrink-0" />
           <span>Profile updated successfully!</span>
         </div>
       )}
 
       {/* Section: Shop Information */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
-        <div className="px-4 py-4 border-b border-gray-50">
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900 dark:border-gray-800">
           <div className="flex items-center gap-2.5">
             <Store size={18} className="text-violet-600" />
-            <h2 className="text-[15px] font-bold text-gray-900">Shop Information</h2>
+            <h2 className="text-[15px] font-bold text-gray-900 dark:text-white dark:text-gray-100">Shop Information</h2>
           </div>
         </div>
         <div className="p-4 space-y-4">
           {/* Shop Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Shop Name</label>
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2.5">Shop Name</label>
             <input
               required
               type="text"
               placeholder="Your barber shop name"
-              className="w-full h-12 px-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+              className="w-full h-14 px-4 rounded-[20px] border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-gray-50 dark:bg-gray-800 text-sm transition-all"
               value={formData.shopName}
               onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
             />
@@ -236,7 +313,7 @@ export default function ShopSettingsPage() {
 
           {/* About */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2.5">
               <div className="flex items-center gap-1.5">
                 <Info size={14} className="text-gray-400" />
                 About the Shop
@@ -245,7 +322,7 @@ export default function ShopSettingsPage() {
             <textarea
               rows={3}
               placeholder="Tell clients about your barbershop..."
-              className="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 resize-none bg-gray-50 text-sm transition-all"
+              className="w-full p-4 rounded-[20px] border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white dark:text-gray-100 resize-none bg-gray-50 dark:bg-gray-800 text-sm transition-all"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
@@ -253,14 +330,14 @@ export default function ShopSettingsPage() {
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number</label>
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2.5">Phone Number</label>
             <div className="relative">
-              <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Phone size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 required
                 type="tel"
                 placeholder="(555) 123-4567"
-                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                className="w-full h-14 pl-10 pr-3.5 rounded-[20px] border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-gray-50 dark:bg-gray-800 text-sm transition-all"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />
@@ -269,14 +346,14 @@ export default function ShopSettingsPage() {
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Address</label>
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2.5">Address</label>
             <div className="relative">
-              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MapPin size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 required
                 type="text"
                 placeholder="123 Main St, City, State"
-                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                className="w-full h-14 pl-10 pr-3.5 rounded-[20px] border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-gray-50 dark:bg-gray-800 text-sm transition-all"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               />
@@ -285,14 +362,14 @@ export default function ShopSettingsPage() {
 
           {/* Google Maps Link */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Google Maps Link</label>
+            <label className="block text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-2.5">Google Maps Link</label>
             <div className="relative">
-              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MapPin size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 required
                 type="text"
                 placeholder="https://maps.app.goo.gl/..."
-                className="w-full h-12 pl-10 pr-3.5 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 bg-gray-50 text-sm transition-all"
+                className="w-full h-14 pl-10 pr-3.5 rounded-[20px] border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-gray-50 dark:bg-gray-800 text-sm transition-all"
                 value={formData.googleMapLink}
                 onChange={(e) => setFormData({ ...formData, googleMapLink: e.target.value })}
               />
@@ -308,18 +385,18 @@ export default function ShopSettingsPage() {
           <div className="pt-2">
             <div className="flex items-center gap-2.5 mb-4">
               <Clock size={16} className="text-violet-500" />
-              <span className="text-sm font-semibold text-gray-800">Business Hours</span>
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Business Hours</span>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening</label>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2.5">Opening</label>
                 <TimeSelectDropdown
                   value={formData.openTime}
                   onChange={(v) => setFormData({ ...formData, openTime: v })}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Closing</label>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2.5">Closing</label>
                 <TimeSelectDropdown
                   value={formData.closeTime}
                   onChange={(v) => setFormData({ ...formData, closeTime: v })}
@@ -329,7 +406,7 @@ export default function ShopSettingsPage() {
           </div>
 
           {/* Divider */}
-          <div className="h-px bg-gray-100" />
+          <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
           {/* ═══════════════════════════════════════════ */}
           {/* Lunch Break */}
@@ -337,18 +414,18 @@ export default function ShopSettingsPage() {
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <Clock size={16} className="text-amber-500" />
-              <span className="text-sm font-semibold text-gray-800">Lunch Break</span>
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Lunch Break</span>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Starts at</label>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2.5">Starts at</label>
                 <TimeSelectDropdown
                   value={formData.lunchStartTime}
                   onChange={(v) => setFormData({ ...formData, lunchStartTime: v })}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Ends at</label>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2.5">Ends at</label>
                 <TimeSelectDropdown
                   value={formData.lunchEndTime}
                   onChange={(v) => setFormData({ ...formData, lunchEndTime: v })}
@@ -363,15 +440,15 @@ export default function ShopSettingsPage() {
       </div>
 
       {/* Section: Shop Logo */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
-        <div className="px-4 py-4 border-b border-gray-50">
-          <h2 className="text-[15px] font-bold text-gray-900">Shop Logo</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900 dark:border-gray-800">
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white dark:text-gray-100">Shop Logo</h2>
         </div>
         <div className="p-4">
           <div className="flex items-center gap-4">
             {/* Logo Preview */}
             {formData.logoUrl ? (
-              <div className="relative w-20 h-20 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-sm">
+              <div className="relative w-20 h-20 rounded-[20px] border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-sm">
                 <SafeImage
                   src={formData.logoUrl}
                   alt="Logo"
@@ -380,12 +457,12 @@ export default function ShopSettingsPage() {
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
+              <div className="w-20 h-20 rounded-[20px] border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center shrink-0">
                 <ImageIcon className="text-gray-300 w-7 h-7" />
               </div>
             )}
             {/* Upload Button */}
-            <label className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 bg-violet-50 text-violet-700 hover:bg-violet-100 active:bg-violet-200 rounded-2xl text-sm font-semibold transition-all">
+            <label className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900 active:bg-violet-200 rounded-[20px] text-sm font-semibold transition-all">
               <Upload size={16} />
               Upload
               <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
@@ -396,19 +473,19 @@ export default function ShopSettingsPage() {
       </div>
 
       {/* Section: Gallery */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
-        <div className="px-4 py-4 border-b border-gray-50">
-          <h2 className="text-[15px] font-bold text-gray-900">Gallery</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900 dark:border-gray-800">
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white dark:text-gray-100">Gallery</h2>
         </div>
         <div className="p-4">
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
             Upload photos of your shop, your team, or your best haircuts.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {formData.images.map((img, idx) => (
               <div
                 key={idx}
-                className="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 shadow-sm group"
+                className="relative aspect-square rounded-[20px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm group"
               >
                 <SafeImage
                   src={img}
@@ -426,7 +503,7 @@ export default function ShopSettingsPage() {
               </div>
             ))}
             {/* Add Image Button */}
-            <label className="relative aspect-square rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-400 bg-gray-50 flex flex-col items-center justify-center cursor-pointer transition-all group">
+            <label className="relative aspect-square rounded-[20px] border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-violet-400 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center cursor-pointer transition-all group">
               {isUploadingGallery ? (
                 <Loader2 className="w-5 h-5 animate-spin text-violet-500 mb-1" />
               ) : (
@@ -448,17 +525,17 @@ export default function ShopSettingsPage() {
       </div>
 
       {/* Section: Holidays / Off-Days */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 overflow-hidden">
-        <div className="px-4 py-4 border-b border-gray-50">
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900 dark:border-gray-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <CalendarX size={18} className="text-red-500" />
-              <h2 className="text-[15px] font-bold text-gray-900">Holidays / Off-Days</h2>
+              <h2 className="text-[15px] font-bold text-gray-900 dark:text-white dark:text-gray-100">Holidays / Off-Days</h2>
             </div>
             <button
               type="button"
               onClick={() => setShowAddHoliday(!showAddHoliday)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 rounded-xl text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 active:bg-red-200 rounded-xl text-xs font-semibold transition-all"
             >
               <Plus size={14} />
               Add
@@ -471,45 +548,60 @@ export default function ShopSettingsPage() {
         <div className="p-4">
           {/* Add Holiday Form */}
           {showAddHoliday && (
-            <div className="mb-4 p-3.5 bg-red-50 rounded-2xl border border-red-100 space-y-3">
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={holidayDate}
-                    onChange={(e) => setHolidayDate(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-red-200 focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none text-gray-900 bg-white text-sm"
-                  />
+            <div className="mb-4 p-4 bg-red-50/60 dark:bg-red-950/60 rounded-[20px] border border-red-100 dark:border-red-900">
+              <div className="space-y-3">
+                {/* Date row */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">From</label>
+                    <input
+                      type="date"
+                      value={holidayDate}
+                      onChange={(e) => setHolidayDate(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-red-200/80 dark:border-red-800 focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-white dark:bg-gray-900 dark:bg-gray-800 text-sm transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">To (optional)</label>
+                    <input
+                      type="date"
+                      min={holidayDate}
+                      value={holidayEndDate}
+                      onChange={(e) => setHolidayEndDate(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-red-200/80 dark:border-red-800 focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-white dark:bg-gray-900 dark:bg-gray-800 text-sm transition-all"
+                    />
+                  </div>
                 </div>
+                {/* Reason */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Reason (optional)</label>
+                  <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">Reason</label>
                   <input
                     type="text"
                     placeholder="e.g. Republic Day"
                     value={holidayReason}
                     onChange={(e) => setHolidayReason(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-red-200 focus:ring-2 focus:ring-red-400 focus:border-red-400 outline-none text-gray-900 bg-white text-sm"
+                    className="w-full h-11 px-3.5 rounded-xl border border-red-200/80 dark:border-red-800 focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none text-gray-900 dark:text-white dark:text-gray-100 bg-white dark:bg-gray-900 dark:bg-gray-800 text-sm placeholder-gray-400 transition-all"
                   />
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={addHoliday}
-                  disabled={!holidayDate}
-                  className="flex-1 h-9 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700 active:bg-red-800 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Plus size={14} />
-                  Add Holiday
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowAddHoliday(false); setHolidayDate(""); setHolidayReason(""); }}
-                  className="h-9 px-4 rounded-xl border border-gray-200 text-gray-600 text-xs font-medium hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
+                {/* Actions */}
+                <div className="flex items-center gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={addHoliday}
+                    disabled={!holidayDate}
+                    className="flex-1 h-11 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 active:bg-red-800 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <Plus size={15} />
+                    Add Holiday
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowAddHoliday(false); setHolidayDate(""); setHolidayEndDate(""); setHolidayReason(""); }}
+                    className="h-11 px-5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-800 active:bg-gray-100 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -517,9 +609,11 @@ export default function ShopSettingsPage() {
           {/* Holiday List */}
           {Object.keys(formData.holidays).length === 0 ? (
             <div className="py-8 text-center">
-              <CalendarX className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-2.5">
+                <CalendarX className="w-5 h-5 text-gray-300" />
+              </div>
               <p className="text-sm text-gray-400 font-medium">No holidays set</p>
-              <p className="text-xs text-gray-300 mt-0.5">Your shop is open every day</p>
+              <p className="text-xs text-gray-300 dark:text-gray-600 dark:text-gray-400 mt-0.5">Your shop is open every day</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -536,29 +630,69 @@ export default function ShopSettingsPage() {
                   return (
                     <div
                       key={date}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"
+                      className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-800 dark:border-gray-700 hover:border-gray-200 dark:border-gray-700 dark:hover:border-gray-600 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center">
-                          <CalendarX size={16} className="text-red-500" />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950 flex items-center justify-center shrink-0">
+                          <CalendarX size={16} className="text-red-400" />
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">{display}</p>
-                          {reason && <p className="text-xs text-gray-500 mt-0.5">{reason}</p>}
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-semibold text-gray-900 dark:text-white dark:text-gray-100 truncate">{display}</p>
+                          {reason && <p className="text-[11px] text-gray-400 mt-0.5 truncate">{reason}</p>}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeHoliday(date)}
-                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-all shrink-0 ml-2"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   );
                 })}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Section: Appearance / Theme */}
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900 dark:border-gray-800">
+          <div className="flex items-center gap-2.5">
+            {theme === "dark" ? <Moon size={18} className="text-violet-600" /> : <Sun size={18} className="text-violet-600" />}
+            <h2 className="text-[15px] font-bold text-gray-900 dark:text-white dark:text-gray-100">Appearance</h2>
+          </div>
+        </div>
+        <div className="p-4">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Choose your preferred theme</p>
+          <div className="flex gap-3">
+            {[
+              { key: "light" as const, label: "Light", icon: Sun },
+              { key: "dark" as const, label: "Dark", icon: Moon },
+              { key: "system" as const, label: "System", icon: Monitor },
+            ].map((opt) => {
+              const Icon = opt.icon;
+              const isActive = theme === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setTheme(opt.key)}
+                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-[20px] border-2 transition-all ${
+                    isActive
+                      ? "border-violet-500 bg-violet-50 dark:bg-violet-950"
+                      : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
+                  }`}
+                >
+                  <Icon size={22} className={isActive ? "text-violet-600" : "text-gray-400 dark:text-gray-500"} />
+                  <span className={`text-sm font-semibold ${isActive ? "text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-400"}`}>
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -569,7 +703,7 @@ export default function ShopSettingsPage() {
             type="submit"
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 transition-all shadow-lg shadow-violet-200"
+            className="w-full flex items-center justify-center gap-2 h-12 rounded-[20px] bg-violet-600 text-white font-semibold text-sm hover:bg-violet-700 active:bg-violet-800 disabled:opacity-50 transition-all shadow-lg shadow-violet-200"
           >
             {isSaving ? (
               <Loader2 className="animate-spin w-5 h-5" />
@@ -595,9 +729,9 @@ export default function ShopSettingsPage() {
               onZoomChange={setZoom}
             />
           </div>
-          <div className="bg-white p-5 flex flex-col gap-4 shrink-0 rounded-t-2xl">
+          <div className="bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 shrink-0 rounded-t-2xl">
             <div>
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">
                 Zoom
               </label>
               <input
@@ -607,7 +741,7 @@ export default function ShopSettingsPage() {
                 max={3}
                 step={0.1}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-violet-600"
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-violet-600"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -617,7 +751,7 @@ export default function ShopSettingsPage() {
                   setIsCropping(false);
                   setImageSrc(null);
                 }}
-                className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                className="flex-1 py-3 rounded-[20px] border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-800 active:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
@@ -625,7 +759,7 @@ export default function ShopSettingsPage() {
                 type="button"
                 onClick={handleCropSave}
                 disabled={isUploadingLogo}
-                className="flex-1 py-3 rounded-2xl bg-violet-600 text-white font-medium text-sm hover:bg-violet-700 active:bg-violet-800 flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+                className="flex-1 py-3 rounded-[20px] bg-violet-600 text-white font-medium text-sm hover:bg-violet-700 active:bg-violet-800 flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
               >
                 {isUploadingLogo && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isUploadingLogo ? "Uploading..." : "Crop & Save"}

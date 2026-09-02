@@ -5,7 +5,7 @@ import { Calendar, Clock, Store, User, ChevronDown, Filter, MapPin } from "lucid
 import { UserAvatar } from "@/components/UserAvatar";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  all: { label: "All", color: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" },
+  all: { label: "All", color: "text-gray-700 dark:text-gray-300", bg: "bg-gray-100", dot: "bg-gray-400" },
   booked: { label: "Booked", color: "text-blue-700", bg: "bg-blue-50", dot: "bg-blue-500" },
   completed: { label: "Completed", color: "text-green-700", bg: "bg-green-50", dot: "bg-green-500" },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", dot: "bg-red-500" },
@@ -67,14 +67,14 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
         <div className="relative md:hidden">
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 active:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 active:bg-gray-50 dark:bg-gray-800 transition-colors"
           >
             <Filter size={15} />
             {statusConfig[statusFilter].label}
             <ChevronDown size={14} />
           </button>
           {showFilterDropdown && (
-            <div className="absolute right-0 top-10 w-40 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden animate-fadeIn">
+            <div className="absolute right-0 top-10 w-40 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 overflow-hidden animate-fadeIn">
               {Object.entries(statusConfig).map(([key, config]) => {
                 const filterKey = getFilterKey(key);
                 return (
@@ -85,7 +85,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                       setShowFilterDropdown(false);
                     }}
                     className={`flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                      statusFilter === filterKey ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700 hover:bg-gray-50"
+                      statusFilter === filterKey ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800"
                     }`}
                   >
                     <span className={`w-2 h-2 rounded-full ${config.dot}`} />
@@ -99,11 +99,11 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
       </div>
 
       {filteredBookings.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-12 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
             <Calendar size={28} className="text-gray-300" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No bookings found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">No bookings found</h3>
           <p className="text-sm text-gray-500">No bookings match the selected filter.</p>
         </div>
       ) : (
@@ -113,7 +113,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
             {filteredBookings.map((b: any) => (
               <div
                 key={b.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden active:scale-[0.99] transition-transform"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden active:scale-[0.99] transition-transform"
               >
                 <div className="p-4">
                   {/* Header Row */}
@@ -125,7 +125,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                         fallbackClassName="bg-indigo-50 text-indigo-600 font-semibold text-sm"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{b.user?.name || "Unknown Client"}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{b.user?.name || "Unknown Client"}</p>
                         <p className="text-xs text-gray-500">{b.user?.email || ""}</p>
                       </div>
                     </div>
@@ -133,10 +133,10 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                   </div>
 
                   {/* Details */}
-                  <div className="space-y-2 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+                  <div className="space-y-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                     <div className="flex items-center gap-2">
                       <Store size={13} className="text-indigo-400 shrink-0" />
-                      <span className="notranslate font-medium text-gray-700">{b.shop?.shopName || "Unknown Shop"}</span>
+                      <span className="notranslate font-medium text-gray-700 dark:text-gray-300">{b.shop?.shopName || "Unknown Shop"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <User size={13} className="text-blue-400 shrink-0" />
@@ -157,10 +157,10 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   <tr>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Shop & Service</th>
@@ -170,15 +170,15 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredBookings.map((b: any) => (
-                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={b.id} className="hover:bg-gray-50 dark:bg-gray-800 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-900">{b.slotDate}</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{b.slotDate}</div>
                         <div className="text-sm text-gray-500 flex items-center gap-1">
                           <Clock size={12} /> {b.slotStartTime}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-900 flex items-center gap-1">
+                        <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
                             <Store size={14} className="text-indigo-600" /> <span className="notranslate">{b.shop?.shopName || 'Unknown Shop'}</span>
                         </div>
                         <div className="text-sm text-gray-500">
@@ -193,7 +193,7 @@ export default function AdminBookingsClient({ bookings }: { bookings: any[] }) {
                             fallbackClassName="bg-indigo-50 text-indigo-600 font-semibold text-sm"
                           />
                           <div>
-                            <div className="font-semibold text-gray-900">{b.user?.name || 'Unknown Client'}</div>
+                            <div className="font-semibold text-gray-900 dark:text-white">{b.user?.name || 'Unknown Client'}</div>
                             <div className="text-sm text-gray-500">
                               {b.user?.email}
                             </div>

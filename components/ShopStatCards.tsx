@@ -126,9 +126,9 @@ export function ShopStatCards({ shopId }: { shopId: string }) {
         <Link
           key={i}
           href={card.href}
-          className="bg-white rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 active:scale-[0.97] transition-all hover:border-violet-200 hover:shadow-md text-center flex flex-col items-center justify-center"
+          className="bg-white dark:bg-gray-900 rounded-2xl p-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-50 dark:border-gray-900 active:scale-[0.97] transition-all hover:border-violet-200 hover:shadow-md text-center flex flex-col items-center justify-center"
         >
-          <p className="text-lg font-bold text-gray-900 leading-tight">
+          <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
             {card.value}
           </p>
           <p className="text-[10px] font-medium text-gray-500 mt-0.5 uppercase tracking-wide">

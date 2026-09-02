@@ -54,7 +54,7 @@ export function NotificationListener() {
           className="bg-gray-900 border border-white/10 rounded-xl p-4 shadow-2xl cursor-pointer hover:bg-gray-800 transition-all animate-slide-in"
         >
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 bg-white dark:bg-gray-900/10 rounded-lg flex items-center justify-center shrink-0">
               <Bell className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">

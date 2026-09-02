@@ -168,7 +168,7 @@ export function ProfilePhotoManager({ user }: { user: any }) {
           disabled={isUploading || isRemoving}
           title="Remove photo"
           aria-label="Remove photo"
-          className="absolute -top-1 -right-1 z-10 w-6 h-6 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-500 hover:text-red-600 hover:border-red-200 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute -top-1 -right-1 z-10 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center text-gray-500 hover:text-red-600 hover:border-red-200 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isRemoving ? (
             <Loader2 size={12} className="animate-spin" />
@@ -191,13 +191,13 @@ export function ProfilePhotoManager({ user }: { user: any }) {
           onClick={() => setShowRemoveConfirm(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-sm text-center animate-scaleIn"
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-6 w-full max-w-sm text-center animate-scaleIn"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
               <Trash2 size={24} className="text-red-500" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1.5">Remove photo?</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1.5">Remove photo?</h3>
             <p className="text-sm text-gray-500 mb-6">
               Your profile picture will be removed and your initial-letter avatar will be restored.
             </p>
@@ -205,7 +205,7 @@ export function ProfilePhotoManager({ user }: { user: any }) {
               <button
                 type="button"
                 onClick={() => setShowRemoveConfirm(false)}
-                className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                className="flex-1 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:bg-gray-800 active:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
@@ -239,7 +239,7 @@ export function ProfilePhotoManager({ user }: { user: any }) {
               onZoomChange={setZoom}
             />
           </div>
-          <div className="bg-white p-5 flex flex-col gap-4 shrink-0 rounded-t-2xl">
+          <div className="bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 shrink-0 rounded-t-2xl">
             <div>
               <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
                 Zoom
@@ -261,7 +261,7 @@ export function ProfilePhotoManager({ user }: { user: any }) {
                   setIsCropping(false);
                   setImageSrc(null);
                 }}
-                className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                className="flex-1 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:bg-gray-800 active:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>

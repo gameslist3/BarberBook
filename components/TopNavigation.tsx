@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "./LanguageContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 import { useBookingNotifications, type NotifItem } from "./useBookingNotifications";
 import { NotificationsPanel } from "./NotificationsPanel";
 
@@ -101,9 +102,10 @@ export function TopNavigation({ serverRole }: TopNavigationProps) {
 
   if (!user) {
     return (
-      <nav className="flex items-center gap-3">
+      <nav className="flex items-center gap-2 sm:gap-3">
         <LanguageSwitcher />
-        <Link href="/signin" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-all duration-200 hover:-translate-y-0.5">{translate("signIn")}</Link>
+        <ThemeToggle />
+        <Link href="/signin" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 hover:-translate-y-0.5">{translate("signIn")}</Link>
         <Link href="/signup" className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]">Sign Up</Link>
       </nav>
     );
@@ -137,21 +139,22 @@ export function TopNavigation({ serverRole }: TopNavigationProps) {
   return (
     <nav className="flex items-center gap-1 sm:gap-2">
       <LanguageSwitcher />
+      <ThemeToggle />
       {/* Welcome text */}
-      <span className="text-sm text-gray-500 hidden md:inline-block mr-2 max-w-[160px] truncate">
+      <span className="text-sm text-gray-500 dark:text-gray-400 hidden md:inline-block mr-2 max-w-[160px] truncate">
         {user.displayName || user.email?.split('@')[0]}
       </span>
 
       {/* Notifications */}
       <div className="relative z-50" ref={notifRef}>
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowNotifications(!showNotifications); setShowSettings(false); }}
-          className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
-          title="Notifications"
-        >
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowNotifications(!showNotifications); setShowSettings(false); }}
+            className="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:text-gray-200 dark:hover:text-gray-200 transition-all duration-200 hover:scale-105 active:scale-95"
+            title="Notifications"
+          >
           <Bell size={20} className={`animate-icon-hover ${showNotifications ? 'animate-ringBell' : ''}`} />
           {notifications.length > 0 && (
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-popIn"></span>
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-popIn"></span>
           )}
         </button>
 
@@ -169,39 +172,39 @@ export function TopNavigation({ serverRole }: TopNavigationProps) {
 
       {/* Settings */}
       <div className="relative z-50" ref={settingsRef}>
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSettings(!showSettings); setShowNotifications(false); }}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
-          title="Settings"
-        >
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowSettings(!showSettings); setShowNotifications(false); }}
+            className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:text-gray-200 dark:hover:text-gray-200 transition-all duration-200 hover:scale-105 active:scale-95"
+            title="Settings"
+          >
           <Settings size={20} className="animate-icon-spin-hover" />
         </button>
 
         {showSettings && (
-          <div className="absolute right-0 top-12 w-[280px] sm:w-56 bg-white rounded-xl shadow-2xl border border-gray-200 z-[999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-              <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || user.email?.split('@')[0]}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          <div className="absolute right-0 top-12 w-[280px] sm:w-56 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200" style={{ animation: 'slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+              <p className="text-sm font-bold text-gray-900 dark:text-white dark:text-gray-100 truncate">{user.displayName || user.email?.split('@')[0]}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
             </div>
             <div className="py-1">
               {settingsItems.map((item, i) => {
                 const Icon = item.icon;
                 const baseClasses = `flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm transition-all duration-200 hover:pl-5 ${
                   item.danger 
-                    ? 'text-red-600 hover:bg-red-50/80' 
-                    : 'text-gray-700 hover:bg-gray-50/80'
+                    ? 'text-red-600 dark:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-950/50' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800/80 dark:hover:bg-gray-800'
                 }`;
 
                 const content = (
                   <>
-                    <Icon size={16} className={`animate-icon-hover ${item.danger ? 'text-red-400' : 'text-gray-400'}`} />
+                    <Icon size={16} className={`animate-icon-hover ${item.danger ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'}`} />
                     <span className="font-medium">{item.label}</span>
                   </>
                 );
 
                 return (
                   <div key={i} style={{ animation: `fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.04}s both` }}>
-                    {item.divider && <div className="border-t border-gray-100 my-1"></div>}
+                    {item.divider && <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>}
                     {item.label && (
                       item.href ? (
                         <Link href={item.href} className={`${baseClasses} group`} onClick={() => setShowSettings(false)}>

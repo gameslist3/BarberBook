@@ -120,11 +120,11 @@ export default function ShopsPage() {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center">
           <div
-            className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg md:mx-4 overflow-hidden flex flex-col max-h-[90vh] animate-slideUp md:animate-fadeIn"
+            className="bg-white dark:bg-gray-900 rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg md:mx-4 overflow-hidden flex flex-col max-h-[90vh] animate-slideUp md:animate-fadeIn"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Add New Shop</h2>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Add New Shop</h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition-colors"
@@ -139,58 +139,58 @@ export default function ShopsPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Shop Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Shop Name</label>
                 <div className="relative">
                   <Store size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input required type="text" placeholder="e.g. Downtown Barbers" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
+                  <input required type="text" placeholder="e.g. Downtown Barbers" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Owner Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Owner Name</label>
                 <div className="relative">
                   <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input required type="text" placeholder="John Doe" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.owner} onChange={e => setNewShop({...newShop, owner: e.target.value})} />
+                  <input required type="text" placeholder="John Doe" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.owner} onChange={e => setNewShop({...newShop, owner: e.target.value})} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Owner Email (Login)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Owner Email (Login)</label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input required type="email" placeholder="owner@example.com" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.email} onChange={e => setNewShop({...newShop, email: e.target.value})} />
+                  <input required type="email" placeholder="owner@example.com" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.email} onChange={e => setNewShop({...newShop, email: e.target.value})} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Owner Password</label>
-                <input required type="password" minLength={6} placeholder="Min. 6 characters" className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Owner Password</label>
+                <input required type="password" minLength={6} placeholder="Min. 6 characters" className="w-full h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone Number</label>
                 <div className="relative">
                   <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input required type="tel" placeholder="(555) 123-4567" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.phone} onChange={e => setNewShop({...newShop, phone: e.target.value})} />
+                  <input required type="tel" placeholder="(555) 123-4567" className="w-full h-11 pl-9 pr-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.phone} onChange={e => setNewShop({...newShop, phone: e.target.value})} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Initial Access (Days)</label>
-                <input required type="number" min="1" className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm" value={newShop.expiryDays} onChange={e => setNewShop({...newShop, expiryDays: parseInt(e.target.value)})} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Initial Access (Days)</label>
+                <input required type="number" min="1" className="w-full h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm" value={newShop.expiryDays} onChange={e => setNewShop({...newShop, expiryDays: parseInt(e.target.value)})} />
               </div>
 
               {/* Business Hours */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Opening Time</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Opening Time</label>
                   <input
                     type="time"
-                    className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    className="w-full h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                     value={convertToTimeInput(newShop.openTime)}
                     onChange={e => setNewShop({...newShop, openTime: convertFromTimeInput(e.target.value)})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Closing Time</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Closing Time</label>
                   <input
                     type="time"
-                    className="w-full h-11 px-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 bg-gray-50 text-sm"
+                    className="w-full h-11 px-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 text-sm"
                     value={convertToTimeInput(newShop.closeTime)}
                     onChange={e => setNewShop({...newShop, closeTime: convertFromTimeInput(e.target.value)})}
                   />
@@ -215,12 +215,12 @@ export default function ShopsPage() {
             {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
           </div>
           {/* Desktop skeleton */}
-          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
             <table className="w-full min-w-[900px] text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
+                <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   {['Shop Name', 'Owner', 'Contact', 'Timeline', 'Status', 'Actions'].map((h) => (
-                    <th key={h} className="px-6 py-4 text-sm font-semibold text-gray-600">{h}</th>
+                    <th key={h} className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -231,11 +231,11 @@ export default function ShopsPage() {
           </div>
         </>
       ) : shops.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-12 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
             <Store size={28} className="text-gray-300" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No shops yet</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">No shops yet</h3>
           <p className="text-sm text-gray-500">Click &quot;Add Shop&quot; to create the first barber shop account.</p>
         </div>
       ) : (
@@ -247,8 +247,8 @@ export default function ShopsPage() {
               return (
                 <div
                   key={shop.id}
-                  className={`bg-white rounded-xl shadow-sm border overflow-hidden active:scale-[0.99] transition-transform ${
-                    isActive ? "border-gray-100" : "border-gray-100 opacity-75"
+                  className={`bg-white dark:bg-gray-900 rounded-xl shadow-sm border overflow-hidden active:scale-[0.99] transition-transform ${
+                    isActive ? "border-gray-100 dark:border-gray-800" : "border-gray-100 dark:border-gray-800 opacity-75"
                   }`}
                 >
                   <div className="p-4">
@@ -259,7 +259,7 @@ export default function ShopsPage() {
                           <Store size={18} />
                         </div>
                         <div>
-                          <p className="notranslate text-sm font-semibold text-gray-900">{shop.shopName}</p>
+                          <p className="notranslate text-sm font-semibold text-gray-900 dark:text-white">{shop.shopName}</p>
                           <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                             <User size={11} />
                             <span>{shop.owner?.name || "Unknown"}</span>
@@ -274,7 +274,7 @@ export default function ShopsPage() {
                     </div>
 
                     {/* Contact Info */}
-                    <div className="space-y-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg p-3 mb-3">
+                    <div className="space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-3">
                       <div className="flex items-center gap-2">
                         <Mail size={12} className="text-gray-400 shrink-0" />
                         <span>{shop.owner?.email || "N/A"}</span>
@@ -321,37 +321,37 @@ export default function ShopsPage() {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden overflow-x-auto">
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden overflow-x-auto">
             <table className="w-full min-w-[900px] text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-1/5">Shop Name</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%]">Owner</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%]">Contact</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[20%]">Timeline</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[12%]">Hours</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[12%]">Status</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 w-[15%] text-right">Actions</th>
+                <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-1/5">Shop Name</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[15%]">Owner</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[15%]">Contact</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[20%]">Timeline</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[12%]">Hours</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[12%]">Status</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-400 w-[15%] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {shops.map(shop => (
-                  <tr key={shop.id} className="hover:bg-gray-50">
-                    <td className="notranslate px-6 py-4 font-medium text-gray-900">{shop.shopName}</td>
-                    <td className="px-6 py-4 text-gray-700">{shop.owner?.name || 'Unknown'}</td>
+                  <tr key={shop.id} className="hover:bg-gray-50 dark:bg-gray-800">
+                    <td className="notranslate px-6 py-4 font-medium text-gray-900 dark:text-white">{shop.shopName}</td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{shop.owner?.name || 'Unknown'}</td>
                     <td className="px-6 py-4">
-                      <div className="text-gray-900 font-medium">{shop.phone || 'N/A'}</div>
+                      <div className="text-gray-900 dark:text-white font-medium">{shop.phone || 'N/A'}</div>
                       <div className="text-gray-500 text-sm mt-1">{shop.owner?.email}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-700">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         <span className="font-semibold">Active for:</span> {getDaysSince(shop.createdAt)} days
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         <span className="font-semibold">Initial Access:</span> {shop.accessExpiresAt && shop.createdAt ? Math.round((new Date(shop.accessExpiresAt).getTime() - new Date(shop.createdAt).getTime()) / (1000 * 3600 * 24)) : 30} days
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {shop.openTime || "9:00 AM"} – {shop.closeTime || "6:00 PM"}
                     </td>
                     <td className="px-6 py-4">

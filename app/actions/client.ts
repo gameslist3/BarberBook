@@ -389,6 +389,10 @@ async function getShopSchedule(shopId: string, dateStr: string) {
   if (!shopDoc.exists) return null;
   const shopData = shopDoc.data();
   
+  if (shopData?.holidays && shopData.holidays[dateStr]) {
+    return null; // Shop is closed today
+  }
+  
   // Default to 9:00 AM - 6:00 PM if not specified
   const openTimeStr = shopData?.openTime || "9:00 AM";
   const closeTimeStr = shopData?.closeTime || "6:00 PM";

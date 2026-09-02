@@ -190,7 +190,7 @@ export default function ShopDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-violet-600" />
-            <h2 className="text-[17px] font-bold text-gray-900">{translate("todaysSchedule")}</h2>
+            <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">{translate("todaysSchedule")}</h2>
           </div>
           <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-3 py-1.5 rounded-full">
             {todaysBookings.length} {translate("upcoming")}
@@ -204,11 +204,11 @@ export default function ShopDashboard() {
           </div>
         ) : todaysBookings.length === 0 ? (
           /* Empty State - Premium */
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-10 text-center">
             <div className="w-16 h-16 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-4">
               <CalendarCheck size={28} className="text-violet-400" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">No appointments scheduled for today.</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments scheduled for today.</h3>
             <p className="text-sm text-gray-500">Once clients book, they&apos;ll appear here.</p>
           </div>
         ) : (
@@ -241,8 +241,8 @@ export default function ShopDashboard() {
               return (
                 <div
                   key={booking.id}
-                  className={`bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.05)] overflow-hidden active:scale-[0.99] transition-transform ${
-                    isOvertime ? "border-2 border-red-300" : "border border-gray-50"
+                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.05)] overflow-hidden active:scale-[0.99] transition-transform ${
+                    isOvertime ? "border-2 border-red-300" : "border border-gray-50 dark:border-gray-900"
                   }`}
                 >
                   <div className="p-4 space-y-3">
@@ -254,7 +254,7 @@ export default function ShopDashboard() {
                           className="w-10 h-10 rounded-full ring-2 ring-white shadow-sm"
                           fallbackClassName="bg-violet-100 text-violet-700 font-bold text-sm"
                         />
-                        <p className="text-[15px] font-bold text-gray-900 truncate">
+                        <p className="text-[15px] font-bold text-gray-900 dark:text-white truncate">
                           {booking.user?.name || "Unknown Client"}
                         </p>
                       </div>
@@ -280,16 +280,16 @@ export default function ShopDashboard() {
                     </div>
 
                     {/* ═══ ROW 2: Services Count | Total Duration | Countdown ═══ */}
-                    <div className="flex items-center justify-center gap-4 bg-gray-50 rounded-xl px-3.5 py-2.5">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <div className="flex items-center justify-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2.5">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                         <Scissors size={13} className="text-gray-400" />
-                        <span className="font-semibold text-gray-800">{servicesList.length}</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{servicesList.length}</span>
                         <span className="text-gray-500">service{servicesList.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="w-px h-4 bg-gray-200" />
-                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                         <Timer size={13} className="text-gray-400" />
-                        <span className="font-semibold text-gray-800">{formatDuration(totalDuration)}</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{formatDuration(totalDuration)}</span>
                       </div>
                       <div className="w-px h-4 bg-gray-200" />
                       {isOvertime ? (
@@ -302,6 +302,11 @@ export default function ShopDashboard() {
                           {countdown}
                         </span>
                       )}
+                    </div>
+
+                    {/* ROW 2.5: Service Names */}
+                    <div className="px-1 text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">
+                      {servicesList.join(", ")}
                     </div>
 
                     {/* ═══ ROW 3: Complete / Not Arrive / Cancel Buttons ═══ */}
@@ -364,17 +369,17 @@ export default function ShopDashboard() {
       {/* Not Arrive Confirmation Modal */}
       {noShowModalId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
             <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4">
               <UserX size={22} />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{translate("notArriveConfirmTitle")}</h3>
-            <p className="text-sm text-gray-600 text-center mb-6">{translate("notArriveConfirmMsg")}</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">{translate("notArriveConfirmTitle")}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-6">{translate("notArriveConfirmMsg")}</p>
             <div className="flex items-center gap-3 w-full">
               <button
                 onClick={() => setNoShowModalId(null)}
                 disabled={processingId === noShowModalId}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
               >
                 Keep it
               </button>
@@ -398,16 +403,16 @@ export default function ShopDashboard() {
       {/* Cancel Confirmation Modal */}
       {cancelModalId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel Booking?</h3>
-            <p className="text-sm text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Cancel Booking?</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               Are you sure you want to cancel this booking? The client will be notified immediately.
             </p>
             <div className="flex items-center gap-3 w-full">
               <button
                 onClick={() => setCancelModalId(null)}
                 disabled={processingId === cancelModalId}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
               >
                 Keep it
               </button>

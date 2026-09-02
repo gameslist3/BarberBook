@@ -29,7 +29,7 @@ function SkeletonBlock({ className }: { className?: string }) {
 /** Full skeleton card (icon, text lines, button area) */
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn("bg-white rounded-2xl border border-gray-50 shadow-sm p-4 space-y-3", className)}>
+    <div className={cn("bg-white dark:bg-gray-900 rounded-2xl border border-gray-50 dark:border-gray-900 shadow-sm p-4 space-y-3", className)}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <SkeletonBlock className="w-12 h-12 rounded-2xl" />
@@ -51,7 +51,7 @@ export function SkeletonExploreList() {
   return (
     <div className="flex flex-col gap-2 mt-2">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-white rounded-2xl border border-gray-50 shadow-sm p-4 space-y-3">
+        <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-50 dark:border-gray-900 shadow-sm p-4 space-y-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <SkeletonBlock className="w-12 h-12 rounded-2xl" />
@@ -75,7 +75,7 @@ export function SkeletonShopDetail() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12">
       <SkeletonBlock className="h-4 w-28 mb-6" />
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Hero */}
         <SkeletonBlock className="h-64 md:h-80 w-full rounded-none" />
         {/* Content */}
@@ -107,7 +107,7 @@ export function SkeletonShopDetail() {
 /** Booking/dashboard card skeleton */
 export function SkeletonBookingCard() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-50 shadow-sm p-4 space-y-3">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-50 dark:border-gray-900 shadow-sm p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <SkeletonBlock className="w-10 h-10 rounded-full" />
@@ -123,7 +123,7 @@ export function SkeletonBookingCard() {
 /** Service card skeleton */
 export function SkeletonServiceCard() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-50 shadow-sm p-4 space-y-3">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-50 dark:border-gray-900 shadow-sm p-4 space-y-3">
       <div className="flex items-center gap-2.5">
         <SkeletonBlock className="w-8 h-8 rounded-lg" />
         <SkeletonBlock className="h-4 w-36" />
@@ -145,7 +145,7 @@ export function SkeletonServiceCard() {
 /** Tabular row skeleton (for admin table) */
 export function SkeletonTableRow() {
   return (
-    <tr className="border-b border-gray-100">
+    <tr className="border-b border-gray-100 dark:border-gray-800">
       <td className="px-6 py-4"><SkeletonBlock className="h-4 w-32" /></td>
       <td className="px-6 py-4"><SkeletonBlock className="h-4 w-24" /></td>
       <td className="px-6 py-4"><SkeletonBlock className="h-4 w-36" /></td>
@@ -161,8 +161,8 @@ export function SkeletonForm() {
   return (
     <div className="space-y-5">
       {[1, 2, 3].map((section) => (
-        <div key={section} className="bg-white rounded-2xl border border-gray-50 overflow-hidden">
-          <div className="px-4 py-4 border-b border-gray-50">
+        <div key={section} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-50 dark:border-gray-900 overflow-hidden">
+          <div className="px-4 py-4 border-b border-gray-50 dark:border-gray-900">
             <SkeletonBlock className="h-5 w-36" />
           </div>
           <div className="p-4 space-y-4">
@@ -183,7 +183,7 @@ export function SkeletonForm() {
 /** Stat card skeleton (for stat cards grid) */
 export function SkeletonStatCard() {
   return (
-    <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl p-3.5 shadow-sm border border-gray-100 dark:border-gray-800">
       <SkeletonBlock className="h-6 w-12 mb-1" />
       <SkeletonBlock className="h-3 w-14" />
     </div>

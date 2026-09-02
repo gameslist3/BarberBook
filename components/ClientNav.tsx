@@ -42,15 +42,15 @@ export function ClientNav({ serverRole }: { serverRole?: string }) {
         <>
           <span className="text-sm text-gray-500 hidden sm:inline-block">Welcome, {user.displayName || user.email}</span>
           {serverRole === "SHOP_OWNER" ? (
-            <Link href="/shop/dashboard" className="text-sm font-medium bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors hidden sm:inline-block">Shop Dashboard</Link>
+            <Link href="/shop/dashboard" className="text-sm font-medium bg-gray-100 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors hidden sm:inline-block">Shop Dashboard</Link>
           ) : (
             <button onClick={handleDeleteAccount} className="text-sm font-medium text-red-600 hover:text-red-800">Delete Account</button>
           )}
-          <button onClick={handleSignOut} className="text-sm font-medium text-gray-700 hover:text-indigo-600">Sign Out</button>
+          <button onClick={handleSignOut} className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">Sign Out</button>
         </>
       ) : (
         <>
-          <Link href="/signin" className="text-sm font-medium text-gray-700 hover:text-indigo-600">Sign In</Link>
+          <Link href="/signin" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">Sign In</Link>
           <Link href="/signup" className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Sign Up</Link>
         </>
       )}

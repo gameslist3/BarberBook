@@ -31,8 +31,8 @@ export const metadata: Metadata = {
 import { LanguageProvider } from "@/components/LanguageContext";
 import { GoogleTranslateInit } from "@/components/GoogleTranslateInit";
 import { SWRegister } from "@/components/SWRegister";
-import { NotificationPrompt } from "@/components/NotificationPrompt";
 import { NotificationListener } from "@/components/NotificationListener";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -40,17 +40,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <GoogleTranslateInit />
-        <SWRegister />
-        <NotificationListener />
-        <NotificationPrompt />
-        <LanguageProvider>
-          <SplashScreen>
-            {children}
-          </SplashScreen>
-        </LanguageProvider>
+        <ThemeProvider>
+          <GoogleTranslateInit />
+          <SWRegister />
+          <NotificationListener />
+          <LanguageProvider>
+            <SplashScreen>
+              {children}
+            </SplashScreen>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

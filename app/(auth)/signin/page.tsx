@@ -8,6 +8,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -55,6 +56,11 @@ export default function SignInPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-900 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Top right theme toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle variant="icon" />
+      </div>
+
       {/* Background decorative elements - blending from splash */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 -right-40 w-[500px] h-500px] bg-violet-100/40 dark:bg-violet-900/10 rounded-full blur-3xl" style={{ animation: "pulse 6s ease-in-out infinite" }} />

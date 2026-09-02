@@ -6,7 +6,7 @@ import { getShopDetails, createBooking, getAvailableSlots, checkUserActiveBookin
 import { getKolkataDateString } from "@/lib/timeUtils";
 import {
   Scissors,  Clock, Loader2, ChevronLeft, ChevronUp, ChevronDown, Phone,
-  Search, X, Check, Map as MapIcon
+  Search, X, Check, Map as MapIcon, CalendarX
 } from "lucide-react";
 import { SkeletonForm } from "@/components/Skeleton";
 import { auth } from "@/lib/firebase";
@@ -37,7 +37,7 @@ function BookingSuccess({ shopName, time, onDone }: {
       style={{ opacity: show ? 1 : 0 }}
     >
       <div
-        className={`bg-white rounded-3xl p-8 mx-4 max-w-sm w-full text-center transition-all duration-500 ${
+        className={`bg-white dark:bg-gray-900 rounded-3xl p-8 mx-4 max-w-sm w-full text-center transition-all duration-500 ${
           showContent ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
         style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
@@ -54,7 +54,7 @@ function BookingSuccess({ shopName, time, onDone }: {
         </div>
 
         <h2
-          className={`text-2xl font-bold text-gray-900 mb-2 transition-all duration-500 ${
+          className={`text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-all duration-500 ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
           style={{ transitionDelay: "400ms" }}
@@ -62,7 +62,7 @@ function BookingSuccess({ shopName, time, onDone }: {
           {translate("bookingConfirmed")}
         </h2>
         <p
-          className={`text-gray-600 mb-1 transition-all duration-500 ${
+          className={`text-gray-600 dark:text-gray-400 mb-1 transition-all duration-500 ${
             showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
           style={{ transitionDelay: "500ms" }}
@@ -587,7 +587,7 @@ export default function BookingPage() {
 
   if (isLoadingShop) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-800 p-4">
         <SkeletonForm />
       </div>
     );
@@ -595,9 +595,9 @@ export default function BookingPage() {
 
   if (!shop) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
         <div className="text-center p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{translate("shopNotFound")}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{translate("shopNotFound")}</h2>
           <Link href="/explore" className="text-violet-600 font-medium">{translate("backToExplore")}</Link>
         </div>
       </div>
@@ -611,25 +611,25 @@ export default function BookingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col" style={{ paddingBottom: 0 }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex flex-col overflow-x-hidden">
       {/* ── Header ──────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-100 px-4 h-14 flex items-center gap-3 shrink-0">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 h-14 flex items-center gap-3 shrink-0">
         <button
           onClick={() => router.back()}
           className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors -ml-1"
         >
-          <ChevronLeft size={20} className="text-gray-700" />
+          <ChevronLeft size={20} className="text-gray-700 dark:text-gray-300" />
         </button>
-        <h1 className="text-[17px] font-bold text-gray-900 truncate">{translate("bookAppointment")}</h1>
+        <h1 className="text-[17px] font-bold text-gray-900 dark:text-white truncate">{translate("bookAppointment")}</h1>
       </div>
 
       {/* ── Scrollable content ───────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           {/* ═══ Shop Info Banner ═══ */}
-          <div className="bg-white px-4 sm:px-6 py-3.5 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-900 px-4 sm:px-6 py-3.5 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100">
+              <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0 overflow-hidden border border-gray-100 dark:border-gray-800">
                 <SafeImage
                   src={shop.logoUrl}
                   alt={shop.shopName}
@@ -638,7 +638,7 @@ export default function BookingPage() {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="notranslate text-base font-bold text-gray-900 truncate">{shop.shopName}</h2>
+                <h2 className="notranslate text-base font-bold text-gray-900 dark:text-white truncate">{shop.shopName}</h2>
                 <p className="text-[11px] text-gray-500 truncate mt-0.5">{shop.address || translate("localShop")}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -650,7 +650,7 @@ export default function BookingPage() {
                 )}
                 {shop.phone && (
                   <a href={`tel:${shop.phone}`}
-                    className="w-9 h-9 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-all">
+                    className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-all">
                     <Phone size={17} />
                   </a>
                 )}
@@ -658,8 +658,21 @@ export default function BookingPage() {
             </div>
           </div>
 
+          {/* ═══ Shop Closed Banner ═══ */}
+          {shop.holidays && shop.holidays[getKolkataDateString()] !== undefined && (
+            <div className="mx-4 sm:mx-6 mt-4 p-4 bg-red-50 rounded-2xl border border-red-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                <CalendarX size={20} className="text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-red-700">Shop is Closed Today</p>
+                <p className="text-xs text-red-500 mt-0.5">{shop.holidays[getKolkataDateString()] || "Holiday"} — No bookings available.</p>
+              </div>
+            </div>
+          )}
+
           {/* ═══ Service Search ═══ */}
-          <div className="bg-white px-4 sm:px-6 pt-4 pb-2 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-900 px-4 sm:px-6 pt-4 pb-2 border-b border-gray-100 dark:border-gray-800">
             <div className="relative">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -667,11 +680,11 @@ export default function BookingPage() {
                 placeholder={translate("searchServices")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-10 pr-9 rounded-2xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                className="w-full h-11 pl-10 pr-9 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400">
                   <X size={15} />
                 </button>
               )}
@@ -702,7 +715,7 @@ export default function BookingPage() {
                     className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border text-left transition-all active:scale-[0.99] ${
                       isSelected
                         ? "border-violet-600 bg-violet-50 ring-1 ring-violet-600/20"
-                        : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm"
+                        : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-200 dark:border-gray-700 hover:shadow-sm"
                     }`}
                   >
                     <div
@@ -713,12 +726,12 @@ export default function BookingPage() {
                       {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-gray-900">{service.name}</p>
+                      <p className="text-base font-bold text-gray-900 dark:text-white">{service.name}</p>
                       <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
                         <Clock size={11} /> {formatDuration(service.duration)}
                       </p>
                     </div>
-                    <div className="text-sm font-bold text-gray-900 shrink-0">
+                    <div className="text-sm font-bold text-gray-900 dark:text-white shrink-0">
                       ₹{Number(service.price).toFixed(2)}
                     </div>
                   </button>
@@ -740,13 +753,13 @@ export default function BookingPage() {
       )}
 
       {/* ── Bottom sticky bar ────────────────────────────────── */}
-      <div className="sticky bottom-0 bg-white/95 backdrop-blur-lg border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
+      <div className="sticky bottom-0 bg-white dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-100 dark:border-gray-800 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
         <div className="max-w-2xl mx-auto px-4 py-3 pb-[calc(env(safe-area-inset-bottom,12px)+4px)]">
           {/* Row 1: Date | Time | Total */}
           <div className="flex items-center gap-2 mb-2.5">
-            <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-center">
+            <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-center">
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("date")}</p>
-              <p className="text-sm font-bold text-gray-900">{translate("today")}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">{translate("today")}</p>
             </div>
 
             <button
@@ -758,8 +771,8 @@ export default function BookingPage() {
                 selectedTime
                   ? "bg-violet-50 border border-violet-200"
                   : selectedServiceIds.size > 0 && !isLoadingSlots
-                    ? "bg-gray-50 border border-dashed border-gray-300 hover:border-violet-400 hover:bg-violet-50/30"
-                    : "bg-gray-50 border border-dashed border-gray-200 opacity-50"
+                    ? "bg-gray-50 dark:bg-gray-800 border border-dashed border-gray-300 hover:border-violet-400 hover:bg-violet-50/30"
+                    : "bg-gray-50 dark:bg-gray-800 border border-dashed border-gray-200 dark:border-gray-700 opacity-50"
               }`}
             >
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("time")}</p>
@@ -769,13 +782,19 @@ export default function BookingPage() {
               </p>
             </button>
 
-            <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-center">
+            <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-center">
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{translate("total")}</p>
-              <p className="text-sm font-bold text-gray-900">₹{totalPrice.toFixed(2)}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">₹{totalPrice.toFixed(2)}</p>
             </div>
           </div>
 
           {/* Row 2: Book button */}
+          {shop.holidays && shop.holidays[getKolkataDateString()] !== undefined ? (
+            <div className="w-full h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center gap-2 text-red-600 font-semibold text-sm">
+              <CalendarX size={16} />
+              Shop is Closed Today
+            </div>
+          ) : (
           <button
             onClick={handleConfirm}
             disabled={isBooking || selectedServiceIds.size === 0 || !selectedTime}
@@ -795,6 +814,7 @@ export default function BookingPage() {
               translate("confirmBooking")
             )}
           </button>
+          )}
         </div>
       </div>
 
@@ -802,7 +822,7 @@ export default function BookingPage() {
       {showTimePicker && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowTimePicker(false)} />
-          <div className="relative bg-white rounded-t-3xl px-5 pt-5 pb-[calc(env(safe-area-inset-bottom,16px)+8px)] max-h-[70vh] flex flex-col animate-slideUp">
+          <div className="relative bg-white dark:bg-gray-900 rounded-t-3xl px-5 pt-5 pb-[calc(env(safe-area-inset-bottom,16px)+8px)] max-h-[70vh] flex flex-col animate-slideUp">
             <div className="flex justify-center mb-4">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
@@ -813,8 +833,8 @@ export default function BookingPage() {
                 onClick={() => setTimeMode('available')}
                 className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
                   timeMode === 'available'
-                    ? 'bg-white text-violet-700 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-900 text-violet-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
                 }`}
               >
                 {translate("nextSchedule")}
@@ -823,8 +843,8 @@ export default function BookingPage() {
                 onClick={() => setTimeMode('custom')}
                 className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
                   timeMode === 'custom'
-                    ? 'bg-white text-violet-700 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-900 text-violet-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
                 }`}
               >
                 {translate("customTime")}
@@ -832,7 +852,7 @@ export default function BookingPage() {
             </div>
 
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[17px] font-bold text-gray-900">
+              <h3 className="text-[17px] font-bold text-gray-900 dark:text-white">
                 {timeMode === 'available' ? translate("nextSchedule") : translate("customTime")}
               </h3>
               <p className="text-xs text-gray-500">{todayFormatted}</p>
@@ -854,7 +874,7 @@ export default function BookingPage() {
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                       {translate("nextAvailable")}
                     </p>
-                    <p className="text-3xl font-bold text-gray-900 mb-1">{availableSlots[0]}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{availableSlots[0]}</p>
                     <p className="text-xs text-gray-400 mb-6">{todayFormatted}</p>
                     <button
                       onClick={() => { setSelectedTime(availableSlots[0]); setShowTimePicker(false); }}
@@ -1002,8 +1022,8 @@ export default function BookingPage() {
                       }}
                       className={`px-8 py-2 text-sm font-semibold rounded-lg transition-all ${
                         customAmPm === 'AM'
-                          ? 'bg-white text-violet-700 shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white dark:bg-gray-900 text-violet-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       AM
@@ -1018,8 +1038,8 @@ export default function BookingPage() {
                       }}
                       className={`px-8 py-2 text-sm font-semibold rounded-lg transition-all ${
                         customAmPm === 'PM'
-                          ? 'bg-white text-violet-700 shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white dark:bg-gray-900 text-violet-700 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       PM
@@ -1039,10 +1059,10 @@ export default function BookingPage() {
                           onClick={() => isSnapValid && setCustomMinute(snapMin)}
                           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                             !isSnapValid
-                              ? 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
+                              ? 'bg-gray-50 dark:bg-gray-800 text-gray-300 border border-gray-100 dark:border-gray-800 cursor-not-allowed'
                               : customMinute === snapMin
                                 ? 'bg-violet-50 text-violet-700 border border-violet-200'
-                                : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-600'
+                                : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-violet-300 hover:text-violet-600'
                           }`}
                         >
                           :{m}
@@ -1062,7 +1082,7 @@ export default function BookingPage() {
                   {/* Live availability status */}
                   {isCustomTimeValid && customStatus !== 'idle' && (
                     customStatus === 'checking' ? (
-                      <div className="text-xs text-gray-500 bg-gray-50 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-center gap-2">
+                      <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-center gap-2">
                         <Loader2 size={14} className="animate-spin" />
                         <span>{translate("checkingAvailability")}</span>
                       </div>

@@ -301,7 +301,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
       cancelled: "bg-red-50 text-red-700 border-red-100",
       no_show: "bg-orange-50 text-orange-700 border-orange-100",
     };
-    return map[status] || "bg-gray-50 text-gray-600 border-gray-100";
+    return map[status] || "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-100 dark:border-gray-800";
   };
 
   return (
@@ -320,7 +320,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
           <History size={22} />
         </div>
         <div>
-          <h2 className="text-[17px] font-bold text-gray-900">Booking History</h2>
+          <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">Booking History</h2>
           <p className="text-xs text-gray-500">
             {isAdmin
               ? "View and export schedule data for any shop. You can also delete any booking."
@@ -330,25 +330,28 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
       </div>
 
       {/* Timeline + Range Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-visible">
-        {/* Top row: timeline presets */}
-        <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3.5 pb-2.5">
-          {PRESETS.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => applyPreset(p.key)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95 ${
-                activePreset === p.key
-                  ? isAdmin
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
-                    : "bg-violet-600 text-white shadow-sm shadow-violet-200"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-visible">
+        {/* Top row: timeline presets - horizontal scroll */}
+        <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5 min-w-max">
+            {PRESETS.map((p) => (
+              <button
+                key={p.key}
+                onClick={() => applyPreset(p.key)}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95 whitespace-nowrap ${
+                  activePreset === p.key
+                    ? isAdmin
+                      ? "bg-indigo-600 text-white"
+                      : "bg-violet-600 text-white"
+                    : "bg-gray-100 text-gray-600 dark:text-gray-400 hover:bg-gray-200"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
+        <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
 
         {/* Date range row */}
         <div className="px-4 pb-4">
@@ -367,7 +370,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                   setStartDate(e.target.value);
                   setActivePreset(null);
                 }}
-                className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-800 transition-all focus:outline-none focus:bg-white focus:ring-2 ${
+                className={`w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 transition-all focus:outline-none focus:bg-white dark:bg-gray-900 focus:ring-2 ${
                   isAdmin ? "focus:ring-indigo-200 focus:border-indigo-300" : "focus:ring-violet-200 focus:border-violet-300"
                 }`}
               />
@@ -386,7 +389,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                   setEndDate(e.target.value);
                   setActivePreset(null);
                 }}
-                className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-800 transition-all focus:outline-none focus:bg-white focus:ring-2 ${
+                className={`w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 transition-all focus:outline-none focus:bg-white dark:bg-gray-900 focus:ring-2 ${
                   isAdmin ? "focus:ring-indigo-200 focus:border-indigo-300" : "focus:ring-violet-200 focus:border-violet-300"
                 }`}
               />
@@ -395,7 +398,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={applyRange}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white border-2 border-violet-600 text-violet-600 hover:bg-violet-50 transition-all active:scale-95"
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white dark:bg-gray-900 border-2 border-violet-600 text-violet-600 hover:bg-violet-50 transition-all active:scale-95"
             >
               <CalendarDays size={13} />
               Show Bookings
@@ -404,7 +407,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
               onClick={() => fetchHistory({ start: startDate, end: endDate }, selectedShopId)}
               disabled={isLoading}
               title="Refresh"
-              className="p-2.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-40"
+              className="p-2.5 rounded-xl text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-40"
             >
               <RefreshCw size={15} className={isLoading ? "animate-spin" : ""} />
             </button>
@@ -412,12 +415,12 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
 
           {/* Admin shop filter */}
           {isAdmin && (
-            <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-100">
+            <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-gray-100 dark:border-gray-800">
               <Store size={14} className="text-indigo-400" />
               <select
                 value={selectedShopId}
                 onChange={(e) => changeShop(e.target.value)}
-                className="bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
               >
                 <option value="all">All Shops</option>
                 {shops.map((s) => (
@@ -437,7 +440,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
       </div>
 
       {/* Summary panel (single white block, no per-stat cards) */}
-      <div className="relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 p-4">
+      <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800 p-4">
         <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-violet-50" />
         <div className="pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-indigo-50/60" />
         <p className="relative text-[10px] font-bold uppercase tracking-widest text-gray-400">Summary</p>
@@ -456,7 +459,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
               </span>
               <div className="min-w-0">
                 <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 truncate">{s.label}</p>
-                <p className="text-base font-bold text-gray-900 truncate">{s.value}</p>
+                <p className="text-base font-bold text-gray-900 dark:text-white truncate">{s.value}</p>
               </div>
             </div>
           ))}
@@ -467,7 +470,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-white rounded-xl border border-gray-100 animate-pulse" />
+            <div key={i} className="h-16 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 animate-pulse" />
           ))}
         </div>
       ) : error ? (
@@ -476,20 +479,20 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
           <p className="text-sm font-medium text-red-700">{error}</p>
         </div>
       ) : bookings.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-10 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
             <CalendarDays size={28} className="text-gray-300" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">No bookings found</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No bookings found</h3>
           <p className="text-sm text-gray-500">No schedule data in this date range.</p>
         </div>
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   <tr>
                     <th className="px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">#</th>
                     <th className="px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Date</th>
@@ -504,13 +507,13 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {bookings.map((b, idx) => (
-                    <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={b.id} className="hover:bg-gray-50 dark:bg-gray-800 transition-colors">
                       <td className="px-4 py-3 text-xs text-gray-400 font-medium">{idx + 1}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">{b.slotDate}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{b.slotStartTime}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">{b.slotDate}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{b.slotStartTime}</td>
                       {isAdmin && (
                         <td className="px-4 py-3">
-                          <p className="text-sm font-semibold text-gray-700 whitespace-nowrap">{b.shopName || "—"}</p>
+                          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{b.shopName || "—"}</p>
                         </td>
                       )}
                       <td className="px-4 py-3">
@@ -521,7 +524,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                             fallbackClassName="bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs"
                           />
                           <div>
-                            <p className="text-sm font-semibold text-gray-900">{b.user?.name || "Unknown"}</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{b.user?.name || "Unknown"}</p>
                             {isAdmin && (
                               <p className="text-xs text-gray-400 truncate max-w-[160px]">
                                 {b.user?.email || b.user?.phone || ""}
@@ -531,14 +534,14 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-sm text-gray-700 max-w-[240px] truncate">
+                        <p className="text-sm text-gray-700 dark:text-gray-300 max-w-[240px] truncate">
                           {b.services?.map((s: any) => s.name).join(", ") || "—"}
                         </p>
                         <p className="text-xs text-gray-400">
                           {b.services?.map((s: any) => `${s.duration || 0}m`).join(", ")}
                         </p>
                       </td>
-                      <td className="px-4 py-3 text-sm font-bold text-gray-900 whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
                         {formatMoney(b.totalPrice)}
                       </td>
                       <td className="px-4 py-3">
@@ -573,7 +576,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
             {bookings.map((b, idx) => (
               <div
                 key={b.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden active:scale-[0.99] transition-transform"
+                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden active:scale-[0.99] transition-transform"
               >
                 <div className="p-3">
                   {/* Header: avatar + name | status */}
@@ -581,11 +584,11 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                     <div className="flex items-center gap-2 min-w-0">
                       <UserAvatar
                         user={b.user}
-                        className="w-8 h-8 rounded-lg shadow-sm"
+                        className="w-8 h-8 rounded-lg"
                         fallbackClassName="bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-xs"
                       />
                       <div className="min-w-0">
-                        <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">{b.user?.name || "Unknown Client"}</p>
+                        <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate leading-tight">{b.user?.name || "Unknown Client"}</p>
                         {isAdmin && (
                           <p className="text-[11px] text-gray-400 truncate">
                             {b.user?.email || b.user?.phone || ""}
@@ -613,18 +616,25 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                     </div>
                   </div>
 
-                  {/* Date + time strip */}
-                  <div className="flex items-center gap-1.5 text-[11px] bg-gray-50 rounded-lg px-2.5 py-2 overflow-hidden">
-                    <CalendarDays size={11} className="text-gray-400 shrink-0" />
-                    <span className="font-medium text-gray-700 whitespace-nowrap">{b.slotDate}</span>
-                    <span className="mx-0.5 text-gray-300">•</span>
-                    <Clock size={11} className="text-gray-400 shrink-0" />
-                    <span className="font-medium text-gray-700 whitespace-nowrap">{b.slotStartTime}</span>
+                  {/* Date + Time + Price in one row */}
+                  <div className="flex items-center gap-2 text-[11px] bg-gray-50 dark:bg-gray-800 rounded-lg px-2.5 py-2">
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      <CalendarDays size={11} className="text-gray-400 shrink-0" />
+                      <span className="font-medium whitespace-nowrap">{b.slotDate}</span>
+                    </div>
+                    <span className="text-gray-300">•</span>
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      <Clock size={11} className="text-gray-400 shrink-0" />
+                      <span className="font-medium whitespace-nowrap">{b.slotStartTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-900 dark:text-white ml-auto">
+                      <span className="text-[11px] font-bold">{formatMoney(b.totalPrice)}</span>
+                    </div>
                     {isAdmin && (
                       <>
-                        <span className="mx-0.5 text-gray-300">•</span>
+                        <span className="text-gray-300">•</span>
                         <Store size={11} className="text-gray-400 shrink-0" />
-                        <span className="font-medium text-gray-700 truncate min-w-0">{b.shopName || "—"}</span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0">{b.shopName || "—"}</span>
                       </>
                     )}
                   </div>
@@ -641,12 +651,6 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                         {s.duration ? <span className="text-violet-400 font-medium">· {s.duration}m</span> : null}
                       </span>
                     ))}
-                  </div>
-
-                  {/* Footer: booking # + price */}
-                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-gray-100">
-                    <span className="text-[10px] uppercase tracking-wide text-gray-400">#{idx + 1}</span>
-                    <span className="text-[13px] font-bold text-gray-900">{formatMoney(b.totalPrice)}</span>
                   </div>
                 </div>
               </div>
@@ -677,7 +681,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
         >
           <span
             className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 ${
-              isAdmin ? "bg-white/25" : "bg-white/20"
+              isAdmin ? "bg-white dark:bg-gray-900/25" : "bg-white dark:bg-gray-900/20"
             }`}
           >
             {exporting ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
@@ -686,7 +690,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
           {bookings.length > 0 && (
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none ${
-                isAdmin ? "bg-white/25" : "bg-white/20"
+                isAdmin ? "bg-white dark:bg-gray-900/25" : "bg-white dark:bg-gray-900/20"
               }`}
             >
               {bookings.length}
@@ -705,7 +709,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
             id="export-menu"
             role="menu"
             style={menuPos ? { left: menuPos.left, top: menuPos.top, bottom: menuPos.bottom } : { left: -9999, bottom: -9999 }}
-            className={`fixed z-[95] w-60 max-h-[calc(100dvh-3rem)] overflow-y-auto bg-white rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.16)] border border-gray-100 ${
+            className={`fixed z-[95] w-60 max-h-[calc(100dvh-3rem)] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.16)] border border-gray-100 dark:border-gray-800 ${
               menuPos?.align === "below" ? "animate-fadeIn" : "animate-slideUp"
             }`}
           >
@@ -727,19 +731,19 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
                 onClick={() => handleExport(f.key)}
                 disabled={exporting !== null}
                 role="menuitem"
-                className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:bg-gray-800 transition-colors disabled:opacity-50"
               >
                 <span
                   className={`p-1.5 rounded-lg ${isAdmin ? "bg-indigo-50 text-indigo-600" : "bg-violet-50 text-violet-600"}`}
                 >
                   <f.icon size={15} />
                 </span>
-                <span className="flex-1 font-semibold text-gray-800">{f.label}</span>
+                <span className="flex-1 font-semibold text-gray-800 dark:text-gray-200">{f.label}</span>
                 <span className="text-[10px] text-gray-400 font-medium">{f.hint}</span>
               </button>
             ))}
             {!isAdmin && (
-              <p className="px-4 py-2 text-[10px] text-gray-400 border-t border-gray-100">
+              <p className="px-4 py-2 text-[10px] text-gray-400 border-t border-gray-100 dark:border-gray-800">
                 Omits shop, contact &amp; booking ID.
               </p>
             )}
@@ -750,13 +754,13 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
       {/* Delete confirm modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
               <Trash2 size={22} />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 text-center mb-1">Delete this booking?</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-1">Delete this booking?</h3>
             <p className="text-sm text-gray-500 text-center mb-5">
-              <span className="font-semibold text-gray-700">{deleteTarget.user?.name || "Unknown"}</span> ·{" "}
+              <span className="font-semibold text-gray-700 dark:text-gray-300">{deleteTarget.user?.name || "Unknown"}</span> ·{" "}
               {deleteTarget.slotDate} at {deleteTarget.slotStartTime} · {formatMoney(deleteTarget.totalPrice)}
               <br />
               This action cannot be undone.
@@ -765,7 +769,7 @@ export default function BookingHistoryPanel({ mode }: BookingHistoryPanelProps) 
               <button
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
               >
                 Cancel
               </button>

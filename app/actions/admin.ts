@@ -40,12 +40,20 @@ export async function toggleUserStatus(userId: string, isActive: boolean) {
   const user = await getServerUser();
   if (!user || (user.role !== "ADMIN" && user.role !== "APP_OWNER")) return { success: false };
 
+  // App Owner accounts cannot be deactivated
+  try {
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    if (userDoc.exists && userDoc.data()?.role === "APP_OWNER") {
+      return { success: false, error: "App Owner accounts cannot be deactivated." };
+    }
+  } catch (e) { /* continue */ }
+
   try {
     await adminDb.collection("users").doc(userId).update({ isActive });
     
     // If shop owner, also toggle their shop
-    const userDoc = await adminDb.collection("users").doc(userId).get();
-    if (userDoc.exists && userDoc.data()?.role === "SHOP_OWNER") {
+    const userDoc2 = await adminDb.collection("users").doc(userId).get();
+    if (userDoc2.exists && userDoc2.data()?.role === "SHOP_OWNER") {
         const shopsSnap = await adminDb.collection("shops").where("ownerId", "==", userId).get();
         if (!shopsSnap.empty) {
             await adminDb.collection("shops").doc(shopsSnap.docs[0].id).update({ isActive });
@@ -61,6 +69,14 @@ export async function toggleUserStatus(userId: string, isActive: boolean) {
 export async function deleteUserAccount(userId: string) {
   const user = await getServerUser();
   if (!user || (user.role !== "ADMIN" && user.role !== "APP_OWNER")) return { success: false };
+
+  // App Owner accounts cannot be deleted
+  try {
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    if (userDoc.exists && userDoc.data()?.role === "APP_OWNER") {
+      return { success: false, error: "App Owner accounts cannot be deleted." };
+    }
+  } catch (e) { /* continue */ }
 
   try {
     const userDoc = await adminDb.collection("users").doc(userId).get();

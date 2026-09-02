@@ -10,6 +10,7 @@ import { normalizePhone } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -95,20 +96,24 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-800 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle variant="icon" />
+      </div>
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-gray-900 p-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-gray-50 dark:border-gray-900 relative overflow-hidden">
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <Image
-              src="/logo.png"
+              src="/logo2.svg"
               alt="BarberBook"
               width={56}
               height={56}
-              className="notranslate rounded-xl"
+              className="notranslate"
+              style={{ objectFit: 'contain' }}
             />
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">Create an account</h2>
-          <p className="mt-2 text-sm text-gray-600">Join <span className="notranslate">BarberBook</span> today</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Create an account</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Join <span className="notranslate">BarberBook</span> today</p>
         </div>
 
         {error && (
@@ -120,13 +125,13 @@ export default function SignUpPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="name">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="name">Full Name</label>
               <input
                 id="name"
                 name="name"
                 type="text"
                 required
-                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -134,14 +139,14 @@ export default function SignUpPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="email">Email address</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">Email address</label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                className="mt-1 flex h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -149,7 +154,7 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="phone">Phone Number <span className="text-gray-400 font-normal">(optional)</span></label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="phone">Phone Number <span className="text-gray-400 font-normal">(optional)</span></label>
               <div className="relative mt-1">
                 <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -158,7 +163,7 @@ export default function SignUpPage() {
                   type="tel"
                   autoComplete="tel"
                   inputMode="tel"
-                  className="flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-11 pr-4 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  className="flex h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 pl-11 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="+91 98765 43210"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -168,7 +173,7 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="password">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">Password</label>
               <div className="relative mt-1">
                 <input
                   id="password"
@@ -176,7 +181,7 @@ export default function SignUpPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
-                  className="flex h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  className="flex h-12 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2 pr-10 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -184,7 +189,7 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-300 focus:outline-none"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -201,7 +206,7 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{" "}
           <Link href="/signin" className="font-medium text-violet-600 hover:text-violet-500 transition-colors">
             Sign in
@@ -223,7 +228,7 @@ export default function SignUpPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 200 }}
-              className="bg-white rounded-3xl p-10 mx-4 max-w-sm w-full text-center shadow-2xl"
+              className="bg-white dark:bg-gray-900 rounded-3xl p-10 mx-4 max-w-sm w-full text-center shadow-2xl"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -243,7 +248,7 @@ export default function SignUpPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-xl font-bold text-gray-900 mb-2"
+                className="text-xl font-bold text-gray-900 dark:text-white mb-2"
               >
                 Account Created! 🎉
               </motion.h3>
@@ -251,7 +256,7 @@ export default function SignUpPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="text-sm text-gray-600"
+                className="text-sm text-gray-600 dark:text-gray-400"
               >
                 Welcome to Barber Book. We value your time. Book → Go → Take service. No time waste.
               </motion.p>
